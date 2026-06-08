@@ -1,0 +1,125 @@
+.wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 340px;
+  min-width: 60px;
+  margin-left: auto;
+  margin-right: 4px;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.input:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+}
+
+.input::placeholder {
+  color: var(--text-faint);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.13);
+  z-index: 200;
+  max-height: 480px;
+  overflow-y: auto;
+  min-width: 320px;
+}
+
+.result {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid var(--hover-surface);
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.result:last-child {
+  border-bottom: none;
+}
+
+.result:hover {
+  background: var(--accent-50);
+}
+
+.resultMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.timelineName {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.resultDate {
+  font-size: 0.72rem;
+  color: var(--text-subtle);
+}
+
+.snippet {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.highlight {
+  background: #fef08a;
+  color: var(--text);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    max-width: 160px;
+    min-width: 60px;
+  }
+
+  .dropdown {
+    min-width: 260px;
+    right: auto;
+  }
+}
+
+.fluid {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+}
+
+.fluid .input {
+  padding: 9px 12px;
+  font-size: 0.9rem;
+}

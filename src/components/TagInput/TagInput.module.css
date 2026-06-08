@@ -1,0 +1,81 @@
+.wrapper {
+  position: relative;
+}
+
+.field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  min-height: 38px;
+  cursor: text;
+  background: var(--surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+/* Visible focus for the input nested inside the field. See UI_STANDARDS.md #2. */
+.field:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent-100);
+  color: var(--accent-ink-strong);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.chipRemove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.input {
+  border: none;
+  outline: none;
+  flex: 1;
+  min-width: 80px;
+  font-size: 0.875rem;
+  background: transparent;
+}
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.suggestion {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.suggestion:hover,
+.suggestionActive {
+  background: var(--hover-surface);
+}

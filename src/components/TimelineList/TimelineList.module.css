@@ -1,0 +1,352 @@
+.panel {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  height: 100%;
+  overflow: hidden;
+}
+
+.header {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.newTimelineBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.newTimelineBtn:hover {
+  background: var(--accent-hover);
+}
+
+.filterBtn {
+  position: relative;
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 7px;
+  cursor: pointer;
+  color: var(--text-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filterBtn:hover {
+  background: var(--hover-surface);
+  color: var(--text-secondary);
+}
+
+.filterBtnActive {
+  background: var(--accent-100);
+  border-color: var(--accent-300);
+  color: var(--accent-ink);
+}
+
+.filterBtnActive:hover {
+  background: var(--accent-200);
+  color: var(--accent-ink);
+}
+
+.filterCount {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  font-size: 0.6rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Match the height of a one-tag item so tagless items don't look cramped
+   * next to tagged ones. The name row stays top-aligned in both cases so names
+   * line up across rows; items with multiple tag rows grow past this. */
+  min-height: 54px;
+  margin: 2px 6px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.item:hover {
+  background: var(--accent-50);
+}
+
+.item.active {
+  background: var(--accent-100);
+}
+
+.item.active .name {
+  background: none;
+  color: var(--accent-ink);
+  font-weight: 500;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+}
+
+.itemTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 0 10px 6px;
+}
+
+.itemTag {
+  font-size: 0.68rem;
+  background: var(--accent-200);
+  color: var(--accent-ink-soft);
+  border-radius: var(--radius-xs);
+  padding: 1px 6px;
+}
+
+.item.active .itemTag {
+  background: var(--accent-300);
+  color: var(--accent-ink-strong);
+}
+
+.name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.nameText {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todoBadge {
+  flex-shrink: 0;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  line-height: 1;
+}
+
+.item.active .todoBadge {
+  background: var(--accent-ink);
+}
+
+.todoBadgeOverdue {
+  background: var(--danger);
+}
+
+.item.active .todoBadgeOverdue {
+  background: var(--danger-hover);
+}
+
+
+
+.kebab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+}
+
+.kebab:hover {
+  color: var(--text-secondary);
+  background: var(--hover-surface);
+}
+
+.menu {
+  position: absolute;
+  right: 8px;
+  top: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  z-index: 30;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+}
+
+.menu li button {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.menu li button:hover {
+  background: var(--hover-surface);
+}
+
+.menu li button.danger {
+  color: var(--danger);
+}
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.createActions {
+  display: flex;
+  gap: 6px;
+}
+
+.createInput {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  font-size: 0.875rem;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.createInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.btn:hover {
+  background: var(--accent-hover);
+}
+
+.btnSecondary {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.btnSecondary:hover {
+  background: var(--hover-surface);
+}
+
+.modalActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.dangerBtn {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dangerBtn:hover {
+  background: var(--danger-hover);
+}
+
+@media (max-width: 768px) {
+  .panel {
+    width: 100%;
+    height: auto;
+    border-right: none;
+  }
+
+  /* The mobile nav row already provides New Timeline and Filter, so the
+   * sidebar's own header buttons are redundant here. The create form and
+   * filter panel are separate elements and stay visible. */
+  .header {
+    display: none;
+  }
+}

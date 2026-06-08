@@ -1,0 +1,481 @@
+.composer {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  margin: 0 24px 24px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+/* Visible focus for the editor as a whole — see UI_STANDARDS.md #2. */
+.composer:focus-within {
+  border-color: var(--accent);
+}
+
+.expanded {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid var(--border-strong);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+}
+
+.expanded .editorContent {
+  flex: 1;
+  max-height: none;
+  overflow-y: auto;
+}
+
+.composerLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  background: var(--accent-50);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.expandBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  line-height: 1;
+  padding: 2px 4px;
+  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expandBtn:hover {
+  opacity: 1;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.toolBtn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolBtn:hover {
+  background: var(--border);
+}
+
+.toolBtnActive {
+  background: var(--accent-100);
+  border-color: var(--accent-300);
+  color: var(--accent-ink);
+}
+
+.sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border-strong);
+  margin: 0 4px;
+}
+
+
+.tableToolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--accent-75);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tableToolbarLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 2px;
+}
+
+.tableBtn {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.tableBtn:hover {
+  background: var(--hover-surface);
+}
+
+.tableBtnDanger {
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+
+.tableBtnDanger:hover {
+  background: var(--danger-bg);
+}
+
+.editorContent {
+  min-height: 100px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.editorContent :global(.ProseMirror) {
+  outline: none;
+  min-height: 80px;
+}
+
+.editorContent :global(.ProseMirror p.is-editor-empty:first-child::before) {
+  content: 'Write something…';
+  color: var(--text-faint);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+.editorContent :global(ul),
+.editorContent :global(ol) {
+  padding-left: 1.4em;
+  margin: 4px 0;
+}
+
+.editorContent :global(li) {
+  margin: 0;
+}
+
+.editorContent :global(li p) {
+  margin: 0;
+}
+
+.editorContent :global(code) {
+  background: var(--hover-surface);
+  border-radius: var(--radius-xs);
+  padding: 1px 4px;
+  font-size: 0.85em;
+}
+
+.editorContent :global(mark) {
+  background: #fef08a;
+  border-radius: 2px;
+  padding: 0 1px;
+  color: inherit;
+}
+
+.editorContent :global(h1) { font-size: 1.5em; font-weight: 700; line-height: 1.3; margin: 8px 0 4px; }
+.editorContent :global(h2) { font-size: 1.25em; font-weight: 700; line-height: 1.3; margin: 8px 0 4px; }
+.editorContent :global(h3) { font-size: 1.1em; font-weight: 600; line-height: 1.3; margin: 6px 0 3px; }
+.editorContent :global(h4) { font-size: 1em; font-weight: 600; line-height: 1.3; margin: 6px 0 3px; }
+
+.editorContent :global(blockquote) {
+  border-left: 3px solid var(--accent-300);
+  margin: 6px 0;
+  padding: 4px 12px;
+  color: var(--text-subtle);
+}
+
+.editorContent :global(hr) {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 12px 0;
+}
+
+.editorContent :global(table) {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.editorContent :global(td),
+.editorContent :global(th) {
+  border: 1px solid var(--border-strong);
+  padding: 6px 10px;
+  vertical-align: top;
+  position: relative;
+  min-width: 60px;
+  box-sizing: border-box;
+}
+
+.editorContent :global(th) {
+  background: var(--hover-surface);
+  font-weight: 600;
+  text-align: left;
+}
+
+.editorContent :global(.selectedCell::after) {
+  background: var(--accent-100);
+  content: '';
+  inset: 0;
+  opacity: 0.4;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.editorContent :global(ul[data-type="taskList"]) {
+  list-style: none;
+  padding-left: 0.25em;
+}
+
+.editorContent :global(li[data-type="taskItem"]) {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0;
+}
+
+.editorContent :global(li[data-type="taskItem"] > label) {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-top: 3px;
+  cursor: pointer;
+}
+
+.editorContent :global(li[data-type="taskItem"] > label > input[type="checkbox"]) {
+  cursor: pointer;
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+}
+
+.editorContent :global(li[data-type="taskItem"][data-checked="true"] > div) {
+  text-decoration: line-through;
+  color: var(--text-faint);
+}
+
+.editorContent :global(li[data-type="taskItem"] > div) {
+  flex: 1;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timeRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.metaSep {
+  color: var(--border-strong);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.dueDateLabel {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+}
+
+.doneLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  cursor: pointer;
+}
+
+.doneCheck {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+}
+
+.dateInput {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.dateInput:focus {
+  border-color: var(--accent);
+}
+
+.customTimeBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.customTimeBtn:hover {
+  color: var(--accent-hover);
+}
+
+.cancelTimeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  padding: 2px 4px;
+  line-height: 1;
+  border-radius: var(--radius-xs);
+}
+
+.cancelTimeBtn:hover {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.attachBtn {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.attachBtn:hover {
+  background: var(--hover-surface);
+}
+
+.cancelBtn {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.cancelBtn:hover {
+  background: var(--hover-surface);
+}
+
+.saveBtn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 5px 16px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.staged {
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stagedItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.stagedItem span:first-child {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.size {
+  color: var(--text-subtle);
+  flex-shrink: 0;
+}
+
+.stagedItem button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-faint);
+  padding: 0 4px;
+}
+
+.stagedItem button:hover {
+  color: var(--danger);
+}

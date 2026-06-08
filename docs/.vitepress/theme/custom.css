@@ -1,0 +1,211 @@
+/*
+ * Animated hero logo on the home page.
+ *
+ * The "O" logo runs a looping routine: a 5s idle hold, then a fast 360° spin,
+ * a pause, a bob up and down, a pause, a ~180° roll to the right and back, and
+ * finally it opens two eyes and blinks before starting over. The whole cycle is
+ * 12s — a 5s rest (0–41.7%) followed by 7s of action (41.7–100%). The rest sits
+ * at the START of each iteration so it repeats before every cycle, including
+ * the first, with no animation-delay needed.
+ *
+ * VitePress centers the hero image with `transform: translate(-50%, -50%)`
+ * (it's absolutely positioned at top/left 50%). Our animation sets `transform`
+ * too, so every keyframe must KEEP that `translate(-50%, -50%)` as its base —
+ * otherwise the logo loses its centering offset and shifts down/left.
+ *
+ * All keyframes use the same transform-function order
+ * (base centering → translateX → translateY → rotate) so the browser can
+ * interpolate between them smoothly. The rotation never resets to 0 mid-cycle:
+ * it holds at 360° (visually identical to 0°) so the spin only ever happens
+ * during the first segment, and 360° at 100% loops cleanly back to 0° at 0%.
+ */
+@keyframes organizer-logo-dance {
+  /* 5s idle hold at rest before each cycle (0–41.7% of the 12s loop) */
+  0%    { transform: translate(-50%, -50%) translateX(0) translateY(0) rotate(0deg); }
+  41.7% { transform: translate(-50%, -50%) translateX(0) translateY(0) rotate(0deg); }
+
+  /* fast 360° spin */
+  47.5% { transform: translate(-50%, -50%) translateX(0) translateY(0) rotate(360deg); }
+
+  /* pause */
+  55.7% { transform: translate(-50%, -50%) translateX(0) translateY(0) rotate(360deg); }
+
+  /* bob up and down */
+  58.6% { transform: translate(-50%, -50%) translateX(0) translateY(-16px) rotate(360deg); }
+  60.9% { transform: translate(-50%, -50%) translateX(0) translateY(0) rotate(360deg); }
+  63.3% { transform: translate(-50%, -50%) translateX(0) translateY(-10px) rotate(360deg); }
+  65.6% { transform: translate(-50%, -50%) translateX(0) translateY(0) rotate(360deg); }
+
+  /* pause */
+  74.3% { transform: translate(-50%, -50%) translateX(0) translateY(0) rotate(360deg); }
+
+  /* ~180° roll to the right and back (translate + half-turn spin = a rolling wheel) */
+  79%   { transform: translate(-50%, -50%) translateX(64px) translateY(0) rotate(540deg); }
+  84.3% { transform: translate(-50%, -50%) translateX(0) translateY(0) rotate(360deg); }
+
+  /* pause (the eyes open and blink here), then loop */
+  100%  { transform: translate(-50%, -50%) translateX(0) translateY(0) rotate(360deg); }
+}
+
+.VPHero .VPImage {
+  transform-origin: center center;
+  will-change: transform;
+  animation: organizer-logo-dance 12s ease-in-out infinite;
+}
+
+/*
+ * Two eyes that blink after the roll.
+ *
+ * They're pseudo-elements on `.image-container` (the logo's img is a replaced
+ * element and can't host ::before/::after). The container's center always lines
+ * up with the centered logo, so anchoring the eyes at 50%/50% keeps them over
+ * the middle of the "O". They share the same 7s clock as the dance, so they
+ * stay phase-locked: hidden during the spin/bob/roll, then fading in right
+ * after the roll (75%) to blink twice before vanishing as the loop restarts.
+ *
+ * Sizing tracks the logo. VitePress sizes the hero image responsively in a way
+ * that doesn't follow a simple container formula (it grows past its documented
+ * max-width at wide viewports), so we can't derive `--logo` in pure CSS. The
+ * theme entry measures the logo's real rendered width with a ResizeObserver and
+ * writes it to `--logo`; every eye dimension is then a fraction of it (diameter
+ * 0.12, x-offset 0.09, y-offset 0.02 of the logo), keeping the eyes locked to
+ * the logo at every width. The 192px below is just a pre-measurement fallback.
+ */
+.VPHero .image-container { --logo: 192px; }
+
+.VPHero .image-container::before,
+.VPHero .image-container::after {
+  content: "";
+  position: absolute;
+  top: calc(50% - 0.02 * var(--logo));
+  width: calc(0.12 * var(--logo));
+  height: calc(0.12 * var(--logo));
+  border-radius: 50%;
+  background: #4f46e5;
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: center center;
+  transform: translate(-50%, -50%) scaleY(1);
+  animation: organizer-logo-eyes 12s ease-in-out infinite;
+}
+
+.VPHero .image-container::before { left: calc(50% - 0.09 * var(--logo)); }
+.VPHero .image-container::after  { left: calc(50% + 0.09 * var(--logo)); }
+
+/*
+ * Per-keyframe timing functions keep the blink crisp instead of mushy: the
+ * eye snaps shut (ease-in, accelerating into the close) and pops back open
+ * (ease-out, fast then settling). The `animation-timing-function` on a keyframe
+ * controls the segment that STARTS at that keyframe. Eyes hold perfectly still
+ * (scaleY 1) before and after each blink so there's no slow drift.
+ */
+@keyframes organizer-logo-eyes {
+  /* hidden through the idle hold, spin, bob, and roll */
+  0%, 84.3% { opacity: 0; transform: translate(-50%, -50%) scaleY(1); }
+
+  /* open right after the roll, then hold steady */
+  85.4%, 86% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); animation-timing-function: ease-in; }
+
+  /* first blink: snap shut, then pop open */
+  86.7%      { opacity: 1; transform: translate(-50%, -50%) scaleY(0.08); animation-timing-function: ease-out; }
+  87.4%      { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
+
+  /* hold open between blinks */
+  91.8%      { opacity: 1; transform: translate(-50%, -50%) scaleY(1); animation-timing-function: ease-in; }
+
+  /* second blink */
+  92.5%      { opacity: 1; transform: translate(-50%, -50%) scaleY(0.08); animation-timing-function: ease-out; }
+  93.2%      { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
+
+  /* hold, then close before the next cycle */
+  98.8%      { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
+  100%       { opacity: 0; transform: translate(-50%, -50%) scaleY(1); }
+}
+
+/* Respect users who prefer reduced motion — hold the logo still and no eyes. */
+@media (prefers-reduced-motion: reduce) {
+  .VPHero .VPImage,
+  .VPHero .image-container::before,
+  .VPHero .image-container::after {
+    animation: none;
+  }
+}
+
+/* Hero "Organizer" wordmark — Fraunces, a warm display serif. */
+.VPHero .name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-optical-sizing: auto;
+}
+
+/* Nav-bar "Organizer" title next to the top-left logo — same Fraunces wordmark
+ * as the hero, so the brand reads consistently across the header and the page. */
+.VPNavBarTitle .title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-optical-sizing: auto;
+}
+
+/* Shrink the hero text line ("Timelines for everything…") — VitePress sizes
+ * it as large as the wordmark (32 / 48 / 56px); make it a smaller subhead.
+ * margin-top adds breathing room between "Organizer" and this line. */
+.VPHero .text {
+  font-size: 22px;
+  line-height: 30px;
+}
+
+@media (min-width: 640px) {
+  .VPHero .text {
+    font-size: 30px;
+    line-height: 38px;
+  }
+}
+
+@media (min-width: 960px) {
+  .VPHero .text {
+    font-size: 34px;
+    line-height: 44px;
+  }
+}
+
+/* Space between "Organizer" and the subhead. Needs the extra `.heading` to
+ * outrank VitePress's `.VPHero.has-image .text { margin: 0 auto }` reset. */
+.VPHero.has-image .heading .text {
+  margin-top: 24px;
+}
+
+@media (min-width: 640px) {
+  .VPHero.has-image .heading .text {
+    margin-top: 32px;
+  }
+}
+
+@media (min-width: 960px) {
+  .VPHero.has-image .heading .text {
+    margin-top: 40px;
+  }
+}
+
+/* Dial the hero tagline down a notch from VitePress's 18 / 20 / 24px, and add
+ * more space above it (VitePress only gives it 8–12px padding-top). */
+.VPHero .tagline {
+  font-size: 16px;
+  line-height: 24px;
+  padding-top: 20px;
+}
+
+@media (min-width: 640px) {
+  .VPHero .tagline {
+    font-size: 17px;
+    line-height: 27px;
+    padding-top: 24px;
+  }
+}
+
+@media (min-width: 960px) {
+  .VPHero .tagline {
+    font-size: 20px;
+    line-height: 30px;
+    padding-top: 28px;
+  }
+}

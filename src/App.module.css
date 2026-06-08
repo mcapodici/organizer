@@ -1,0 +1,517 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.logoBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius);
+  opacity: 1;
+  transition: opacity 0.15s;
+}
+
+.logoBtn:hover {
+  opacity: 0.75;
+}
+
+.appLogo {
+  height: 34px;
+  width: auto;
+  display: block;
+}
+
+/* "Organizer" wordmark next to the logo — Fraunces, matching the docs site. */
+.appWordmark {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--text-strong);
+  margin-left: 9px;
+  line-height: 1;
+}
+
+.homeBtn {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.homeBtn:hover {
+  background: var(--hover-surface);
+}
+
+.todosBtn {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.todosBtn:hover {
+  background: var(--hover-surface);
+}
+
+.todosBtnActive {
+  background: var(--accent-100);
+  border-color: var(--accent-300);
+  color: var(--accent-ink);
+}
+
+.todosBtnActive:hover {
+  background: var(--accent-200);
+}
+
+.nudge {
+  font-size: 0.78rem;
+  color: var(--text-subtle);
+  white-space: nowrap;
+}
+
+.nudgeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+
+.nudgeBtn:hover {
+  color: var(--accent-hover);
+}
+
+.appHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.mobileBurger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+}
+
+.mobileBurger:hover {
+  background: var(--hover-surface);
+}
+
+.mobileBrand {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.headerSearch {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobileNav {
+  display: none;
+}
+
+.headerBtn {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.headerBtn:hover {
+  background: var(--hover-surface);
+}
+
+.headerBtnActive {
+  background: var(--accent-100);
+  border-color: var(--accent-300);
+  color: var(--accent-ink);
+}
+
+.headerBtnActive:hover {
+  background: var(--accent-200);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+/* Drag handle between the sidebar and main content (desktop only). It overlaps
+ * the sidebar's existing border-right (via the negative left margin) so there's
+ * a single divider line; on hover/focus that line lights up with the accent. */
+.resizer {
+  flex-shrink: 0;
+  width: 6px;
+  margin-left: -3px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  z-index: 5;
+}
+
+.resizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.resizer:hover::after,
+.resizer:focus-visible::after {
+  background: var(--accent);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.emptyIcon {
+  color: var(--accent-300);
+  line-height: 1;
+}
+
+.emptyHeading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.emptyText {
+  font-size: 0.9rem;
+  color: var(--text-subtle);
+  margin: 0;
+}
+
+/* Inline "sidebar" link in the empty state — opens the mobile drawer. */
+.sidebarLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.sidebarLink:hover {
+  color: var(--accent-hover);
+}
+
+.recentList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 280px;
+  margin: 4px 0;
+}
+
+.recentItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: left;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.recentItem:hover {
+  border-color: var(--accent-300);
+  box-shadow: 0 1px 5px rgba(99, 102, 241, 0.1);
+}
+
+.recentName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentBadge {
+  flex-shrink: 0;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  line-height: 1;
+}
+
+.recentBadgeOverdue {
+  background: var(--danger);
+}
+
+.emptyBtn {
+  margin-top: 4px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 9px 20px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.emptyBtn:hover {
+  background: var(--accent-hover);
+}
+
+.emptyRestoreBtn {
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.emptyRestoreBtn:hover {
+  color: var(--text-secondary);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--text-subtle);
+}
+
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.btn:hover {
+  background: var(--accent-hover);
+}
+
+.btnSecondary {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.btnSecondary:hover {
+  background: var(--hover-surface);
+}
+
+.dangerBtn {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dangerBtn:hover {
+  background: var(--danger-hover);
+}
+
+@media (max-width: 768px) {
+  .appHeader {
+    display: none;
+  }
+
+  .mobileBurger {
+    display: flex;
+    position: fixed;
+    top: 14px;
+    left: 12px;
+    z-index: 30;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 50;
+    transition: left 0.2s ease;
+    background: var(--bg);
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+    overflow-y: auto;
+  }
+
+  .drawerOpen {
+    left: 0;
+  }
+
+  .drawerOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 40;
+  }
+
+  .mobileNav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mobileBrand {
+    align-self: flex-start;
+  }
+
+  .mobileSearch {
+    width: 100%;
+  }
+
+  /* Todos · Settings · Filter · New Timeline, all in one row. */
+  .mobileActions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .mobileNavBtn {
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 10px 4px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .mobileNavBtn:hover {
+    background: var(--hover-surface);
+  }
+
+  .mobileNavBtnActive {
+    background: var(--accent-100);
+    border-color: var(--accent-300);
+    color: var(--accent-ink);
+  }
+}

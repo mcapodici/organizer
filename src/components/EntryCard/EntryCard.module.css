@@ -1,0 +1,348 @@
+.card {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding: 0 24px 24px;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  left: 29px;
+  top: 8px;
+  bottom: -8px;
+  width: 2px;
+  background: var(--border);
+}
+
+.card:last-child::before {
+  display: none;
+}
+
+.editing {
+  background: var(--accent-50);
+  border-radius: 0 6px 6px 0;
+  border-left: 3px solid var(--accent);
+  padding-left: 21px;
+}
+
+.editing .dot {
+  background: var(--accent-hover);
+  box-shadow: 0 0 0 3px var(--accent-300);
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--accent);
+  margin-top: 4px;
+  z-index: 1;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.editingLabel {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--accent);
+}
+
+.time {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  visibility: hidden;
+  margin-left: auto;
+}
+
+.card:hover .actions {
+  visibility: visible;
+}
+
+/* Touch devices have no hover — keep actions reachable. See UI_STANDARDS.md #4. */
+@media (hover: none) {
+  .actions {
+    visibility: visible;
+  }
+}
+
+.actionBtn {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.actionBtn:hover {
+  background: var(--hover-surface);
+}
+
+.actionBtn.danger {
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+
+.actionBtn.danger:hover {
+  background: var(--danger-bg);
+}
+
+.content {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.content :global(ul),
+.content :global(ol) {
+  padding-left: 1.4em;
+  margin: 4px 0;
+}
+
+.content :global(p) {
+  margin: 0;
+  min-height: 1.5em;
+}
+
+.content :global(code) {
+  background: var(--hover-surface);
+  border-radius: var(--radius-xs);
+  padding: 1px 4px;
+  font-size: 0.85em;
+}
+
+.content :global(a) {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.content :global(mark) {
+  background: #fef08a;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.content :global(h1) { font-size: 1.4em; font-weight: 700; line-height: 1.3; margin: 8px 0 4px; }
+.content :global(h2) { font-size: 1.2em; font-weight: 700; line-height: 1.3; margin: 6px 0 3px; }
+.content :global(h3) { font-size: 1.05em; font-weight: 600; line-height: 1.3; margin: 6px 0 3px; }
+.content :global(h4) { font-size: 1em; font-weight: 600; line-height: 1.3; margin: 4px 0 2px; }
+
+.content :global(blockquote) {
+  border-left: 3px solid var(--accent-300);
+  margin: 6px 0;
+  padding: 4px 12px;
+  color: var(--text-subtle);
+}
+
+.content :global(hr) {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 10px 0;
+}
+
+.content :global(table) {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.content :global(td),
+.content :global(th) {
+  border: 1px solid var(--border-strong);
+  padding: 5px 8px;
+  vertical-align: top;
+  min-width: 50px;
+}
+
+.content :global(th) {
+  background: var(--hover-surface);
+  font-weight: 600;
+  text-align: left;
+}
+
+.content :global(ul[data-type="taskList"]) {
+  list-style: none;
+  padding-left: 0.25em;
+}
+
+.content :global(li[data-type="taskItem"]) {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0;
+}
+
+.content :global(li[data-type="taskItem"] > label) {
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.content :global(li[data-type="taskItem"][data-checked="true"] > div) {
+  text-decoration: line-through;
+  color: var(--text-faint);
+}
+
+.content :global(li[data-type="taskItem"] > div) {
+  flex: 1;
+}
+
+.todoLozenge {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  background: var(--accent-100);
+  color: var(--accent-ink);
+  border: 1px solid var(--accent-300);
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.6;
+  flex-shrink: 0;
+  overflow: visible;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.todoDone {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+
+.todoDone .todoDueText {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.todoOverdue {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.todoCheckBtn,
+.todoDueBtn {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 1px 6px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.todoCheckBtn {
+  padding-left: 7px;
+  border-radius: 999px 0 0 999px;
+}
+
+.todoDueBtn {
+  padding-right: 9px;
+  border-radius: 0 999px 999px 0;
+  /* Soft divider; set directly rather than overriding currentColor. */
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.todoCheckBtn:hover,
+.todoDueBtn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.todoCheck {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.todoDueText {
+  line-height: 1;
+}
+
+.attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.thumbnail {
+  max-height: 200px;
+  max-width: 300px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  object-fit: cover;
+}
+
+.thumbnail:hover {
+  opacity: 0.9;
+}
+
+.fileLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-decoration: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  background: var(--bg);
+}
+
+.fileLink:hover {
+  background: var(--accent-100);
+  border-color: var(--accent-300);
+}
+
+.fileSize {
+  color: var(--text-subtle);
+}
+
+.attPlaceholder {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  cursor: zoom-out;
+}
+
+.lightboxImg {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: var(--radius);
+  object-fit: contain;
+}
