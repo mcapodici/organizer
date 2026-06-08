@@ -12,6 +12,8 @@ Organizer shows attachments inline where it can:
 - **Everything else** (PDFs, spreadsheets, archives, …) appears as a labelled
   **download link** showing the file's name.
 
+![An entry with an image previewing inline next to a PDF shown as a download link.](/screenshots/attachments.png)
+
 ## Where attachments are stored
 
 Attachments are stored **with your data**, in whichever

@@ -8,6 +8,8 @@ Instead of files and folders, you work with **timelines**. A timeline is a named
 log you add to over time. Each thing you add is an **entry**: a timestamped,
 rich-text note that can carry attachments, a due date, and a done/not-done state.
 
+![The Organizer app: timelines in the sidebar, a timeline of rich-text entries, and the note editor.](/screenshots/hero.png)
+
 ## Why timelines?
 
 Most note tools make you choose a structure up front. Organizer assumes the most

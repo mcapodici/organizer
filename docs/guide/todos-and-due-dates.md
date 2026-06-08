@@ -44,6 +44,8 @@ follow-up across **all** timelines, grouped by urgency:
 Within each group, items are sorted soonest-first. Each card shows a preview of
 the entry and the timeline it belongs to.
 
+![The Todos page listing outstanding follow-ups grouped into Overdue, Due Today, Due Within 7 Days, and Due Later.](/screenshots/todos.png)
+
 - **Click a card** to jump to that entry's timeline in context.
 - **Click the check** on the left of a card to mark it done — it disappears from
   the list immediately.

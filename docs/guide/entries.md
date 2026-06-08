@@ -25,6 +25,8 @@ The editor toolbar gives you everything you'd expect from a rich-text note:
 You can mix these freely within an entry — for example a short paragraph
 followed by a checklist and a table of figures.
 
+![A single entry combining a heading, highlighted and bold text, a task list, a table, and inline code.](/screenshots/entry-rich.png)
+
 ## Custom timestamps
 
 By default an entry is stamped with the moment you save it. To record something

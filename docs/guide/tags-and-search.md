@@ -21,6 +21,9 @@ ones you care about right now (e.g. show only `client` timelines). The filter
 icon shows a count while any filter is active; click a tag again — or **Clear** —
 to remove it.
 
+<img src="/screenshots/tags-sidebar.png" alt="The sidebar with the tag filter open, showing tag chips above the tagged, badge-counted timelines." width="320">
+
+
 ### Tagging tips
 
 - Prefer a **few broad tags** (`client`, `project`, `archive`) over many narrow
@@ -39,6 +42,8 @@ it's in.
 - Start typing to see matches.
 - Select a result to jump straight to it.
 - On mobile, the search box is available in the slide-out menu.
+
+![Searching for "delivery" shows matching entries with the term highlighted and the timeline each belongs to.](/screenshots/search.png)
 
 ::: tip
 Search reads the *text* of your entries — so writing clear, keyword-rich notes

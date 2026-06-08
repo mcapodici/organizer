@@ -7,6 +7,8 @@ timeline with a few entries. It takes about two minutes.
 
 The first time you open Organizer, you'll pick a storage location:
 
+![The storage chooser, offering Folder storage or Browser storage.](/screenshots/storage-picker.png)
+
 - **Browser storage** — the quickest way to start. Your data is saved in this
   browser on this device.
 - **A folder on your computer** — Organizer reads and writes your data in a
@@ -37,6 +39,8 @@ short tour entry. Read it, then feel free to delete it once you're comfortable.
    more — see [Entries & rich text](./entries).
 3. Press **Save**. Your entry appears in the timeline with the current
    timestamp.
+
+![The note editor with its formatting toolbar, custom-time and due-date options, and Attach and Save buttons.](/screenshots/editor-toolbar.png)
 
 Want it dated differently? Use **Set custom time** in the editor to back-date or
 future-date the entry before saving.
