@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Home as HomeIcon, CheckSquare, Settings as SettingsIcon, Menu, CircleDot, Plus, Filter } from 'lucide-react';
+import { CheckSquare, Settings as SettingsIcon, Menu, CircleDot, Plus, Filter } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { useTimelines } from './hooks/useTimelines';
@@ -165,9 +165,6 @@ export default function App() {
           <img src="/logo.svg" alt="" className={styles.appLogo} />
           <span className={styles.appWordmark}>Organizer</span>
         </button>
-        {activeTimeline && (
-          <button className={`${styles.homeBtn} ${styles.headerOnly}`} onClick={() => navigate('/')}><HomeIcon size={14} />Home</button>
-        )}
         <div className={styles.headerSearch}>
           <SearchBox timelines={timelines} />
         </div>

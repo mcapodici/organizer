@@ -39,23 +39,6 @@
   line-height: 1;
 }
 
-.homeBtn {
-  background: none;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  padding: 5px 14px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.homeBtn:hover {
-  background: var(--hover-surface);
-}
-
 .todosBtn {
   background: none;
   border: 1px solid var(--border-strong);
