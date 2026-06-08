@@ -50,10 +50,11 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/introduction' },
       { text: 'Tutorials', link: '/tutorials/daily-journal' },
       { text: 'Use cases', link: '/use-cases/' },
+      { text: 'Source', link: 'https://codeberg.org/mcapodici/organizer', target: '_blank', rel: 'noopener', noIcon: true },
       // `target: _self` forces a real browser navigation to the app instead of
       // letting VitePress's client router try (and fail) to resolve /app/ as a
       // docs page.
-      { text: 'Open App ↗', link: '/app/', target: '_self', rel: 'nofollow' },
+      { text: 'Open App', link: '/app/', target: '_self', rel: 'nofollow' },
     ],
 
     sidebar: {
