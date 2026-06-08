@@ -148,6 +148,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  text-decoration: none;
 }
 
 .headerBtn:hover {
@@ -351,23 +352,6 @@
 
 .emptyRestoreBtn:hover {
   color: var(--text-secondary);
-}
-
-.emptyDocsLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: none;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  padding: 8px 18px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  text-decoration: none;
-}
-
-.emptyDocsLink:hover {
-  background: var(--hover-surface);
 }
 
 .loading {

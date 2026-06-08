@@ -192,6 +192,14 @@ export default function App() {
           >
             <SettingsIcon size={14} />Settings
           </button>
+          <a
+            className={styles.headerBtn}
+            href="https://www.useorganizer.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <BookOpen size={14} />Docs
+          </a>
         </div>
       </header>
 
@@ -329,16 +337,6 @@ export default function App() {
                   <button className={styles.emptyRestoreBtn} onClick={seedWelcomeTimeline}>
                     Restore welcome guide
                   </button>
-                )}
-                {isDesktop && (
-                  <a
-                    className={styles.emptyDocsLink}
-                    href="https://www.useorganizer.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <BookOpen size={14} />Docs
-                  </a>
                 )}
               </div>
             </div>
