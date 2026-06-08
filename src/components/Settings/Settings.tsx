@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Upload, RotateCcw, Folder, Globe, FolderSync } from 'lucide-react';
+import { Download, Upload, RotateCcw, Folder, Globe, FolderSync, BookOpen } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
 import { Modal } from '../Modal/Modal';
 import { exportData, importData } from '../../utils/exportImport';
@@ -109,6 +109,27 @@ export function Settings({ onDataChanged }: Props) {
                 }}
               />
             </label>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Help</h2>
+        <div className={styles.card}>
+          <div className={styles.row}>
+            <div className={styles.rowText}>
+              <div className={styles.rowTitle}>Documentation</div>
+              <div className={styles.rowDesc}>Guides and help for using Organizer.</div>
+            </div>
+            <a
+              className={styles.btnSecondary}
+              href="https://www.useorganizer.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: 'none' }}
+            >
+              <BookOpen size={14} />Docs
+            </a>
           </div>
         </div>
       </section>

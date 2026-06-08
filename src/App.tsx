@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { CheckSquare, Settings as SettingsIcon, Menu, CircleDot, Plus, Filter } from 'lucide-react';
+import { CheckSquare, Settings as SettingsIcon, Menu, CircleDot, Plus, Filter, BookOpen } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { useTimelines } from './hooks/useTimelines';
@@ -161,7 +161,7 @@ export default function App() {
   return (
     <div className={styles.app}>
       <header className={styles.appHeader}>
-        <button className={styles.logoBtn} onClick={() => navigate('/')} aria-label="Go home" title={`Organizer · ${__BUILD_INFO__}`}>
+        <button className={styles.logoBtn} onClick={() => navigate('/')} aria-label="Go home">
           <img src="/logo.svg" alt="" className={styles.appLogo} />
           <span className={styles.appWordmark}>Organizer</span>
         </button>
@@ -329,6 +329,16 @@ export default function App() {
                   <button className={styles.emptyRestoreBtn} onClick={seedWelcomeTimeline}>
                     Restore welcome guide
                   </button>
+                )}
+                {isDesktop && (
+                  <a
+                    className={styles.emptyDocsLink}
+                    href="https://www.useorganizer.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <BookOpen size={14} />Docs
+                  </a>
                 )}
               </div>
             </div>
