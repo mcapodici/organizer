@@ -79,9 +79,9 @@ describe('importData — replace mode', () => {
     expect(await a.getBlob('k')).toBeDefined();
   });
 
-  // See bugs.md #2: replace mode deletes timelines/entries but never the blobs,
-  // leaving orphaned attachment data behind.
-  it.skip('replace mode should not leave orphaned blobs behind (BUG #2)', async () => {
+  // Replace mode must clear blobs too — otherwise attachment data from the old,
+  // now-deleted entries is orphaned in storage.
+  it('replace mode does not leave orphaned blobs behind', async () => {
     const a = new FakeAdapter();
     await a.putBlob('stale', bytes(9, 9, 9)); // belongs to old, soon-deleted data
 

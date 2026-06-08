@@ -31,9 +31,9 @@ describe('useEntries', () => {
     expect(result.current.entries.map((e) => e.id)).toEqual(['early', 'late']);
   });
 
-  // See bugs.md #3: the sort comparator never returns 0 for equal timestamps, so
-  // same-timestamp entries get their insertion order reversed instead of preserved.
-  it.skip('keeps equal-timestamp entries in stable order (BUG #3)', async () => {
+  // Same-timestamp entries must keep their insertion order (stable sort), not be
+  // reversed by a comparator that never returns 0 for ties.
+  it('keeps equal-timestamp entries in stable order', async () => {
     await h.adapter.putEntry(en('first', 't1', { timestamp: '2026-01-01T00:00:00Z' }));
     await h.adapter.putEntry(en('second', 't1', { timestamp: '2026-01-01T00:00:00Z' }));
     await h.adapter.putEntry(en('third', 't1', { timestamp: '2026-01-01T00:00:00Z' }));

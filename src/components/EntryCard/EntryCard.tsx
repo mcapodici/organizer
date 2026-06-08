@@ -13,7 +13,7 @@ import { Highlight } from '@tiptap/extension-highlight';
 import { Check, Circle, Paperclip } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
 import type { Entry, Attachment } from '../../types';
-import { formatTimestamp, formatFileSize, formatDueDate } from '../../utils/dateFormat';
+import { formatTimestamp, formatFileSize, formatDueDate, todayDateString } from '../../utils/dateFormat';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
 import styles from './EntryCard.module.css';
 
@@ -116,7 +116,7 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
 }
 
 function isOverdue(dueDate: string): boolean {
-  return dueDate < new Date().toISOString().slice(0, 10);
+  return dueDate < todayDateString();
 }
 
 function AttachmentList({ attachments, onLightbox }: { attachments: Attachment[]; onLightbox: (src: string) => void }) {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, CheckCircle2 } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
 import type { Entry, Timeline } from '../../types';
-import { formatDueDate } from '../../utils/dateFormat';
+import { formatDueDate, toLocalDateString, todayDateString } from '../../utils/dateFormat';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
 import styles from './TodoPage.module.css';
 
@@ -21,15 +21,15 @@ interface Sections {
 }
 
 function buildSections(todos: TodoItem[]): Sections {
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = todayDateString();
 
   const d7 = new Date();
   d7.setDate(d7.getDate() + 7);
-  const in7 = d7.toISOString().slice(0, 10);
+  const in7 = toLocalDateString(d7);
 
   const d30 = new Date();
   d30.setDate(d30.getDate() + 30);
-  const in30 = d30.toISOString().slice(0, 10);
+  const in30 = toLocalDateString(d30);
 
   const result: Sections = { overdue: [], today: [], week: [], month: [], later: [] };
 

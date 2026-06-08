@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useStorage } from '../context/StorageContext';
+import { todayDateString } from '../utils/dateFormat';
 
 export interface TodoCount {
   count: number;
@@ -11,7 +12,7 @@ export function useTodoCounts() {
   const [todoCounts, setTodoCounts] = useState<Record<string, TodoCount>>({});
 
   const reloadTodoCounts = useCallback(async () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayDateString();
     const all = await adapter.getAllEntries();
     const result: Record<string, TodoCount> = {};
     for (const entry of all) {

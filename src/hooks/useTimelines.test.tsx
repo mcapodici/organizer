@@ -36,9 +36,9 @@ describe('useTimelines', () => {
     expect(result.current.timelines.map((t) => t.id)).toEqual(['new', 'mid', 'old']);
   });
 
-  // See bugs.md #3: equal-updatedAt timelines have their insertion order reversed
-  // because the sort comparator never returns 0 for ties.
-  it.skip('keeps equal-updatedAt timelines in stable order (BUG #3)', async () => {
+  // Equal-updatedAt timelines must keep their insertion order (stable sort) rather
+  // than being reversed by a comparator that never returns 0 for ties.
+  it('keeps equal-updatedAt timelines in stable order', async () => {
     const ts = '2026-03-01T00:00:00Z';
     await h.adapter.putTimeline(tl('first', { updatedAt: ts }));
     await h.adapter.putTimeline(tl('second', { updatedAt: ts }));

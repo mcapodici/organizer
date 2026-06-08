@@ -6,6 +6,8 @@ import {
   fromDatetimeLocalValue,
   formatDueDate,
   formatFileSize,
+  toLocalDateString,
+  todayDateString,
 } from './dateFormat';
 
 describe('formatTimestamp', () => {
@@ -60,11 +62,12 @@ describe('datetime-local round trip', () => {
     expect(Number.isNaN(new Date(iso).getTime())).toBe(false);
   });
 
-  // See bugs.md #1: fromDatetimeLocalValue('') throws RangeError instead of
-  // returning a fallback like its sibling toDatetimeLocalValue does.
-  it.skip('does not throw on empty input (BUG #1)', () => {
+  // fromDatetimeLocalValue must not throw on empty/invalid input — it falls back to
+  // '' like its sibling toDatetimeLocalValue, rather than letting toISOString throw.
+  it('does not throw on empty input', () => {
     expect(() => fromDatetimeLocalValue('')).not.toThrow();
     expect(fromDatetimeLocalValue('')).toBe('');
+    expect(fromDatetimeLocalValue('garbage')).toBe('');
   });
 });
 
@@ -84,6 +87,28 @@ describe('formatDueDate', () => {
   it('returns the input unchanged when it cannot be parsed', () => {
     expect(formatDueDate('')).toBe('');
     expect(formatDueDate('nope')).toBe('nope');
+  });
+});
+
+describe('toLocalDateString / todayDateString', () => {
+  it('formats a date from its LOCAL calendar parts, zero-padded', () => {
+    // Constructed in local time, so the output is timezone-independent.
+    expect(toLocalDateString(new Date(2026, 0, 5))).toBe('2026-01-05');
+    expect(toLocalDateString(new Date(2026, 8, 3))).toBe('2026-09-03');
+    expect(toLocalDateString(new Date(2026, 11, 31))).toBe('2026-12-31');
+  });
+
+  it('does not shift the day across a UTC boundary (uses local, not toISOString)', () => {
+    // Late-evening local time would roll over to the next UTC day; the local-parts
+    // formatter must still report the local day.
+    const lateLocal = new Date(2026, 2, 15, 23, 30); // Mar 15 2026, 23:30 local
+    expect(toLocalDateString(lateLocal)).toBe('2026-03-15');
+  });
+
+  it('todayDateString matches the local parts of the current date', () => {
+    const now = new Date();
+    expect(todayDateString()).toBe(toLocalDateString(now));
+    expect(todayDateString()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
 

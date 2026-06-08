@@ -22,7 +22,21 @@ export function toDatetimeLocalValue(iso: string): string {
 }
 
 export function fromDatetimeLocalValue(value: string): string {
-  return new Date(value).toISOString();
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString();
+}
+
+// Local calendar date as YYYY-MM-DD. Due dates are written from local time (see
+// DueDatePopover), so "today" and relative cutoffs must use local parts too —
+// using a UTC date here would be off by a day near midnight in non-UTC zones.
+export function toLocalDateString(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+export function todayDateString(): string {
+  return toLocalDateString(new Date());
 }
 
 export function formatDueDate(dateStr: string): string {

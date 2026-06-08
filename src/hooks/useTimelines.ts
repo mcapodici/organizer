@@ -14,7 +14,9 @@ export function useTimelines() {
     // Most recently changed first. Fall back to createdAt for data saved before
     // updatedAt existed.
     const changed = (t: Timeline) => t.updatedAt ?? t.createdAt;
-    all.sort((a, b) => (changed(b) > changed(a) ? 1 : -1));
+    // localeCompare returns 0 for ties, keeping equal-"changed" timelines in their
+    // original order instead of reversing them.
+    all.sort((a, b) => changed(b).localeCompare(changed(a)));
     setTimelines(all);
     setLoading(false);
   }, [adapter]);

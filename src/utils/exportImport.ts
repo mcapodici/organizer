@@ -43,8 +43,12 @@ export async function importData(adapter: StorageAdapter, file: File, mode: 'rep
   if (mode === 'replace') {
     const existingTimelines = await adapter.getAllTimelines();
     const existingEntries = await adapter.getAllEntries();
+    const existingBlobKeys = await adapter.getAllBlobKeys();
     await Promise.all(existingTimelines.map((t) => adapter.deleteTimeline(t.id)));
     await Promise.all(existingEntries.map((e) => adapter.deleteEntry(e.id)));
+    // Clear blobs too — a true replace starts from a clean slate, and leaving the
+    // old attachment data behind would orphan it (and stray .bin files on disk).
+    await Promise.all(existingBlobKeys.map((k) => adapter.deleteBlob(k)));
   }
 
   const existing = mode === 'merge'

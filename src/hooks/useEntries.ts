@@ -10,7 +10,9 @@ export function useEntries(timelineId: string | null) {
   const reload = useCallback(async () => {
     if (!timelineId) { setEntries([]); return; }
     const all = await adapter.getEntriesForTimeline(timelineId);
-    all.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+    // localeCompare returns 0 for equal timestamps, so same-timestamp entries keep
+    // their original (insertion) order rather than being reversed.
+    all.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     setEntries(all);
   }, [timelineId, adapter]);
 
