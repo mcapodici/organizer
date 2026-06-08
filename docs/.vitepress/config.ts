@@ -16,6 +16,10 @@ export default defineConfig({
   // README.md is contributor notes, not a published page.
   srcExclude: ['**/README.md'],
 
+  // The app lives at /app/ but is built by Vite separately, so VitePress can't
+  // resolve it as a docs page. Don't flag in-page links to it as dead.
+  ignoreDeadLinks: [/^\/app\//],
+
   // In dev, `npm run dev` runs this docs server (port 5173) alongside the app
   // dev server (port 5174). Proxy /app/* through to the app server so the dev
   // origin mirrors production: visiting http://localhost:5173/app/ Just Works
@@ -50,7 +54,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/introduction' },
       { text: 'Tutorials', link: '/tutorials/daily-journal' },
       { text: 'Use cases', link: '/use-cases/' },
-      { text: 'Source', link: 'https://codeberg.org/mcapodici/organizer', target: '_blank', rel: 'noopener', noIcon: true },
+      { text: 'Source', link: '/source' },
       // `target: _self` forces a real browser navigation to the app instead of
       // letting VitePress's client router try (and fail) to resolve /app/ as a
       // docs page.
