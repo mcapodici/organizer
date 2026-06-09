@@ -1,0 +1,12 @@
+# Local-only tooling and scratch — must never be uploaded to Vercel.
+# The bundled ffmpeg binaries alone are ~600 MB and blow past Vercel's
+# 100 MB-per-file limit. The Vercel CLI uses THIS file (not .gitignore) to
+# decide what to upload, so these have to be listed here explicitly.
+.ffmpeg/
+.demo-raw/
+.demo-profile/
+.demo-frames/
+
+# Dependencies and build output — Vercel installs and builds these itself.
+node_modules/
+dist/
