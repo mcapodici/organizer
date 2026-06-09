@@ -31,3 +31,9 @@ docs/.vitepress/cache
 .playwright-mcp/
 .vercel
 .env*
+
+# Local demo-recording tooling & scratch (regenerate with `npm run docs:video`)
+.ffmpeg/
+.demo-raw/
+.demo-profile/
+.demo-frames/

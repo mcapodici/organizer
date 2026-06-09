@@ -149,7 +149,8 @@ async function tagEntryByText(page, needle, id) {
 
 // Runs in the page. Seeds timelines, entries, blobs into the app's IndexedDB.
 // Returns the id of the timeline to open for the hero shot.
-function seedData() {
+// Exported so the video harness (record-demo.mjs) can seed the same data.
+export function seedData() {
   return new Promise(async (resolveSeed) => {
     const pad = (n) => String(n).padStart(2, '0');
     const today = new Date();
@@ -292,4 +293,7 @@ function seedData() {
   });
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+// Only run when invoked directly (not when imported for its seedData export).
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('seed-and-shoot.mjs')) {
+  main().catch((e) => { console.error(e); process.exit(1); });
+}
