@@ -54,6 +54,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/introduction' },
       { text: 'Tutorials', link: '/tutorials/daily-journal' },
       { text: 'Use cases', link: '/use-cases/' },
+      { text: 'Blog', link: '/blog/' },
       { text: 'Source', link: '/source' },
       // `target: _self` forces a real browser navigation to the app instead of
       // letting VitePress's client router try (and fail) to resolve /app/ as a
@@ -96,6 +97,17 @@ export default defineConfig({
           text: 'Use cases',
           items: [
             { text: 'Overview', link: '/use-cases/' },
+          ],
+        },
+      ],
+      // Blog posts aren't listed individually here — the /blog/ index is the
+      // auto-generated list (see blog/posts.data.ts). The sidebar just offers a
+      // way back to that index from a post.
+      '/blog/': [
+        {
+          text: 'Blog',
+          items: [
+            { text: 'All posts', link: '/blog/' },
           ],
         },
       ],
