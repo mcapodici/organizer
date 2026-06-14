@@ -238,14 +238,12 @@ export default function App() {
               >
                 <SettingsIcon size={16} />Settings
               </button>
-              {allTags.length > 0 && (
-                <button
-                  className={`${styles.mobileNavBtn} ${showFilter ? styles.mobileNavBtnActive : ''}`}
-                  onClick={() => setShowFilter((v) => !v)}
-                >
-                  <Filter size={16} />Filter
-                </button>
-              )}
+              <button
+                className={`${styles.mobileNavBtn} ${showFilter ? styles.mobileNavBtnActive : ''}`}
+                onClick={() => setShowFilter((v) => !v)}
+              >
+                <Filter size={16} />Filter
+              </button>
               <button
                 className={styles.mobileNavBtn}
                 onClick={() => setTriggerCreate(true)}

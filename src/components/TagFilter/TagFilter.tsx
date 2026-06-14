@@ -7,7 +7,13 @@ interface Props {
 }
 
 export function TagFilter({ allTags, selected, onChange }: Props) {
-  if (allTags.length === 0) return null;
+  if (allTags.length === 0) {
+    return (
+      <div className={styles.wrapper}>
+        <span className={styles.empty}>No tags yet — add tags to a timeline to filter by them.</span>
+      </div>
+    );
+  }
 
   function toggle(tag: string) {
     onChange(selected.includes(tag) ? selected.filter((t) => t !== tag) : [...selected, tag]);

@@ -18,43 +18,35 @@
   flex-shrink: 0;
 }
 
-.newTimelineBtn {
+/* Desktop New Timeline / Filter share the mobile nav look: outlined,
+ * icon-above-text columns, each taking ~50% of the header row. */
+.newTimelineBtn,
+.filterBtn {
   flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
+  gap: 5px;
+  background: none;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  padding: 8px 14px;
+  padding: 10px 4px;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
-.newTimelineBtn:hover {
-  background: var(--accent-hover);
+.newTimelineBtn:hover,
+.filterBtn:hover {
+  background: var(--hover-surface);
 }
 
 .filterBtn {
   position: relative;
-  flex-shrink: 0;
-  background: none;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  padding: 7px;
-  cursor: pointer;
-  color: var(--text-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.filterBtn:hover {
-  background: var(--hover-surface);
-  color: var(--text-secondary);
 }
 
 .filterBtnActive {

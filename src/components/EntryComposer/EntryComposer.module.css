@@ -258,14 +258,17 @@
   padding-left: 0.25em;
 }
 
-.editorContent :global(li[data-type="taskItem"]) {
+/* In the live editor TipTap's node view renders the <li> with only
+   data-checked (no data-type="taskItem"), so scope off the taskList <ul>,
+   which carries data-type in both the editor and the static card output. */
+.editorContent :global(ul[data-type="taskList"] > li) {
   display: flex;
   align-items: flex-start;
   gap: 6px;
   margin: 2px 0;
 }
 
-.editorContent :global(li[data-type="taskItem"] > label) {
+.editorContent :global(ul[data-type="taskList"] > li > label) {
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -273,19 +276,19 @@
   cursor: pointer;
 }
 
-.editorContent :global(li[data-type="taskItem"] > label > input[type="checkbox"]) {
+.editorContent :global(ul[data-type="taskList"] > li > label > input[type="checkbox"]) {
   cursor: pointer;
   accent-color: var(--accent);
   width: 14px;
   height: 14px;
 }
 
-.editorContent :global(li[data-type="taskItem"][data-checked="true"] > div) {
+.editorContent :global(ul[data-type="taskList"] > li[data-checked="true"] > div) {
   text-decoration: line-through;
   color: var(--text-faint);
 }
 
-.editorContent :global(li[data-type="taskItem"] > div) {
+.editorContent :global(ul[data-type="taskList"] > li > div) {
   flex: 1;
 }
 

@@ -85,18 +85,16 @@ export function TimelineList({ timelines, allTags, activeId, todoCounts, onSelec
           <button className={styles.newTimelineBtn} onClick={() => setCreating(true)}>
             <Plus size={16} />New Timeline
           </button>
-          {allTags.length > 0 && (
-            <button
-              className={`${styles.filterBtn} ${showFilter || filterTags.length > 0 ? styles.filterBtnActive : ''}`}
-              onClick={onToggleFilter}
-              aria-label="Filter by tags"
-              aria-pressed={showFilter}
-              title="Filter by tags"
-            >
-              <Filter size={16} />
-              {filterTags.length > 0 && <span className={styles.filterCount}>{filterTags.length}</span>}
-            </button>
-          )}
+          <button
+            className={`${styles.filterBtn} ${showFilter || filterTags.length > 0 ? styles.filterBtnActive : ''}`}
+            onClick={onToggleFilter}
+            aria-label="Filter by tags"
+            aria-pressed={showFilter}
+            title="Filter by tags"
+          >
+            <Filter size={16} />Filter
+            {filterTags.length > 0 && <span className={styles.filterCount}>{filterTags.length}</span>}
+          </button>
         </div>
       )}
 

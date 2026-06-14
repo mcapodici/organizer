@@ -17,6 +17,11 @@
   margin-bottom: 2px;
 }
 
+.empty {
+  font-size: 0.78rem;
+  color: var(--text-subtle);
+}
+
 .tag {
   background: var(--hover-surface);
   border: 1px solid var(--border-strong);

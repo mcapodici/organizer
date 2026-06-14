@@ -4,9 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { TagFilter } from './TagFilter';
 
 describe('TagFilter', () => {
-  it('renders nothing when there are no tags', () => {
-    const { container } = render(<TagFilter allTags={[]} selected={[]} onChange={() => {}} />);
-    expect(container.firstChild).toBeNull();
+  it('shows an empty-state message when there are no tags', () => {
+    render(<TagFilter allTags={[]} selected={[]} onChange={() => {}} />);
+    expect(screen.getByText(/no tags yet/i)).toBeTruthy();
   });
 
   it('renders a button per tag', () => {
