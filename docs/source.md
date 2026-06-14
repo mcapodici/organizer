@@ -14,9 +14,9 @@ file in the repository.
 
 ## Where the code lives
 
-The source is hosted on Codeberg (login required):
+The source is hosted on Codeberg:
 
-[**codeberg.org/mcapodici/organizer**](https://codeberg.org/mcapodici/organizer)
+[**https://codeberg.org/mcapodici/organizer**](https://codeberg.org/mcapodici/organizer)
 
 ## No login needed to *use* the app
 
