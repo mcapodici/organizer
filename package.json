@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "kill-port 5174 5175",
     "dev": "concurrently -k -n docs,app -c blue,green \"npm:docs:dev\" \"npm:app:dev\"",
     "app:dev": "vite",
     "test": "vitest run",
@@ -58,6 +59,7 @@
     "fake-indexeddb": "^6.2.5",
     "globals": "^17.5.0",
     "jsdom": "^29.1.1",
+    "kill-port": "^2.0.1",
     "playwright": "^1.60.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
