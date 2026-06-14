@@ -64,4 +64,12 @@ describe('TagInput', () => {
     await userEvent.click(screen.getByText('apple'));
     expect(onChange).toHaveBeenCalledWith(['apple']);
   });
+
+  it('commits a typed-but-unconfirmed tag when the input loses focus', async () => {
+    const onChange = vi.fn();
+    render(<TagInput tags={[]} allTags={[]} onChange={onChange} />);
+    await userEvent.type(screen.getByRole('textbox'), 'mytag');
+    await userEvent.tab();
+    expect(onChange).toHaveBeenCalledWith(['mytag']);
+  });
 });

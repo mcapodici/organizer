@@ -22,7 +22,7 @@ export function TagInput({ tags, allTags, onChange, placeholder = 'Add tag…' }
     (t) => t.toLowerCase().includes(input.toLowerCase()) && !tags.includes(t)
   );
 
-  function addTag(tag: string) {
+  function addTag(tag: string, refocus = true) {
     const trimmed = tag.trim();
     if (trimmed && !tags.includes(trimmed)) {
       onChange([...tags, trimmed]);
@@ -31,7 +31,8 @@ export function TagInput({ tags, allTags, onChange, placeholder = 'Add tag…' }
     setShowSuggestions(false);
     setActiveIndex(-1);
     // Keep the cursor in the input so the next tag can be typed right away.
-    inputRef.current?.focus();
+    // Skipped when committing on blur so we don't steal focus back (e.g. from Save).
+    if (refocus) inputRef.current?.focus();
   }
 
   function removeTag(tag: string) {
@@ -85,7 +86,11 @@ export function TagInput({ tags, allTags, onChange, placeholder = 'Add tag…' }
           onChange={(e) => { setInput(e.target.value); setShowSuggestions(true); setActiveIndex(-1); }}
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+          onBlur={() => {
+            // Commit whatever was typed but not confirmed, so it isn't lost on save.
+            if (input.trim()) addTag(input, false);
+            setTimeout(() => setShowSuggestions(false), 150);
+          }}
           className={styles.input}
         />
       </div>
