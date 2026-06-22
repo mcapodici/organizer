@@ -25,5 +25,9 @@ export interface StorageAdapter {
   getAllBlobs(): Promise<Record<string, ArrayBuffer>>;
 
   hasConflict(): Promise<boolean>;
-  mergeFromDisk(activeBase: Entry | null): Promise<{ duplicatedEntryId: string | null }>;
+  mergeFromDisk(activeBase: Entry | null): Promise<{ duplicatedEntryId: string | null; importedCount: number }>;
+  // Scan for and merge any external conflict files (e.g. Syncthing
+  // `.sync-conflict-*` files), renaming each to `.done` once processed. Adapters
+  // without a file backing return zero counts.
+  mergeConflictFiles(): Promise<{ importedCount: number; conflictCount: number }>;
 }

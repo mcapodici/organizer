@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mergeDiskState, markMergedCopy } from './merge';
+import { mergeDiskState, mergeForeignState, markMergedCopy } from './merge';
 import type { Entry, Timeline } from '../types';
 
 const tl: Timeline = { id: 't1', name: 'T', createdAt: '2026-01-01T00:00:00Z', tags: [] };
@@ -48,6 +48,56 @@ describe('mergeDiskState', () => {
     const out = mergeDiskState([tl], [entry('b', doc('other'))], base);
     expect(out.duplicatedEntryId).toBeNull();
     expect(out.entries).toHaveLength(1);
+  });
+});
+
+describe('mergeForeignState', () => {
+  it('imports a brand-new note and counts it', () => {
+    const out = mergeForeignState([tl], [entry('a', doc('a'))], [tl], [entry('b', doc('b'))]);
+    expect(out.entries.map((e) => e.id).sort()).toEqual(['a', 'b']);
+    expect(out.importedCount).toBe(1);
+    expect(out.conflictCount).toBe(0);
+  });
+
+  it('skips an incoming note whose content is identical', () => {
+    const out = mergeForeignState([tl], [entry('a', doc('same'))], [tl], [entry('a', doc('same'))]);
+    expect(out.entries).toHaveLength(1);
+    expect(out.importedCount).toBe(0);
+    expect(out.conflictCount).toBe(0);
+  });
+
+  it('keeps both versions when the same id has different content', () => {
+    const out = mergeForeignState([tl], [entry('a', doc('mine'))], [tl], [entry('a', doc('theirs'))]);
+    expect(out.entries).toHaveLength(2);
+    const original = out.entries.find((e) => e.id === 'a')!;
+    expect(original.content).toBe(doc('mine'));
+    const dup = out.entries.find((e) => e.id !== 'a')!;
+    expect(dup.content).toContain('Merged copy from another device');
+    expect(dup.content).toContain('theirs');
+    expect(out.importedCount).toBe(1);
+    expect(out.conflictCount).toBe(1);
+  });
+
+  it('adds a missing timeline so imported notes are not orphaned', () => {
+    const incomingTl: Timeline = { id: 't2', name: 'T2', createdAt: '2026-01-01T00:00:00Z', tags: [] };
+    const out = mergeForeignState([tl], [], [incomingTl], [{ ...entry('x', doc('x')), timelineId: 't2' }]);
+    expect(out.timelines.map((t) => t.id).sort()).toEqual(['t1', 't2']);
+    expect(out.entries.map((e) => e.id)).toEqual(['x']);
+  });
+
+  it('keeps the timeline with the later updatedAt on a conflict', () => {
+    const current: Timeline = { ...tl, name: 'old', updatedAt: '2026-01-01T00:00:00Z' };
+    const incoming: Timeline = { ...tl, name: 'new', updatedAt: '2026-02-01T00:00:00Z' };
+    const out = mergeForeignState([current], [], [incoming], []);
+    expect(out.timelines).toHaveLength(1);
+    expect(out.timelines[0].name).toBe('new');
+  });
+
+  it('does not overwrite an existing timeline with an older incoming one', () => {
+    const current: Timeline = { ...tl, name: 'new', updatedAt: '2026-02-01T00:00:00Z' };
+    const incoming: Timeline = { ...tl, name: 'old', updatedAt: '2026-01-01T00:00:00Z' };
+    const out = mergeForeignState([current], [], [incoming], []);
+    expect(out.timelines[0].name).toBe('new');
   });
 });
 

@@ -6,6 +6,7 @@ import { saveHandle, loadHandle } from '../storage/handleStore';
 import { ConflictError, type StorageAdapter } from '../storage/interface';
 import { WorkspacePicker } from '../components/WorkspacePicker/WorkspacePicker';
 import { Modal } from '../components/Modal/Modal';
+import { ToastStack, type ToastItem } from '../components/Toast/Toast';
 
 export type StorageMode = 'file' | 'idb';
 
@@ -61,6 +62,7 @@ function withErrorCapture(
     deleteBlob: k => wrap(() => inner.deleteBlob(k)),
     hasConflict: () => inner.hasConflict(),
     mergeFromDisk: active => inner.mergeFromDisk(active),
+    mergeConflictFiles: () => inner.mergeConflictFiles(),
   };
 }
 
@@ -74,8 +76,11 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
   const [phase, setPhase] = useState<Phase>({ tag: 'booting' });
   const [writeError, setWriteError] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
-  const [conflict, setConflict] = useState(false);
-  const [merging, setMerging] = useState(false);
+  // Merge announcements shown bottom-right until the user acknowledges each.
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const toastSeqRef = useRef(0);
+  // Guards against two poll ticks (or a poll + a failed write) merging at once.
+  const mergeInFlightRef = useRef(false);
   // Bumped after a merge so `safeAdapter` is rebuilt with a fresh identity, which
   // makes every adapter-keyed data hook refetch the merged state.
   const [mergeNonce, setMergeNonce] = useState(0);
@@ -227,46 +232,63 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
     finally { setReconnecting(false); }
   }
 
-  async function mergeInChanges() {
+  // Auto-merge any external changes — another tab/device saving (saveId change)
+  // or Syncthing `.sync-conflict-*` files — and announce it via a toast. Runs
+  // silently with no blocking dialog, driven by the 2s poll below. The in-flight
+  // guard keeps overlapping ticks from merging at once.
+  const runMerge = useCallback(async () => {
+    if (mergeInFlightRef.current) return;
     const adapter = phase.tag === 'readyFile' || phase.tag === 'readyIdb' ? phase.adapter : null;
-    if (!adapter || merging) return;
-    setMerging(true);
+    if (!adapter) return;
+    mergeInFlightRef.current = true;
     try {
-      await adapter.mergeFromDisk(activeEditRef.current);
-      setConflict(false);
-      setMergeNonce(v => v + 1);
-    } catch { /* leave the conflict dialog up so the user can retry */ }
-    finally { setMerging(false); }
-  }
+      let imported = 0;
+      let conflicts = 0;
+      let merged = false;
+      if (await adapter.hasConflict()) {
+        const r = await adapter.mergeFromDisk(activeEditRef.current);
+        imported += r.importedCount;
+        merged = true;
+      }
+      if (phase.tag === 'readyFile') {
+        const r = await adapter.mergeConflictFiles();
+        imported += r.importedCount;
+        conflicts += r.conflictCount;
+        if (r.importedCount > 0 || r.conflictCount > 0) merged = true;
+      }
+      if (merged) {
+        setMergeNonce(v => v + 1);
+        setToasts(list => [...list, { id: (toastSeqRef.current += 1), imported, conflicts }]);
+      }
+    } catch { /* transient read/write failure — the next poll tick retries */ }
+    finally { mergeInFlightRef.current = false; }
+  }, [phase]);
 
   // Wrap the adapter so failed writes surface the appropriate modal.
   // useMemo keyed on phase so it is only recreated when storage mode changes.
   const safeAdapter = useMemo<StorageAdapter | null>(() => {
+    // A ConflictError just means another instance saved first — the 2s poll will
+    // auto-merge within a tick, so the conflict callback is a no-op (it only needs
+    // to keep ConflictErrors out of the unrecoverable write-error path).
     if (phase.tag === 'readyFile') {
-      return withErrorCapture(phase.adapter, () => setWriteError(true), () => setConflict(true));
+      return withErrorCapture(phase.adapter, () => setWriteError(true), () => { /* poll auto-merges */ });
     }
     if (phase.tag === 'readyIdb') {
-      return withErrorCapture(phase.adapter, () => { /* idb writes don't have a recoverable error path */ }, () => setConflict(true));
+      return withErrorCapture(phase.adapter, () => { /* idb writes don't have a recoverable error path */ }, () => { /* poll auto-merges */ });
     }
     return null;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, mergeNonce]);
 
-  // Poll the active storage every 2s for an external saveId change.
-  // Must stay above any early return so the hook order is stable across phases.
+  // Poll the active storage every 2s and auto-merge any external changes that
+  // appear (saveId change or Syncthing conflict files). Must stay above any early
+  // return so the hook order is stable across phases.
   useEffect(() => {
-    if (conflict) return;
-    const adapter = phase.tag === 'readyFile' ? phase.adapter
-      : phase.tag === 'readyIdb' ? phase.adapter
-      : null;
-    if (!adapter) return;
-    const id = setInterval(async () => {
-      try {
-        if (await adapter.hasConflict()) setConflict(true);
-      } catch { /* transient read failure — try again next tick */ }
-    }, 2000);
+    const isReady = phase.tag === 'readyFile' || phase.tag === 'readyIdb';
+    if (!isReady) return;
+    const id = setInterval(() => { void runMerge(); }, 2000);
     return () => clearInterval(id);
-  }, [phase, conflict]);
+  }, [phase, runMerge]);
 
   if (phase.tag !== 'readyIdb' && phase.tag !== 'readyFile') {
     return (
@@ -336,47 +358,7 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
           </div>
         </Modal>
       )}
-      {conflict && (
-        <div
-          role="alertdialog"
-          aria-modal="true"
-          aria-label="File edited elsewhere"
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.55)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999,
-          }}
-        >
-          <div style={{
-            background: '#fff', borderRadius: 8, padding: '24px 28px',
-            width: 'min(440px, 90vw)', boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-          }}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '1.05rem', color: '#b91c1c' }}>
-              Edited in another window
-            </h2>
-            <p style={{ margin: '0 0 10px', color: '#374151', lineHeight: 1.5 }}>
-              Another window or device saved changes to this workspace. Merge them
-              in to load the latest version and keep working.
-            </p>
-            <p style={{ margin: '0 0 18px', color: '#6b7280', lineHeight: 1.5, fontSize: '0.85rem' }}>
-              A note you're editing won't be lost — if it also changed elsewhere,
-              the other version is kept as a duplicate.
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                onClick={mergeInChanges}
-                disabled={merging}
-                style={{
-                  background: '#6366f1', color: '#fff', border: 'none', borderRadius: 6,
-                  padding: '7px 16px', cursor: merging ? 'default' : 'pointer',
-                  fontSize: '0.875rem', fontWeight: 500, opacity: merging ? 0.65 : 1,
-                }}
-              >
-                {merging ? 'Merging…' : 'Merge in changes'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ToastStack toasts={toasts} onDismiss={(id) => setToasts(list => list.filter(t => t.id !== id))} />
     </StorageContext.Provider>
   );
 }

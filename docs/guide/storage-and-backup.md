@@ -101,16 +101,36 @@ Organizer picks them up.
 ### How Organizer handles incoming changes
 
 Organizer watches the active workspace for changes that arrive from another
-device. When it notices the files were updated elsewhere, it shows an **"Edited
-in another window"** prompt; click **Merge in changes** to load the latest
-version and keep working. A note you happen to have open in the editor is never
-lost — if it also changed on the other device, the other version is kept beside
-it as a clearly-marked duplicate.
+device and **merges them in automatically** — there's no prompt to click. When a
+merge happens you'll see a short toast in the corner, for example *"Merged 3
+notes from another device,"* that stays until you dismiss it. A note you happen
+to have open in the editor is never lost — if it also changed elsewhere, the
+other version is kept beside it as a clearly-marked duplicate.
 
-::: tip Avoid editing the same workspace on two devices at once
-Syncthing copies files device-to-device, so a moment of overlap while both are
-online is fine. But to keep things tidy, let one device finish syncing before
-you start editing on another — especially after a device has been offline.
+### When two devices edit offline (Syncthing conflict files)
+
+If two devices change the workspace while **both are offline** and then sync,
+Syncthing can't pick a winner, so it keeps one version as the normal file and
+saves the other alongside it as a `…sync-conflict-…` file.
+
+Organizer notices these conflict files and folds them back in for you
+automatically:
+
+- Notes that only exist in the conflict file are **imported**.
+- Notes that match what you already have are skipped.
+- Notes that changed **differently** on each side are kept **both ways** — yours
+  is left untouched and the other version is added as a clearly-marked duplicate
+  so nothing is thrown away.
+
+The toast tells you how many notes were imported, and whether any had conflicting
+versions that were kept side by side. Once a conflict file has been merged,
+Organizer renames it with a `.done` suffix so it's never processed twice.
+
+::: tip Editing on two devices is safe, but tidier in turns
+Conflicting edits are merged without losing data, so an occasional overlap is
+fine. To keep duplicates to a minimum, it's still nicest to let one device finish
+syncing before you start editing on another — especially after a device has been
+offline.
 :::
 
 ::: warning Syncing is not a backup

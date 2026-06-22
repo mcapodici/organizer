@@ -104,6 +104,111 @@ describe('listWorkspaces', () => {
   it('returns an empty list for a directory with no workspaces', async () => {
     expect(await listWorkspaces(asHandle(dir))).toEqual([]);
   });
+
+  it('excludes Syncthing conflict and processed (.done) files', async () => {
+    await (await FileAdapter.load(asHandle(dir), 'ws')).putTimeline(tl('t'));
+    dir.files.set('ws.sync-conflict-20240101-120000-AAAA.json', { data: '{}' });
+    dir.files.set('ws.sync-conflict-20240101-120000-AAAA.json.done', { data: '{}' });
+    expect(await listWorkspaces(asHandle(dir))).toEqual(['ws']);
+  });
+});
+
+describe('FileAdapter — Syncthing conflict files', () => {
+  const doc = (text: string) =>
+    JSON.stringify({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] });
+
+  it('merges a conflict file, reports counts, and renames it to .done', async () => {
+    const a = await FileAdapter.load(asHandle(dir), 'ws');
+    await a.putTimeline(tl('t1'));
+    await a.putEntry({ ...en('shared', 't1'), content: doc('mine') });
+
+    const conflictName = 'ws.sync-conflict-20240101-120000-AAAA.json';
+    dir.files.set(conflictName, { data: JSON.stringify({
+      version: 2,
+      timelines: [tl('t1')],
+      entries: [
+        { ...en('fresh', 't1'), content: doc('brand new') },
+        { ...en('shared', 't1'), content: doc('theirs') },
+      ],
+    }) });
+
+    const result = await a.mergeConflictFiles();
+    expect(result.importedCount).toBe(2); // one new + one conflicting duplicate
+    expect(result.conflictCount).toBe(1);
+
+    const ids = (await a.getAllEntries()).map((e) => e.id);
+    expect(ids).toContain('fresh');
+    expect(ids.filter((id) => id === 'shared')).toHaveLength(1); // original kept once
+    expect(await a.getAllEntries()).toHaveLength(3); // shared + fresh + duplicate
+
+    // The conflict file is renamed so it isn't processed again.
+    expect(dir.files.has(conflictName)).toBe(false);
+    expect(dir.files.has(`${conflictName}.done`)).toBe(true);
+
+    // A second run finds nothing to do.
+    const again = await a.mergeConflictFiles();
+    expect(again.importedCount).toBe(0);
+  });
+
+  it('still renames to .done via fallback when move() throws (the prod bug)', async () => {
+    dir.moveMode = 'throws'; // move() exists but rejects, as on some picked dirs
+    const a = await FileAdapter.load(asHandle(dir), 'ws');
+    await a.putEntry({ ...en('shared', 't1'), content: doc('mine') });
+
+    const conflictName = 'ws.sync-conflict-20240101-120000-AAAA.json';
+    dir.files.set(conflictName, { data: JSON.stringify({
+      version: 2, timelines: [], entries: [{ ...en('shared', 't1'), content: doc('theirs') }],
+    }) });
+
+    const first = await a.mergeConflictFiles();
+    expect(first.conflictCount).toBe(1);
+    // The copy+remove fallback ran, so the file is renamed and not reprocessed.
+    expect(dir.files.has(conflictName)).toBe(false);
+    expect(dir.files.has(`${conflictName}.done`)).toBe(true);
+  });
+
+  it('does not merge the same conflict file twice even if it is never renamed', async () => {
+    const a = await FileAdapter.load(asHandle(dir), 'ws');
+    await a.putEntry({ ...en('shared', 't1'), content: doc('mine') });
+
+    const conflictName = 'ws.sync-conflict-20240101-120000-AAAA.json';
+    dir.files.set(conflictName, { data: JSON.stringify({
+      version: 2, timelines: [], entries: [{ ...en('shared', 't1'), content: doc('theirs') }],
+    }) });
+    // Simulate renaming being impossible: removeEntry is a no-op and there is no
+    // move(), so the conflict file lingers on disk after the first merge.
+    dir.removeEntry = async () => { /* rename can't complete */ };
+
+    const first = await a.mergeConflictFiles();
+    expect(first.conflictCount).toBe(1);
+    expect(dir.files.has(conflictName)).toBe(true); // still there
+
+    // A second pass must NOT merge it again (no runaway duplication).
+    const second = await a.mergeConflictFiles();
+    expect(second.importedCount).toBe(0);
+    expect(second.conflictCount).toBe(0);
+    expect(await a.getAllEntries()).toHaveLength(2); // shared + one duplicate, not three
+  });
+
+  it('splits a conflicting attachment blob into a second attachment', async () => {
+    const a = await FileAdapter.load(asHandle(dir), 'ws');
+    await a.putBlob('blob-original', new Uint8Array([1, 2]).buffer); // creates the `ws/` subdir
+    await a.putEntry({
+      ...en('e1', 't1'),
+      attachments: [{ id: 'att1', name: 'photo.png', mimeType: 'image/png', size: 2, blobKey: 'blob-original' }],
+    });
+    // Syncthing names a blob conflict <key>.sync-conflict-*.bin in the subfolder.
+    const sub = dir.dirs.get('ws')!;
+    sub.files.set('blob-original.sync-conflict-20240101-120000-AAAA.bin', { data: new Uint8Array([9, 9]).buffer });
+
+    await a.mergeConflictFiles();
+
+    const e1 = (await a.getAllEntries()).find((e) => e.id === 'e1')!;
+    expect(e1.attachments).toHaveLength(2);
+    const copy = e1.attachments.find((at) => at.name.includes('conflicted copy'))!;
+    expect(copy.blobKey).not.toBe('blob-original');
+    expect(new Uint8Array((await a.getBlob(copy.blobKey))!)).toEqual(new Uint8Array([9, 9]));
+  });
 });
 
 describe('FileAdapter — cross-tab conflict handling', () => {

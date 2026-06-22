@@ -10,10 +10,22 @@ class MockFileHandle {
   readonly kind = 'file';
   readonly name: string;
   private readonly store: Map<string, StoredFile>;
+  private readonly moveMode: 'absent' | 'works' | 'throws';
 
-  constructor(name: string, store: Map<string, StoredFile>) {
+  constructor(name: string, store: Map<string, StoredFile>, moveMode: 'absent' | 'works' | 'throws' = 'absent') {
     this.name = name;
     this.store = store;
+    this.moveMode = moveMode;
+    // Only expose move() when the directory opts into emulating it, so tests can
+    // cover both the native-move and the copy+remove fallback paths.
+    if (moveMode === 'works' || moveMode === 'throws') {
+      (this as unknown as { move: (newName: string) => Promise<void> }).move = async (newName: string) => {
+        if (this.moveMode === 'throws') throw new DOMException('move not allowed', 'NotAllowedError');
+        const entry = this.store.get(this.name);
+        this.store.set(newName, entry ?? { data: '' });
+        this.store.delete(this.name);
+      };
+    }
   }
 
   async getFile() {
@@ -51,6 +63,9 @@ export class MockDir {
   files = new Map<string, StoredFile>();
   dirs = new Map<string, MockDir>();
   readonly name: string;
+  // How file handles from this directory emulate the FSA move() method:
+  // 'absent' (no move, default), 'works', or 'throws' (move present but rejects).
+  moveMode: 'absent' | 'works' | 'throws' = 'absent';
 
   constructor(name: string = 'root') {
     this.name = name;
@@ -61,7 +76,7 @@ export class MockDir {
       if (!opts?.create) throw new DOMException(`${name} not found`, 'NotFoundError');
       this.files.set(name, { data: '' });
     }
-    return new MockFileHandle(name, this.files);
+    return new MockFileHandle(name, this.files, this.moveMode);
   }
 
   async getDirectoryHandle(name: string, opts?: { create?: boolean }): Promise<MockDir> {
@@ -80,7 +95,7 @@ export class MockDir {
 
   async *entries(): AsyncGenerator<[string, MockFileHandle | MockDir]> {
     for (const name of this.files.keys()) {
-      yield [name, new MockFileHandle(name, this.files)];
+      yield [name, new MockFileHandle(name, this.files, this.moveMode)];
     }
     for (const [name, dir] of this.dirs) {
       yield [name, dir];
