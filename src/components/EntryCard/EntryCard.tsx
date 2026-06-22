@@ -45,6 +45,32 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
     html = entry.content;
   }
 
+  function handleContentClick(e: React.MouseEvent<HTMLDivElement>) {
+    const target = e.target as HTMLElement;
+    if (!onUpdate) return;
+    // The checkbox is an <input> wrapped in a <label> (with a styler <span>);
+    // accept a click anywhere on that label, but not on the task text.
+    const label = target.closest('li[data-type="taskItem"] > label');
+    if (!label) return;
+    const item = label.closest('li[data-type="taskItem"]');
+    if (!item) return;
+    const container = e.currentTarget;
+    const items = Array.from(container.querySelectorAll('li[data-type="taskItem"]'));
+    const index = items.indexOf(item);
+    if (index < 0) return;
+    // Prevent the native checkbox toggle; React re-renders from the saved JSON.
+    e.preventDefault();
+    let json: TiptapNode;
+    try {
+      json = JSON.parse(entry.content);
+    } catch {
+      return;
+    }
+    if (toggleTaskItem(json, index)) {
+      onUpdate({ ...entry, content: JSON.stringify(json) });
+    }
+  }
+
   return (
     <div id={domId} className={`${styles.card} ${isEditing ? styles.editing : ''}`}>
       <div className={styles.dot} />
@@ -97,6 +123,7 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
         </div>
         <div
           className={styles.content}
+          onClick={handleContentClick}
           dangerouslySetInnerHTML={{ __html: html }}
         />
         {entry.attachments.length > 0 && (
@@ -117,6 +144,34 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
 
 function isOverdue(dueDate: string): boolean {
   return dueDate < todayDateString();
+}
+
+interface TiptapNode {
+  type?: string;
+  attrs?: { checked?: boolean; [k: string]: unknown };
+  content?: TiptapNode[];
+}
+
+// Walks the Tiptap JSON document in order, toggling the `checked` attr of the
+// task item at the given index (matching the DOM order of rendered checkboxes).
+function toggleTaskItem(node: TiptapNode, targetIndex: number): boolean {
+  let counter = 0;
+  function walk(n: TiptapNode): boolean {
+    if (n.type === 'taskItem') {
+      if (counter === targetIndex) {
+        n.attrs = { ...(n.attrs ?? {}), checked: !n.attrs?.checked };
+        return true;
+      }
+      counter++;
+    }
+    if (Array.isArray(n.content)) {
+      for (const child of n.content) {
+        if (walk(child)) return true;
+      }
+    }
+    return false;
+  }
+  return walk(node);
 }
 
 function AttachmentList({ attachments, onLightbox }: { attachments: Attachment[]; onLightbox: (src: string) => void }) {
