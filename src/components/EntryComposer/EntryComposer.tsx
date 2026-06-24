@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
-import Link from '@tiptap/extension-link';
+import { EntryLink } from './linkExtension';
 import { Table as TableExtension } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
@@ -52,7 +52,7 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3, 4] } }),
       Underline,
-      Link.configure({ openOnClick: false }),
+      EntryLink,
       TableExtension.configure({ resizable: false }),
       TableRow,
       TableHeader,
