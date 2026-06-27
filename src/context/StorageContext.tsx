@@ -225,7 +225,7 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
     try {
       const perm = await handle.requestPermission({ mode: 'readwrite' });
       if (perm === 'granted') {
-        await fileAdapter.flush();
+        await fileAdapter.persistAll();
         setWriteError(false);
       }
     } catch { /* stay on error screen */ }

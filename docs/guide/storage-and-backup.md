@@ -83,6 +83,11 @@ devices — peer-to-peer, with no third-party cloud in the middle.
 This gives you Organizer on, say, a laptop and a desktop, both reading and
 writing the same workspace.
 
+Organizer stores each note as its own small file (grouped into a folder per
+timeline), which is exactly what Syncthing is good at: editing *different* notes
+on two devices syncs cleanly with no conflict at all. A conflict file can only
+appear for a single note that was changed on two devices before they synced.
+
 ### One-time setup
 
 1. Install Syncthing on each device (see the

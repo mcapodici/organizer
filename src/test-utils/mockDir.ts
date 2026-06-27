@@ -4,7 +4,12 @@
  * methods those code paths use are implemented.
  */
 
-interface StoredFile { data: string | ArrayBuffer }
+interface StoredFile { data: string | ArrayBuffer; mtime: number }
+
+// Strictly-increasing stand-in for File.lastModified so each write is detectably
+// newer than the last, without relying on a real (coarse, possibly-equal) clock.
+let mtimeCounter = 0;
+function nextMtime(): number { return ++mtimeCounter; }
 
 class MockFileHandle {
   readonly kind = 'file';
@@ -22,7 +27,7 @@ class MockFileHandle {
       (this as unknown as { move: (newName: string) => Promise<void> }).move = async (newName: string) => {
         if (this.moveMode === 'throws') throw new DOMException('move not allowed', 'NotAllowedError');
         const entry = this.store.get(this.name);
-        this.store.set(newName, entry ?? { data: '' });
+        this.store.set(newName, entry ?? { data: '', mtime: nextMtime() });
         this.store.delete(this.name);
       };
     }
@@ -32,6 +37,7 @@ class MockFileHandle {
     const entry = this.store.get(this.name);
     const data = entry ? entry.data : '';
     return {
+      lastModified: entry ? entry.mtime : 0,
       async text() {
         return typeof data === 'string' ? data : new TextDecoder().decode(new Uint8Array(data));
       },
@@ -51,7 +57,7 @@ class MockFileHandle {
         const normalized = ArrayBuffer.isView(data)
           ? (data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer)
           : data;
-        store.set(name, { data: normalized as string | ArrayBuffer });
+        store.set(name, { data: normalized as string | ArrayBuffer, mtime: nextMtime() });
       },
       async close() { /* no-op */ },
     };
@@ -74,7 +80,7 @@ export class MockDir {
   async getFileHandle(name: string, opts?: { create?: boolean }): Promise<MockFileHandle> {
     if (!this.files.has(name)) {
       if (!opts?.create) throw new DOMException(`${name} not found`, 'NotFoundError');
-      this.files.set(name, { data: '' });
+      this.files.set(name, { data: '', mtime: nextMtime() });
     }
     return new MockFileHandle(name, this.files, this.moveMode);
   }
@@ -82,11 +88,32 @@ export class MockDir {
   async getDirectoryHandle(name: string, opts?: { create?: boolean }): Promise<MockDir> {
     if (!this.dirs.has(name)) {
       if (!opts?.create) throw new DOMException(`${name} not found`, 'NotFoundError');
-      this.dirs.set(name, new MockDir(name));
+      const child = new MockDir(name);
+      // A picked directory's move() policy applies throughout its subtree.
+      child.moveMode = this.moveMode;
+      this.dirs.set(name, child);
     }
     return this.dirs.get(name)!;
   }
 
+  // Test helper: write a file at a slash-separated path, creating any missing
+  // intermediate directories, with a fresh mtime.
+  seed(path: string, data: string | ArrayBuffer): void {
+    const parts = path.split('/');
+    const fname = parts.pop()!;
+    const target = parts.reduce<MockDir>((d, p) => {
+      if (!d.dirs.has(p)) {
+        const child = new MockDir(p);
+        child.moveMode = d.moveMode;
+        d.dirs.set(p, child);
+      }
+      return d.dirs.get(p)!;
+    }, this);
+    target.files.set(fname, { data, mtime: nextMtime() });
+  }
+
+  // Accepts the FSA `{ recursive }` option as an extra arg at the call site;
+  // deleting a directory from the map already drops its whole subtree.
   async removeEntry(name: string): Promise<void> {
     if (!this.files.delete(name) && !this.dirs.delete(name)) {
       throw new DOMException(`${name} not found`, 'NotFoundError');
