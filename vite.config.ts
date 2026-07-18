@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'child_process';
 
 // The app is served under "/app/" so it can sit alongside the VitePress
@@ -33,7 +34,81 @@ function getBuildInfo(): string {
 export default defineConfig({
   // Served at "/app/" — the VitePress docs site owns the root.
   base: '/app/',
-  plugins: [react(), appTrailingSlash()],
+  plugins: [
+    react(),
+    appTrailingSlash(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg', 'logo.svg'],
+      manifest: {
+        name: 'Organizer',
+        short_name: 'Organizer',
+        description: 'A timeline-based personal organizer',
+        theme_color: '#6366f1',
+        background_color: '#f9fafb',
+        display: 'standalone',
+        scope: '/app/',
+        start_url: '/app/',
+        icons: [
+          {
+            src: 'pwa-192x192.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml',
+          },
+          {
+            src: 'pwa-512x512.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+          },
+          {
+            src: 'pwa-192x192-maskable.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml',
+            purpose: 'maskable',
+          },
+          {
+            src: 'pwa-512x512-maskable.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg}'],
+        runtimeCaching: [
+          {
+            // App shell — network first with cache fallback
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'app-shell',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
+          },
+          {
+            // Static assets — cache first
+            urlPattern: ({ request }) =>
+              request.destination === 'style' ||
+              request.destination === 'script' ||
+              request.destination === 'font' ||
+              request.destination === 'image',
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'static-assets',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
+          },
+        ],
+      },
+    }),
+  ],
   server: {
     // Fixed port so the docs dev server (5173) can proxy /app/* here. The HMR
     // client connects straight to 5174, so hot reload works whether the app is
