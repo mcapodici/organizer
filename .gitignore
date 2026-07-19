@@ -37,3 +37,6 @@ docs/.vitepress/cache
 .demo-raw/
 .demo-profile/
 .demo-frames/
+
+.hermes/
+.worktrees/
