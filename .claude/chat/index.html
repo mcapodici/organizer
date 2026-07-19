@@ -1,0 +1,139 @@
+<title>Organizer Pipeline</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0 }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #e8e8e8; min-height: 100vh }
+  header { padding: 20px 24px; border-bottom: 1px solid #222; display: flex; align-items: center; gap: 12px }
+  header h1 { font-size: 16px; font-weight: 600; color: #fff }
+  .badge { font-size: 12px; padding: 2px 8px; border-radius: 99px; background: #1a1a1a; color: #888; border: 1px solid #333 }
+  .badge.live { background: #0d2b1a; color: #4ade80; border-color: #166534 }
+  #inbox { padding: 24px; display: flex; flex-direction: column; gap: 16px; max-width: 800px; margin: 0 auto }
+  .empty { text-align: center; padding: 80px 24px; color: #555 }
+  .empty h2 { font-size: 18px; font-weight: 400; margin-bottom: 8px }
+  .card { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden }
+  .card.approval { border-color: #854d0e }
+  .card-header { padding: 16px 20px; display: flex; align-items: flex-start; gap: 12px; border-bottom: 1px solid #1f1f1f }
+  .card.approval .card-header { background: #1c1007 }
+  .type-chip { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 99px; white-space: nowrap; margin-top: 2px }
+  .type-chip.question { background: #1e3a5f; color: #7dd3fc }
+  .type-chip.approval { background: #3b1f00; color: #fbbf24 }
+  .card-header-text { flex: 1 }
+  .card-header-text h2 { font-size: 14px; font-weight: 600; color: #fff }
+  .card-header-text .meta { font-size: 12px; color: #666; margin-top: 3px }
+  .preview-link { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #818cf8; text-decoration: none; margin-top: 6px }
+  .preview-link:hover { color: #a5b4fc }
+  .card-body { padding: 16px 20px }
+  .question-text { font-size: 14px; line-height: 1.6; color: #c8c8c8; white-space: pre-wrap }
+  textarea { width: 100%; margin-top: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #e8e8e8; font-size: 14px; font-family: inherit; padding: 10px 12px; resize: vertical; min-height: 72px; outline: none }
+  textarea:focus { border-color: #555 }
+  .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap }
+  button { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: opacity .15s }
+  button:disabled { opacity: .4; cursor: default }
+  .btn-primary { background: #2563eb; color: #fff }
+  .btn-primary:hover:not(:disabled) { background: #3b82f6 }
+  .btn-approve { background: #166534; color: #fff }
+  .btn-approve:hover:not(:disabled) { background: #15803d }
+  .btn-reject { background: #7f1d1d; color: #fff }
+  .btn-reject:hover:not(:disabled) { background: #991b1b }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #1a2e1a; border: 1px solid #166534; color: #4ade80; padding: 10px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none }
+  .toast.show { opacity: 1 }
+  .refresh-hint { font-size: 11px; color: #444; text-align: center; padding: 8px }
+</style>
+
+<header>
+  <h1>Organizer Pipeline</h1>
+  <span class="badge live" id="status">live</span>
+</header>
+<div id="inbox"><div class="empty"><h2>Loading…</h2></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+let questions = []
+
+function timeAgo(iso) {
+  if (!iso) return ''
+  const diff = Date.now() - new Date(iso).getTime()
+  const m = Math.floor(diff / 60000)
+  if (m < 1) return 'just now'
+  if (m < 60) return `${m}m ago`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h}h ago`
+  return `${Math.floor(h / 24)}d ago`
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.classList.add('show')
+  setTimeout(() => t.classList.remove('show'), 2500)
+}
+
+async function send(file, answer, action) {
+  const btn = document.querySelector(`[data-file="${file}"]`)
+  if (btn) btn.disabled = true
+  try {
+    const r = await fetch('/answer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file, answer, action }),
+    })
+    const d = await r.json()
+    if (d.ok) {
+      showToast(action === 'approve' ? 'Approved ✓' : action === 'reject' ? 'Rejected' : 'Answered ✓')
+      setTimeout(load, 600)
+    }
+  } catch(e) {
+    if (btn) btn.disabled = false
+    showToast('Error — is the server running?')
+  }
+}
+
+function renderCard(q) {
+  const isApproval = q.type === 'approval'
+  const ta = `ta-${q.file}`
+  return `
+    <div class="card ${isApproval ? 'approval' : ''}">
+      <div class="card-header">
+        <span class="type-chip ${isApproval ? 'approval' : 'question'}">${isApproval ? 'Approval needed' : 'Question'}</span>
+        <div class="card-header-text">
+          <h2>${q.ticket_title || q.ticket_id}</h2>
+          <div class="meta">${q.ticket_id} · ${timeAgo(q.asked_at)}</div>
+          ${q.preview_url ? `<a class="preview-link" href="${q.preview_url}" target="_blank">↗ Preview deployment</a>` : ''}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="question-text">${q.body.replace(/</g,'&lt;')}</div>
+        <textarea id="${ta}" placeholder="${isApproval ? 'Notes (optional)…' : 'Your answer…'}"></textarea>
+        <div class="actions">
+          ${isApproval
+            ? `<button class="btn-approve" data-file="${q.file}" onclick="send('${q.file}', document.getElementById('${ta}').value, 'approve')">Approve</button>
+               <button class="btn-reject" data-file="${q.file}" onclick="send('${q.file}', document.getElementById('${ta}').value, 'reject')">Reject</button>`
+            : `<button class="btn-primary" data-file="${q.file}" onclick="send('${q.file}', document.getElementById('${ta}').value, 'answer')">Send answer</button>`
+          }
+        </div>
+      </div>
+    </div>`
+}
+
+async function load() {
+  try {
+    const r = await fetch('/questions')
+    questions = await r.json()
+    const inbox = document.getElementById('inbox')
+    if (questions.length === 0) {
+      inbox.innerHTML = '<div class="empty"><h2>All clear</h2><p style="color:#555;margin-top:8px;font-size:14px">No pending questions or approvals</p></div>'
+    } else {
+      inbox.innerHTML = questions.map(renderCard).join('') + '<p class="refresh-hint">Auto-refreshes every 15s</p>'
+    }
+    document.getElementById('status').textContent = 'live'
+    document.getElementById('status').className = 'badge live'
+  } catch(e) {
+    document.getElementById('status').textContent = 'offline'
+    document.getElementById('status').className = 'badge'
+  }
+}
+
+load()
+setInterval(load, 15000)
+</script>

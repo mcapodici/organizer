@@ -40,3 +40,7 @@ docs/.vitepress/cache
 
 .hermes/
 .worktrees/
+
+# Pipeline
+.pipeline.log
+.claude/settings.local.json

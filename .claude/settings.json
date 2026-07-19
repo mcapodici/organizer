@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm test)",
+      "Bash(npm run build)",
+      "Bash(npm run deploy:preview)",
+      "Bash(npx tsc --noEmit*)",
+      "Bash(git worktree*)",
+      "Bash(git push*)",
+      "Bash(git merge*)",
+      "Bash(git branch*)",
+      "Bash(git commit*)",
+      "Bash(git add*)"
+    ]
+  }
+}
