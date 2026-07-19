@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Upload, RotateCcw, Folder, Globe, FolderSync, BookOpen } from 'lucide-react';
+import { Download, Upload, RotateCcw, Globe, BookOpen } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
 import { Modal } from '../Modal/Modal';
 import { exportData, importData } from '../../utils/exportImport';
@@ -11,7 +11,7 @@ interface Props {
 }
 
 export function Settings({ onDataChanged }: Props) {
-  const { adapter, mode, workspaceName, markSaved, resetStorage, openSwitcher } = useStorage();
+  const { adapter, lastSaved, markSaved } = useStorage();
   const navigate = useNavigate();
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -20,7 +20,7 @@ export function Settings({ onDataChanged }: Props) {
 
   async function handleExport() {
     await exportData(adapter);
-    if (mode === 'idb') markSaved();
+    markSaved();
   }
 
   async function handleImport(importMode: 'replace' | 'merge') {
@@ -39,7 +39,6 @@ export function Settings({ onDataChanged }: Props) {
   function handleReset() {
     setResetModalOpen(false);
     navigate('/', { replace: true });
-    resetStorage();
   }
 
   return (
@@ -51,29 +50,26 @@ export function Settings({ onDataChanged }: Props) {
         <div className={styles.card}>
           <div className={styles.row}>
             <div className={styles.rowText}>
-              <div className={styles.rowTitle}>Current</div>
+              <div className={styles.rowTitle}>Backend</div>
               <div className={styles.rowDesc}>
-                {mode === 'file'
-                  ? <><Folder size={14} /> Folder · <strong>{workspaceName}</strong></>
-                  : <><Globe size={14} /> Browser storage</>}
+                <Globe size={14} /> App storage on this device
+                {lastSaved !== null && (
+                  <span style={{ opacity: 0.6, fontSize: '0.8rem', marginLeft: 8 }}>
+                    · Last backup export: {new Date(lastSaved).toLocaleDateString()}
+                  </span>
+                )}
               </div>
             </div>
-            {mode === 'file' && (
-              <button className={styles.btnSecondary} onClick={openSwitcher}>
-                <FolderSync size={14} />Switch folder
-              </button>
-            )}
           </div>
           <div className={styles.row}>
             <div className={styles.rowText}>
-              <div className={styles.rowTitle}>Reset storage choice</div>
+              <div className={styles.rowTitle}>Clear all data</div>
               <div className={styles.rowDesc}>
-                Pick a different storage location. Your existing data is not deleted —
-                choose the same option again to get back to it.
+                Remove all timelines, entries, and attachments from this device.
               </div>
             </div>
             <button className={styles.btnSecondary} onClick={() => setResetModalOpen(true)}>
-              <RotateCcw size={14} />Reset
+              <RotateCcw size={14} />Clear
             </button>
           </div>
         </div>
@@ -157,16 +153,18 @@ export function Settings({ onDataChanged }: Props) {
       )}
 
       {resetModalOpen && (
-        <Modal title="Reset storage choice" onClose={() => setResetModalOpen(false)}>
+        <Modal title="Clear all data" onClose={() => setResetModalOpen(false)}>
           <p style={{ marginTop: 0 }}>
-            You'll be taken back to the storage selection screen.
+            This will delete <strong>all</strong> your timelines, entries, and attachments
+            from this device permanently.
           </p>
           <p>
-            <strong>Your data is not deleted.</strong> If you pick the same storage
-            again, you'll find your timelines exactly where you left them.
+            Export your data first if you want to keep it.
           </p>
           <div className={styles.modalActions}>
-            <button className={styles.btn} onClick={handleReset}>Reset</button>
+            <button className={styles.dangerBtn} onClick={handleReset}>
+              Clear everything
+            </button>
             <button className={styles.btnSecondary} onClick={() => setResetModalOpen(false)}>Cancel</button>
           </div>
         </Modal>

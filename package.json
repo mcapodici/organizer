@@ -16,7 +16,8 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "docs:shots": "node scripts/seed-and-shoot.mjs",
-    "docs:video": "node scripts/record-demo.mjs"
+    "docs:video": "node scripts/record-demo.mjs",
+    "deploy:preview": "bash scripts/deploy-preview.sh"
   },
   "dependencies": {
     "@tiptap/extension-code": "^3.22.5",

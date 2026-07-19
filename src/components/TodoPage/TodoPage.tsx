@@ -104,8 +104,8 @@ export function TodoPage({ onEntryChanged }: Props) {
     await reload();
   }
 
-  function goToTimeline(timelineId: string) {
-    navigate(`/timelines/${timelineId}`);
+  function goToTimeline(timelineId: string, entryId: string) {
+    navigate(`/timelines/${timelineId}`, { state: { scrollToEntryId: entryId } });
   }
 
   if (loading) {
@@ -162,7 +162,7 @@ function TodoSection({
   variant: 'overdue' | 'today' | 'soon' | 'normal';
   onToggle: (entry: Entry) => void;
   onUpdate: (entry: Entry) => void | Promise<void>;
-  onGoToTimeline: (id: string) => void;
+  onGoToTimeline: (timelineId: string, entryId: string) => void;
 }) {
   return (
     <section className={styles.section}>
@@ -197,7 +197,7 @@ function TodoRow({
   variant: 'overdue' | 'today' | 'soon' | 'normal';
   onToggle: (entry: Entry) => void;
   onUpdate: (entry: Entry) => void | Promise<void>;
-  onGoToTimeline: (id: string) => void;
+  onGoToTimeline: (timelineId: string, entryId: string) => void;
 }) {
   const [dueAnchor, setDueAnchor] = useState<DOMRect | null>(null);
 
@@ -214,10 +214,10 @@ function TodoRow({
       </button>
       <div
         className={styles.cardBody}
-        onClick={() => onGoToTimeline(entry.timelineId)}
+        onClick={() => onGoToTimeline(entry.timelineId, entry.id)}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter') onGoToTimeline(entry.timelineId); }}
+        onKeyDown={(e) => { if (e.key === 'Enter') onGoToTimeline(entry.timelineId, entry.id); }}
       >
         <div className={styles.cardText}>{entryPreview(entry.content)}</div>
         <div className={styles.cardMeta}>

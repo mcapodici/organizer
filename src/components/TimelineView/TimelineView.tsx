@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { Timeline, Entry } from '../../types';
 import { useStorage } from '../../context/StorageContext';
 import { EntryCard } from '../EntryCard/EntryCard';
@@ -35,17 +36,29 @@ export function TimelineView({
   const [composerHasContent, setComposerHasContent] = useState(false);
   const [loadContent, setLoadContent] = useState<string | null>(null);
   const [copyConfirmContent, setCopyConfirmContent] = useState<string | null>(null);
-  const [scrollTargetId, setScrollTargetId] = useState<string | null>(null);
+  const [scrollTarget, setScrollTarget] = useState<{ id: string; block: ScrollLogicalPosition } | null>(null);
   const entriesRef = useRef<HTMLDivElement>(null);
   const scrolledTimelineRef = useRef<string | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // When arriving from the Todos page, scroll the clicked entry to the top of the pane.
+  useEffect(() => {
+    const targetId = (location.state as { scrollToEntryId?: string } | null)?.scrollToEntryId;
+    if (targetId) {
+      setScrollTarget({ id: targetId, block: 'start' });
+      // Clear the history state so a refresh or back-navigation doesn't re-scroll.
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location, navigate]);
 
   // Scroll to a specific saved note, or to the latest entry when switching timelines.
   useEffect(() => {
-    if (scrollTargetId) {
-      const el = document.getElementById(`entry-${scrollTargetId}`);
+    if (scrollTarget) {
+      const el = document.getElementById(`entry-${scrollTarget.id}`);
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setScrollTargetId(null);
+        el.scrollIntoView({ behavior: 'smooth', block: scrollTarget.block });
+        setScrollTarget(null);
       }
       return;
     }
@@ -59,7 +72,7 @@ export function TimelineView({
       const container = entriesRef.current;
       if (container) container.scrollTop = container.scrollHeight;
     }
-  }, [entries, timeline.id, scrollTargetId]);
+  }, [entries, timeline.id, scrollTarget]);
 
   // Tell the storage layer which note is open in the editor so a merge can
   // preserve both the in-progress edit and any disk-side version of the same note.
@@ -91,11 +104,11 @@ export function TimelineView({
   async function handleSave(data: { content: string; timestamp: string; attachments: Entry['attachments']; dueDate?: string; isDone?: boolean }) {
     if (editingEntry) {
       await onUpdateEntry({ ...editingEntry, ...data });
-      setScrollTargetId(editingEntry.id);
+      setScrollTarget({ id: editingEntry.id, block: 'center' });
       setEditingEntry(null);
     } else {
       const created = await onAddEntry(data);
-      setScrollTargetId(created.id);
+      setScrollTarget({ id: created.id, block: 'center' });
     }
   }
 

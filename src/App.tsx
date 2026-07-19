@@ -20,7 +20,7 @@ import styles from './App.module.css';
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { adapter, mode, lastSaved, markSaved } = useStorage();
+    const { adapter, markSaved } = useStorage();
   const { timelines, loading, createTimeline, updateTimeline, removeTimeline, reload: reloadTimelines } = useTimelines();
 
   const isTodoPage = location.pathname === '/todos';
@@ -96,8 +96,7 @@ export default function App() {
     reloadTodoCounts();
   }
 
-  const showNudge = mode === 'idb' && timelines.length > 0 &&
-    (lastSaved === null || Date.now() - new Date(lastSaved).getTime() > 7 * 24 * 60 * 60 * 1000);
+  const showNudge = false;
 
   useEffect(() => {
     if (!loading && urlId && !timelines.find((t) => t.id === urlId)) {
