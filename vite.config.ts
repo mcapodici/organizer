@@ -131,5 +131,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test-setup.ts',
+    // Windows bind-mount I/O over node_modules is slow enough that `forks`
+    // (a fresh OS process + module resolution per worker) times out on
+    // startup. `threads` share one process/module cache, avoiding that cost.
+    pool: 'threads',
   },
 } as any);
