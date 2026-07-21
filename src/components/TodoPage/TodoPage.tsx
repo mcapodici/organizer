@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, CheckCircle2 } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
 import type { Entry, Timeline } from '../../types';
-import { formatDueDate, toLocalDateString, todayDateString } from '../../utils/dateFormat';
+import { formatDueDate, toLocalDateString, todayDateString, getDueDateStatus } from '../../utils/dateFormat';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
 import styles from './TodoPage.module.css';
 
@@ -224,7 +224,7 @@ function TodoRow({
           {timeline && <span className={styles.timelineChip}>{timeline.name}</span>}
           <button
             type="button"
-            className={`${styles.dueDate} ${variant === 'overdue' ? styles.dueDateOverdue : variant === 'today' ? styles.dueDateToday : ''}`}
+            className={styles.dueDate}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
@@ -233,7 +233,15 @@ function TodoRow({
             }}
             title="Edit due date"
           >
-            {formatDueDate(entry.dueDate!)}
+            {!entry.isDone && (() => {
+              const status = getDueDateStatus(entry.dueDate!);
+              return status.label ? (
+                <span className={`${styles.dueStatus} ${styles['dueStatus' + capitalize(status.className)]}`}>
+                  {status.label}
+                </span>
+              ) : null;
+            })()}
+            <span className={styles.dueDateText}>{formatDueDate(entry.dueDate!)}</span>
           </button>
           {dueAnchor && (
             <DueDatePopover
@@ -247,4 +255,9 @@ function TodoRow({
       </div>
     </div>
   );
+}
+
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
