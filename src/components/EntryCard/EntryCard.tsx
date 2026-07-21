@@ -13,7 +13,7 @@ import { Highlight } from '@tiptap/extension-highlight';
 import { Check, Circle, Paperclip } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
 import type { Entry, Attachment } from '../../types';
-import { formatTimestamp, formatFileSize, formatDueDate, todayDateString } from '../../utils/dateFormat';
+import { formatTimestamp, formatFileSize, formatDueDate, getDueDateStatus } from '../../utils/dateFormat';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
 import styles from './EntryCard.module.css';
 
@@ -79,7 +79,7 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
           <time className={styles.time}>{formatTimestamp(entry.timestamp)}</time>
           {entry.dueDate && (
             <span
-              className={`${styles.todoLozenge} ${entry.isDone ? styles.todoDone : isOverdue(entry.dueDate) ? styles.todoOverdue : ''}`}
+              className={`${styles.todoLozenge} ${entry.isDone ? styles.todoDone : ''}`}
             >
               <button
                 type="button"
@@ -90,6 +90,14 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
               >
                 <span className={styles.todoCheck}>{entry.isDone ? <Check size={12} /> : <Circle size={11} />}</span>
               </button>
+              {!entry.isDone && (() => {
+                const status = getDueDateStatus(entry.dueDate!);
+                return status.label ? (
+                  <span className={`${styles.todoStatus} ${styles['todoStatus' + capitalize(status.className)]}`}>
+                    {status.label}
+                  </span>
+                ) : null;
+              })()}
               <button
                 type="button"
                 className={styles.todoDueBtn}
@@ -140,10 +148,6 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
       )}
     </div>
   );
-}
-
-function isOverdue(dueDate: string): boolean {
-  return dueDate < todayDateString();
 }
 
 interface TiptapNode {
@@ -231,4 +235,8 @@ function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; on
       <Paperclip size={13} /> {attachment.name} <span className={styles.fileSize}>({formatFileSize(attachment.size)})</span>
     </a>
   );
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
