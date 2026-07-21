@@ -173,7 +173,6 @@ function TodoSection({
             key={entry.id}
             entry={entry}
             timeline={timeline}
-            variant={variant}
             onToggle={onToggle}
             onUpdate={onUpdate}
             onGoToTimeline={onGoToTimeline}
@@ -187,14 +186,12 @@ function TodoSection({
 function TodoRow({
   entry,
   timeline,
-  variant,
   onToggle,
   onUpdate,
   onGoToTimeline,
 }: {
   entry: Entry;
   timeline: Timeline | undefined;
-  variant: 'overdue' | 'today' | 'soon' | 'normal';
   onToggle: (entry: Entry) => void;
   onUpdate: (entry: Entry) => void | Promise<void>;
   onGoToTimeline: (timelineId: string, entryId: string) => void;
