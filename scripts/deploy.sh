@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run the test suite first; only deploy if it passes.
+# Run TypeScript check first, then the test suite; only deploy if both pass.
+npx tsc --noEmit
 npm test
 
 vercel deploy --prod

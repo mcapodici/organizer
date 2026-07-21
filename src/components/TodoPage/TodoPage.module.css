@@ -153,16 +153,20 @@
 }
 
 .dueDate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
   font-size: 0.75rem;
   color: var(--text-subtle);
   font-weight: 500;
   background: none;
   border: 1px solid transparent;
-  padding: 1px 8px;
+  padding: 1px 0;
   border-radius: var(--radius-pill);
   cursor: pointer;
   font-family: inherit;
   line-height: 1.4;
+  overflow: hidden;
 }
 
 .dueDate:hover {
@@ -170,22 +174,36 @@
   border-color: var(--border-strong);
 }
 
-.dueDateOverdue {
-  color: var(--danger);
+
+.dueStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 999px 0 0 999px;
+  margin-right: 6px;
 }
 
-.dueDateOverdue:hover {
-  background: var(--danger-bg);
-  border-color: var(--danger-border);
+.dueStatusOverdue {
+  background: #fef2f2;
+  color: #dc2626;
 }
 
-.dueDateToday {
-  color: var(--accent-hover);
+.dueStatusToday {
+  background: #fef9c3;
+  color: #a16207;
 }
 
-.dueDateToday:hover {
-  background: var(--accent-50);
-  border-color: var(--accent-300);
+.dueStatusWeek {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.dueDateText {
+  padding-right: 8px;
 }
 
 .loading {

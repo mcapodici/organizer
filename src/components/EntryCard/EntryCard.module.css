@@ -209,6 +209,7 @@
   flex: 1;
 }
 
+/* Same base lozenge — always theme colour (no conditional overrides) */
 .todoLozenge {
   position: relative;
   display: inline-flex;
@@ -225,21 +226,36 @@
   transition: background 0.1s, border-color 0.1s;
 }
 
-.todoDone {
-  background: #d1fae5;
-  color: #065f46;
-  border-color: #6ee7b7;
-}
-
 .todoDone .todoDueText {
   text-decoration: line-through;
   opacity: 0.7;
 }
 
-.todoOverdue {
-  background: #fef3c7;
-  color: #92400e;
-  border-color: #fcd34d;
+/* Status badge — the coloured pill inside the lozenge */
+.todoStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.todoStatusOverdue {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.todoStatusToday {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.todoStatusWeek {
+  background: #f0fdf4;
+  color: #16a34a;
 }
 
 .todoCheckBtn,

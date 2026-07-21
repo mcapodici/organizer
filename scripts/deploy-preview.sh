@@ -14,25 +14,27 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-echo "=== 1. Running test suite ==="
+echo "=== 1. TypeScript check (tsc --noEmit) ==="
+npx tsc --noEmit
+
+echo ""
+echo "=== 2. Running test suite ==="
 npm test
 
 echo ""
-echo "=== 2. Building (test + tsc + vite) ==="
-npm run build
+echo "=== 3. Building (vite) ==="
+npx vite build
 
 echo ""
-echo "=== 3. Deploying to Vercel preview ==="
-# Capture the deployment URL from stdout
+echo "=== 4. Deploying to Vercel preview ==="
 DEPLOY_OUTPUT=$(vercel deploy --no-wait --yes 2>&1)
 echo "$DEPLOY_OUTPUT"
 
-# Extract the URL — Vercel usually prints it last
 DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oE 'https://[a-zA-Z0-9.-]+\.vercel\.app' | tail -1)
 
 if [ -n "$DEPLOY_URL" ]; then
   echo ""
-  echo "=== 4. Opening preview: $DEPLOY_URL ==="
+  echo "=== 5. Opening preview: $DEPLOY_URL ==="
   open "$DEPLOY_URL"
   echo ""
   echo "✅ Preview deployed: $DEPLOY_URL"
