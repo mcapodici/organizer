@@ -51,3 +51,26 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+export interface DueDateStatus {
+  label: 'OVERDUE' | 'TODAY' | 'DUE SOON' | null;
+  className: 'overdue' | 'today' | 'week' | 'future';
+}
+
+export function getDueDateStatus(dueDate: string): DueDateStatus {
+  const today = todayDateString();
+  if (dueDate < today) {
+    return { label: 'OVERDUE', className: 'overdue' };
+  }
+  if (dueDate === today) {
+    return { label: 'TODAY', className: 'today' };
+  }
+  // Check if due within 7 days (inclusive of today+1 through today+7)
+  const d = new Date();
+  d.setDate(d.getDate() + 7);
+  const in7Days = toLocalDateString(d);
+  if (dueDate <= in7Days) {
+    return { label: 'DUE SOON', className: 'week' };
+  }
+  return { label: null, className: 'future' };
+}

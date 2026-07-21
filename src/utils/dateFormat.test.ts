@@ -8,6 +8,7 @@ import {
   formatFileSize,
   toLocalDateString,
   todayDateString,
+  getDueDateStatus,
 } from './dateFormat';
 
 describe('formatTimestamp', () => {
@@ -131,5 +132,34 @@ describe('formatFileSize', () => {
 
   it('uses KB right up to the 1 MB boundary', () => {
     expect(formatFileSize(1024 * 1024 - 1)).toContain('KB');
+  });
+});
+
+describe('getDueDateStatus', () => {
+  it('returns "overdue" for a date before today', () => {
+    const result = getDueDateStatus('2026-01-01');
+    expect(result).toEqual({ label: 'OVERDUE', className: 'overdue' });
+  });
+
+  it('returns "today" for today', () => {
+    const today = todayDateString();
+    const result = getDueDateStatus(today);
+    expect(result).toEqual({ label: 'TODAY', className: 'today' });
+  });
+
+  it('returns "week" for a date within 7 days from today', () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 3);
+    const dateStr = toLocalDateString(d);
+    const result = getDueDateStatus(dateStr);
+    expect(result).toEqual({ label: 'DUE SOON', className: 'week' });
+  });
+
+  it('returns "future" with no label for dates beyond 7 days', () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    const dateStr = toLocalDateString(d);
+    const result = getDueDateStatus(dateStr);
+    expect(result).toEqual({ label: null, className: 'future' });
   });
 });
