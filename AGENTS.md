@@ -25,13 +25,21 @@ This file provides conventions for AI agents (Hermes, Claude Code, etc.) working
    ```
    This runs `scripts/check.sh` (`npm test` + `npm run build`). Everything must pass.
 
-### When ready for human review
+### When ready for human review (preview)
 
 4. **Deploy a preview** so the human can test the changes live:
    ```bash
    npm run deploy:preview
    ```
    This runs `scripts/deploy-preview.sh` — it runs tests, builds, deploys to Vercel preview, and prints the preview URL.
+
+### Production deployment
+
+5. **Deploy to production** when the feature is approved:
+   ```bash
+   bash scripts/deploy.sh
+   ```
+   This runs `scripts/deploy.sh` — TypeScript check, tests, then `vercel deploy --prod`. Aliases to `chaseups.vercel.app`.
 
 ## Project conventions
 
