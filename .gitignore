@@ -40,3 +40,4 @@ docs/.vitepress/cache
 
 .hermes/
 .worktrees/
+.backlog/
