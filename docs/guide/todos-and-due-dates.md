@@ -12,6 +12,12 @@ In the editor, click **Set due date** (next to *Set custom time*) and pick a
 date. Save the entry as usual. It now carries a due-date **lozenge** in the
 timeline.
 
+Once a due date is within a week, its lozenge also shows a small colored
+status badge — **OVERDUE** (red), **TODAY** (yellow), or **DUE SOON** (green)
+— so you can tell how urgent it is at a glance without opening the popover.
+The badge disappears once the item is marked done, or once the due date is
+more than 7 days away.
+
 ### On an existing entry
 
 Click the due-date lozenge on an entry to open the date popover. From there you
@@ -50,6 +56,8 @@ the entry and the timeline it belongs to.
 - **Click the check** on the left of a card to mark it done — it disappears from
   the list immediately.
 - **Click the due date** on a card to reschedule it without leaving the page.
+  The same OVERDUE / TODAY / DUE SOON badge shown on the entry's lozenge also
+  appears here, right on the due-date button.
 
 When nothing is pending, you'll see **"All caught up!"**.
 
