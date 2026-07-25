@@ -16,10 +16,9 @@ Organizer shows attachments inline where it can:
 
 ## Where attachments are stored
 
-Attachments are stored **with your data**, in whichever
-[storage mode](./storage-and-backup) you've chosen — browser storage or your
-chosen folder. They are included in **Export**, so a JSON backup is a complete
-copy: timelines, entries, *and* their files.
+Attachments are stored **with your data** on this device — see
+[Storage & backup](./storage-and-backup). They are included in **Export**, so a
+JSON backup is a complete copy: timelines, entries, *and* their files.
 
 ::: tip
 Because attachments travel inside the export file, moving to a new device with
