@@ -17,6 +17,14 @@ This file provides conventions for AI agents (Hermes, Claude Code, etc.) working
 
 2. Make changes in the worktree directory, commit, push.
 
+### Automated task-list runs (`markdown-tasks:do-one-task` / `markdown-tasks:do-all-tasks`)
+
+The `do-task` agent's own completion step normally runs `/orchestration:finish` to handle worktrees, commits, and rebasing — but that command isn't installed in this environment, so `do-task` silently falls back to committing directly on `main` if not told otherwise. This violates rule 1 above. To avoid that:
+
+- Before dispatching any `do-task` agent, the orchestrating agent must first create (or reuse) **one shared worktree for the whole run** — same command as rule 1 — not a separate worktree per task.
+- Each `do-task` agent must be explicitly told to `cd` into that worktree directory and do all its work there.
+- All tasks processed in one run land as separate commits on that same branch, ready for one push/PR/preview at the end.
+
 ### Before completing any task
 
 3. **Run all checks** before finishing — tests, TypeScript, docs build, and app build:
