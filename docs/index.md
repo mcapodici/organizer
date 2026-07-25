@@ -59,5 +59,5 @@ features:
       width: 24
       height: 24
     title: Local-first & private
-    details: Your data lives in your browser or a folder you choose — no account, no server. Export to JSON any time.
+    details: Your data lives in this browser on this device — no account, no server. Export to JSON any time.
 ---

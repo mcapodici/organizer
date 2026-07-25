@@ -20,8 +20,8 @@ with search.
 
 ## What makes it different
 
-- **Local-first.** There's no account and no server. Your data is stored either
-  in your browser or in a folder you pick on your own computer. See
+- **Local-first.** There's no account and no server. Your data is stored
+  automatically in this browser on this device — no folder to pick. See
   [Storage & backup](./storage-and-backup).
 - **Rich, but fast.** Entries support bold, italics, lists, tables, code,
   highlights, and links, yet adding a note is just type-and-save.

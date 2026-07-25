@@ -46,8 +46,7 @@ the day's mementos. See [Attachments](/guide/attachments).
 
 - Pin a daily reminder for yourself to write the entry.
 - Every so often, **Settings → Backup → Export** to save a JSON copy somewhere
-  safe — especially if you're on browser storage. Organizer will nudge you if
-  it's been over a week.
+  safe. Organizer will nudge you if it's been over a week.
 
 ## Variations
 

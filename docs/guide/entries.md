@@ -25,6 +25,10 @@ The editor toolbar gives you everything you'd expect from a rich-text note:
 You can mix these freely within an entry — for example a short paragraph
 followed by a checklist and a table of figures.
 
+Once a checklist has been saved, you can check or uncheck its items directly
+in the timeline — clicking a checkbox toggles it and saves the entry
+immediately, no need to open the entry for editing first.
+
 ![A single entry combining a heading, highlighted and bold text, a task list, a table, and inline code.](/screenshots/entry-rich.png)
 
 ## Custom timestamps
