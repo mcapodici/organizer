@@ -5,17 +5,8 @@ timeline with a few entries. It takes about two minutes.
 
 ## 1. Choose where your data lives
 
-The first time you open Organizer, you'll pick a storage location:
-
-![The storage chooser, offering Folder storage or Browser storage.](/screenshots/storage-picker.png)
-
-- **Browser storage** — the quickest way to start. Your data is saved in this
-  browser on this device.
-- **A folder on your computer** — Organizer reads and writes your data in a
-  folder you choose, so your files live alongside the rest of your documents.
-
-Not sure? Pick **Browser storage** to get going — you can change your mind later
-in **Settings → Storage**, and switching never deletes your data. See
+There's nothing to choose — Organizer starts storing your data automatically on
+this device the moment you open it, no setup step required. See
 [Storage & backup](./storage-and-backup) for the full picture.
 
 ## 2. Meet the welcome timeline
@@ -56,8 +47,8 @@ Because everything is stored locally, **you** own the backups. Head to
 Do this whenever it matters — Organizer will also nudge you if it's been a while.
 
 ::: tip
-If you're using Browser storage, an export is your safety net. Clearing your
-browser data would otherwise remove your timelines.
+Export is your safety net. Clearing your browser data would otherwise remove
+your timelines, since everything lives in this browser on this device.
 :::
 
 ## Where to go next
