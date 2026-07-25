@@ -28,18 +28,29 @@ has_undone_tasks() {
   [ -f "$TODO_FILE" ] && grep -qE "$UNDONE_PATTERN" "$TODO_FILE"
 }
 
+task_progress() {
+  if [ -f "$TODO_FILE" ]; then
+    local done total
+    done="$(grep -cE '^- \[x\]' "$TODO_FILE" || true)"
+    total="$(grep -cE '^- \[[ x]\]' "$TODO_FILE" || true)"
+    echo "${done}/${total} tasks done"
+  else
+    echo "no todo file"
+  fi
+}
+
 log "watch-todo started (poll every ${POLL_SECONDS}s)."
 
 while true; do
   sleep "$POLL_SECONDS"
 
   if has_undone_tasks; then
-    log "undone task found in $TODO_FILE — running do-all-tasks"
+    log "undone task found in $TODO_FILE ($(task_progress)) — running do-all-tasks"
 
     if claude -p "/markdown-tasks:markdown-do-all-tasks" --dangerously-skip-permissions 2>&1 | tee -a "$LOG_FILE"; then
-      log "do-all-tasks run finished"
+      log "do-all-tasks run finished ($(task_progress))"
     else
-      log "do-all-tasks run exited non-zero"
+      log "do-all-tasks run exited non-zero ($(task_progress))"
     fi
 
     log "resuming watch."
