@@ -3,6 +3,13 @@
 This walks you from opening Organizer for the first time to having a working
 timeline with a few entries. It takes about two minutes.
 
+::: tip Install it as an app
+Organizer is installable. Look for an **Install app** (or **Add to Home
+Screen**) option in your browser's address bar or menu to add it to your
+desktop or home screen. Once installed, it opens in its own window, loads
+faster, and keeps working offline.
+:::
+
 ## 1. Choose where your data lives
 
 There's nothing to choose — Organizer starts storing your data automatically on
