@@ -1,4 +1,5 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
+import type { Connect, Plugin, PreviewServer, ViteDevServer } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'child_process';
@@ -10,14 +11,14 @@ import { execSync } from 'child_process';
 // in dev and preview before Vite's SPA fallback resolves it. Registering the
 // middleware directly (not via a returned thunk) places it ahead of Vite's
 // internal middlewares.
-function appTrailingSlash() {
-  const redirect = (req: any, _res: any, next: any) => req.url === '/app'
-    ? (_res.writeHead(301, { Location: '/app/' }), _res.end())
+function appTrailingSlash(): Plugin {
+  const redirect: Connect.NextHandleFunction = (req, res, next) => req.url === '/app'
+    ? (res.writeHead(301, { Location: '/app/' }), res.end())
     : next();
   return {
     name: 'app-trailing-slash',
-    configureServer(server: any) { server.middlewares.use(redirect); },
-    configurePreviewServer(server: any) { server.middlewares.use(redirect); },
+    configureServer(server: ViteDevServer) { server.middlewares.use(redirect); },
+    configurePreviewServer(server: PreviewServer) { server.middlewares.use(redirect); },
   };
 }
 
@@ -136,4 +137,4 @@ export default defineConfig({
     // startup. `threads` share one process/module cache, avoiding that cost.
     pool: 'threads',
   },
-} as any);
+});
