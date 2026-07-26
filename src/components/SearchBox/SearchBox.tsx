@@ -81,6 +81,8 @@ export function SearchBox({ timelines, fluid = false }: { timelines: Timeline[];
   useEffect(() => {
     const queryWords = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
     if (!queryWords.length) {
+      // Derived search results — clearing these properly means becoming a useMemo.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([]);
       setOpen(false);
       return;

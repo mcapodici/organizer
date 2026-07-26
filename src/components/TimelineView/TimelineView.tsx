@@ -46,6 +46,8 @@ export function TimelineView({
   useEffect(() => {
     const targetId = (location.state as { scrollToEntryId?: string } | null)?.scrollToEntryId;
     if (targetId) {
+      // Router-state-driven scroll orchestration; the target comes from history state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setScrollTarget({ id: targetId, block: 'start' });
       // Clear the history state so a refresh or back-navigation doesn't re-scroll.
       navigate(location.pathname, { replace: true, state: null });
@@ -58,6 +60,8 @@ export function TimelineView({
       const el = document.getElementById(`entry-${scrollTarget.id}`);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: scrollTarget.block });
+        // Clearing the consumed scroll target after the DOM scroll has been issued.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setScrollTarget(null);
       }
       return;

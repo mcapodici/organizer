@@ -38,9 +38,13 @@ export function TimelineList({ timelines, allTags, activeId, todoCounts, onSelec
 
   useEffect(() => {
     if (triggerCreate) {
+      // triggerCreate is a one-shot signal prop, consumed by entering create mode.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCreating(true);
       onTriggerCreateHandled?.();
     }
+  // onTriggerCreateHandled is an unmemoized parent callback; including it would loop.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerCreate]);
 
   const filtered = filterTags.length === 0
