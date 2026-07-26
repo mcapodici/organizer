@@ -25,6 +25,12 @@ The `do-task` agent's own completion step normally runs `/orchestration:finish` 
 - Each `do-task` agent must be explicitly told to `cd` into that worktree directory and do all its work there.
 - All tasks processed in one run land as separate commits on that same branch, ready for one push/PR/preview at the end.
 
+### Issue-driven runs (the `.sandcastle/` pipeline)
+
+Work can also arrive as a GitHub issue labelled `agent:queued`, handled by the local orchestrator in `.sandcastle/` (see `.sandcastle/README.md`). That pipeline plans first, waits for a human to tick an approval checkbox on the plan comment, and only then implements — on a worktree branched from the latest `origin/main`, gated on `npm run check`.
+
+If you are an agent invoked *by* that pipeline, your prompt already tells you what to do; follow it rather than this section.
+
 ### Before completing any task
 
 3. **Run all checks** before finishing — tests, TypeScript, docs build, and app build:
@@ -55,4 +61,4 @@ The `do-task` agent's own completion step normally runs `/orchestration:finish` 
 - **Review process**: see `CHANGES_REVIEW.md` for the change-log and review expectations.
 - **Tests**: Vitest + Testing Library + `fake-indexeddb`. Run `npm test` before declaring anything done.
 - **Build**: `npm run build` (runs tests → tsc → VitePress docs → Vite app).
-- **Lint**: `npm run lint` (ESLint). Fix all warnings before committing.
+- **Lint**: `npm run lint` (ESLint). Note that repo-wide lint is **currently red on `main`** (~21 pre-existing errors, mostly `src/hooks/useTodoCounts.ts` and `vite.config.ts`). Don't take fixing those on as a side quest — just keep the files *you* touch clean: `npx eslint <your changed files>`.
