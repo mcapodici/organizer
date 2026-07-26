@@ -90,6 +90,8 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
       }
       editor.commands.setContent(JSON.parse(editing.content));
       const empty = editor.isEmpty;
+      // Syncing the TipTap editor instance's content into React state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEditorEmpty(empty);
       onEditorEmptyChange(empty);
       setTimestamp(toDatetimeLocalValue(editing.timestamp));
@@ -123,15 +125,21 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
         onEditorEmptyChange(true);
       }
     }
+  // onEditorEmptyChange is an unmemoized parent callback; including it would loop.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editing, editor]);
 
   useEffect(() => {
     if (!editor || !loadContent) return;
     editor.commands.setContent(JSON.parse(loadContent));
     const empty = editor.isEmpty;
+    // Syncing the TipTap editor instance's content into React state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEditorEmpty(empty);
     onEditorEmptyChange(empty);
     onLoadConsumed();
+  // onEditorEmptyChange/onLoadConsumed are unmemoized parent callbacks; including them would loop.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadContent, editor]);
 
   function enableCustomTime() {

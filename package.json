@@ -12,7 +12,7 @@
     "typecheck": "tsc -b",
     "check": "bash scripts/check.sh",
     "build": "vitest run && npm run typecheck && vitepress build docs && vite build",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
     "docs:dev": "vitepress dev docs --host 0.0.0.0",
     "docs:build": "vitepress build docs",

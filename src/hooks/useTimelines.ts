@@ -21,6 +21,8 @@ export function useTimelines() {
     setLoading(false);
   }, [adapter]);
 
+  // reload() is async and setStates past an await; the rule can't see that.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { reload(); }, [reload]);
 
   const createTimeline = useCallback(async (name: string): Promise<Timeline> => {

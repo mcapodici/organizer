@@ -27,11 +27,11 @@ The `do-task` agent's own completion step normally runs `/orchestration:finish` 
 
 ### Before completing any task
 
-3. **Run all checks** before finishing — tests, TypeScript, docs build, and app build:
+3. **Run all checks** before finishing — lint, tests, TypeScript, docs build, and app build:
    ```bash
    npm run check
    ```
-   This runs `scripts/check.sh` (`npm test` + `npm run build`). Everything must pass.
+   This runs `scripts/check.sh` (lint → tests → TypeScript → VitePress docs build → Vite app build). Everything must pass.
 
 ### When ready for human review (preview)
 

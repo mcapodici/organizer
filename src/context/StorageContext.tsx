@@ -54,6 +54,9 @@ function withErrorCapture(
   };
 }
 
+// StorageProvider is the single app-root provider, so losing fast refresh for
+// this file is not worth splitting the hook out across its 16 importers.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useStorage(): StorageCtxValue {
   const ctx = useContext(StorageContext);
   if (!ctx) throw new Error('useStorage must be inside StorageProvider');
@@ -109,7 +112,7 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
     mergeInFlightRef.current = true;
     try {
       let imported = 0;
-      let conflicts = 0;
+      const conflicts = 0;
       let merged = false;
       if (await adapter.hasConflict()) {
         const r = await adapter.mergeFromDisk(activeEditRef.current);

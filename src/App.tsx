@@ -105,6 +105,9 @@ export default function App() {
   }, [loading, urlId, timelines, navigate]);
 
   useEffect(() => {
+    // Closing the drawer on navigation at mobile width is a deliberate
+    // render-time state sync, not something to derive.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (window.innerWidth < 768) setDrawerOpen(false);
   }, [location.pathname]);
 
@@ -112,6 +115,8 @@ export default function App() {
     if (loading || timelines.length > 0) return;
     if (localStorage.getItem(WELCOME_KEY)) return;
     seedWelcomeTimeline();
+  // seedWelcomeTimeline is a hoisted declaration that runs once, guarded by WELCOME_KEY.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, timelines.length]);
 
   async function seedWelcomeTimeline() {

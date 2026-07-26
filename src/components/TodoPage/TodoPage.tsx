@@ -90,6 +90,8 @@ export function TodoPage({ onEntryChanged }: Props) {
     setLoading(false);
   }, [adapter]);
 
+  // reload() is async and setStates past an await; the rule can't see that.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { reload(); }, [reload]);
 
   async function handleToggle(entry: Entry) {

@@ -31,7 +31,7 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [dueAnchor, setDueAnchor] = useState<DOMRect | null>(null);
 
-  let html = '';
+  let html: string;
   try {
     const json = JSON.parse(entry.content);
     html = generateHTML(json, [
@@ -203,6 +203,8 @@ function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; on
       setUrl(objectUrl);
     });
     return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  // Adding `adapter` would re-run on every merge-nonce bump and churn object URLs.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attachment.blobKey, attachment.mimeType]);
 
   if (!url) return <span className={styles.attPlaceholder}>{attachment.name}</span>;
