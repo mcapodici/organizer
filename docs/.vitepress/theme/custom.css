@@ -146,6 +146,26 @@
   font-optical-sizing: auto;
 }
 
+/* An inline SVG paired with a text label: the "Source" nav item (built in
+ * .vitepress/navLabel.ts) and the repo link on source.md.
+ *
+ * `vertical-align: middle` is the load-bearing property. An inline-flex box
+ * with `align-items: center` has no baseline-participating child, so browsers
+ * synthesise its baseline from the first flex item's border-box bottom edge —
+ * the bottom of the 16px SVG. Aligning that to the nav's 64px line box lifted
+ * the whole group ~3px above the sibling nav items (issue #9). Positioning by
+ * the box's own midpoint instead fixes it.
+ *
+ * `line-height: 1` keeps the group at icon height so it never grows the 24px
+ * line box in the mobile nav screen. */
+.icon-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 /* Shrink the hero text line ("Timelines for everything…") — VitePress sizes
  * it as large as the wordmark (32 / 48 / 56px); make it a smaller subhead.
  * margin-top adds breathing room between "Organizer" and this line. */
