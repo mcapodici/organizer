@@ -30,7 +30,6 @@ async function main() {
   // chooser renders (headless Chromium lacks showDirectoryPicker otherwise).
   await page.addInitScript(() => {
     if (!('showDirectoryPicker' in window)) {
-      // eslint-disable-next-line no-undef
       window.showDirectoryPicker = () => Promise.reject(new Error('stub'));
     }
   });
@@ -151,6 +150,9 @@ async function tagEntryByText(page, needle, id) {
 // Returns the id of the timeline to open for the hero shot.
 // Exported so the video harness (record-demo.mjs) can seed the same data.
 export function seedData() {
+  // The executor awaits chartPng() before opening IndexedDB; splitting that out
+  // would restructure the whole seeding body for no benefit in a docs script.
+  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolveSeed) => {
     const pad = (n) => String(n).padStart(2, '0');
     const today = new Date();
