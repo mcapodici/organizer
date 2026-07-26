@@ -16,7 +16,7 @@ npx vitest run --no-file-parallelism
 
 echo ""
 echo "=== 2. TypeScript check ==="
-npx tsc -b
+npm run typecheck
 
 echo ""
 echo "=== 3. Building VitePress docs ==="
