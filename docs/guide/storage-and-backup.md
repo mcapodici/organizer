@@ -20,6 +20,17 @@ way:
 **Settings → Backend** shows "App storage on this device," and **Clear all
 data** wipes it if you ever need a clean slate.
 
+### Using Organizer in more than one tab
+
+All your tabs share the same data, so a change you make in one appears in the
+others within a moment — and whenever you switch back to a tab you left open,
+it catches up before you start typing.
+
+If you happen to edit the **same note** in two tabs without reloading, nothing
+is thrown away: the note keeps the version you saved last, and the other version
+is kept alongside it as a separate note marked *"Merged copy from another
+device"* so you can compare the two and delete whichever you don't want.
+
 ## Backing up with Export / Import
 
 **Export** is how you make a portable backup.
