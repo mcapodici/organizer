@@ -1,0 +1,7 @@
+# Sandcastle runtime artefacts — all regenerated per run.
+worktrees/
+logs/
+patches/
+
+# Agent tokens (only needed for the Docker sandbox).
+.env
