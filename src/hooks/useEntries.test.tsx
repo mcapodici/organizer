@@ -3,9 +3,12 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { FakeAdapter } from '../test-utils/fakeAdapter';
 import type { Entry } from '../types';
 
-const h = vi.hoisted(() => ({ adapter: null as unknown as FakeAdapter }));
+const h = vi.hoisted(() => ({
+  adapter: null as unknown as FakeAdapter,
+  notifyMergedCopy: vi.fn(),
+}));
 vi.mock('../context/StorageContext', () => ({
-  useStorage: () => ({ adapter: h.adapter }),
+  useStorage: () => ({ adapter: h.adapter, notifyMergedCopy: h.notifyMergedCopy }),
 }));
 
 import { useEntries } from './useEntries';
@@ -14,7 +17,7 @@ const en = (id: string, timelineId: string, over: Partial<Entry> = {}): Entry =>
   id, timelineId, content: id, timestamp: '2026-01-01T00:00:00Z', attachments: [], isStart: false, ...over,
 });
 
-beforeEach(() => { h.adapter = new FakeAdapter(); });
+beforeEach(() => { h.adapter = new FakeAdapter(); h.notifyMergedCopy.mockClear(); });
 
 describe('useEntries', () => {
   it('returns an empty list when no timeline is selected', async () => {
@@ -71,6 +74,37 @@ describe('useEntries', () => {
     await waitFor(() => expect(result.current.entries).toHaveLength(1));
     await act(async () => { await result.current.updateEntry(en('e1', 't1', { content: 'after' })); });
     expect(result.current.entries[0].content).toBe('after');
+  });
+
+  it('updateEntry with a matching rev leaves one entry and announces nothing', async () => {
+    await h.adapter.putEntry(en('e1', 't1', { content: 'before', rev: 'r1' }));
+    const { result } = renderHook(() => useEntries('t1'));
+    await waitFor(() => expect(result.current.entries).toHaveLength(1));
+
+    await act(async () => {
+      await result.current.updateEntry(en('e1', 't1', { content: 'after', rev: 'r1' }));
+    });
+
+    expect(result.current.entries).toHaveLength(1);
+    expect(result.current.entries[0].content).toBe('after');
+    expect(h.notifyMergedCopy).not.toHaveBeenCalled();
+  });
+
+  // Another tab saved e1 while this one held it open: keep both, and say so.
+  it('updateEntry with a stale rev keeps both versions and announces the copy', async () => {
+    await h.adapter.putEntry(en('e1', 't1', { content: 'their edit', rev: 'r2' }));
+    const { result } = renderHook(() => useEntries('t1'));
+    await waitFor(() => expect(result.current.entries).toHaveLength(1));
+
+    await act(async () => {
+      await result.current.updateEntry(en('e1', 't1', { content: 'my edit', rev: 'r1' }));
+    });
+
+    expect(result.current.entries).toHaveLength(2);
+    expect(result.current.entries.find((e) => e.id === 'e1')?.content).toBe('my edit');
+    const dup = result.current.entries.find((e) => e.id !== 'e1')!;
+    expect(dup.content).toContain('their edit');
+    expect(h.notifyMergedCopy).toHaveBeenCalledTimes(1);
   });
 
   it('removeEntry deletes the entry and all its attachment blobs', async () => {

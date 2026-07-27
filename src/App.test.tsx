@@ -15,7 +15,7 @@ vi.mock('./context/StorageContext', () => ({
     adapter: h.adapter,
     lastSaved: null,
     markSaved: () => {},
-    registerActiveEdit: () => {},
+    notifyMergedCopy: () => {},
   }),
 }));
 

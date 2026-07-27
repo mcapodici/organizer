@@ -11,6 +11,10 @@ export async function getAllEntries(): Promise<Entry[]> {
   return (await db()).getAll('entries');
 }
 
+export async function getEntry(id: string): Promise<Entry | undefined> {
+  return (await db()).get('entries', id);
+}
+
 export async function getEntriesForTimeline(timelineId: string): Promise<Entry[]> {
   return (await db()).getAllFromIndex('entries', 'by-timeline', timelineId);
 }

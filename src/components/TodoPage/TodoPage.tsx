@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, CheckCircle2 } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
 import { useUndo } from '../../context/UndoContext';
+import { saveEntry } from '../../storage/saveEntry';
 import type { Entry, Timeline } from '../../types';
 import { formatDueDate, toLocalDateString, todayDateString, getDueDateStatus } from '../../utils/dateFormat';
 import { describeTodoChange, revertTodoFields } from '../../utils/todoUndo';
@@ -72,7 +73,7 @@ interface Props {
 }
 
 export function TodoPage({ onEntryChanged }: Props) {
-  const { adapter } = useStorage();
+  const { adapter, notifyMergedCopy } = useStorage();
   const { registerUndo } = useUndo();
   const navigate = useNavigate();
   const [sections, setSections] = useState<Sections>({ dueNow: [], week: [], month: [], later: [] });
@@ -98,7 +99,8 @@ export function TodoPage({ onEntryChanged }: Props) {
   // The write lands immediately — nothing is deferred, so closing the tab can't
   // lose it — and the undo bar offers a compensating revert for 10 seconds.
   async function applyTodoChange(prev: Entry, next: Entry) {
-    await adapter.putEntry(next);
+    const { duplicatedEntryId } = await saveEntry(adapter, next);
+    if (duplicatedEntryId) notifyMergedCopy();
     onEntryChanged();
     await reload();
     const label = describeTodoChange(prev, next);

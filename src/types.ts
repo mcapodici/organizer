@@ -17,6 +17,10 @@ export interface Entry {
   isStart: boolean;
   dueDate?: string;
   isDone?: boolean;
+  /** Opaque token regenerated on every write, used to detect that another tab
+   *  changed this note since we loaded it. Optional for data created before this
+   *  field existed — concurrency detection is skipped until both sides carry one. */
+  rev?: string;
 }
 
 export interface Attachment {

@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuid } from 'uuid';
 import { useStorage } from '../context/StorageContext';
+import { saveEntry } from '../storage/saveEntry';
 import type { Entry } from '../types';
 
 export function useEntries(timelineId: string | null) {
-  const { adapter } = useStorage();
+  const { adapter, notifyMergedCopy } = useStorage();
   const [entries, setEntries] = useState<Entry[]>([]);
 
   const reload = useCallback(async () => {
@@ -25,15 +26,18 @@ export function useEntries(timelineId: string | null) {
   ): Promise<Entry> => {
     if (!timelineId) throw new Error('No timeline selected');
     const entry: Entry = { id: uuid(), timelineId, isStart: false, ...partial };
-    await adapter.putEntry(entry);
+    await saveEntry(adapter, entry);
     await reload();
     return entry;
   }, [timelineId, adapter, reload]);
 
+  // saveEntry keeps a version another tab wrote rather than clobbering it; when
+  // it does, the user ends up with a note they didn't create, so say so.
   const updateEntry = useCallback(async (entry: Entry) => {
-    await adapter.putEntry(entry);
+    const { duplicatedEntryId } = await saveEntry(adapter, entry);
+    if (duplicatedEntryId) notifyMergedCopy();
     await reload();
-  }, [adapter, reload]);
+  }, [adapter, reload, notifyMergedCopy]);
 
   const removeEntry = useCallback(async (entry: Entry) => {
     for (const att of entry.attachments) {

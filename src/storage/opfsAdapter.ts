@@ -1,9 +1,5 @@
-import { v4 as uuid } from 'uuid';
 import type { Timeline, Entry } from '../types';
-import { ConflictError, type StorageAdapter } from './interface';
-import { mergeDiskState } from './merge';
-
-const SAVE_ID_FILE = 'saveId';
+import type { StorageAdapter } from './interface';
 
 // ----- low-level OPFS helpers -----
 
@@ -35,22 +31,6 @@ async function readText(dir: FileSystemDirectoryHandle, name: string): Promise<s
 
 async function removeFile(dir: FileSystemDirectoryHandle, name: string): Promise<void> {
   try { await dir.removeEntry(name); } catch { /* already gone */ }
-}
-
-// ----- save-id helpers -----
-
-async function readSaveId(root: FileSystemDirectoryHandle): Promise<string | undefined> {
-  try {
-    const meta = await dirPath(root, ['meta'], false);
-    return await readText(meta, SAVE_ID_FILE);
-  } catch {
-    return undefined;
-  }
-}
-
-async function writeSaveId(root: FileSystemDirectoryHandle, id: string): Promise<void> {
-  const meta = await dirPath(root, ['meta'], true);
-  await writeRaw(meta, SAVE_ID_FILE, id);
 }
 
 // ----- In-memory index for a workspace -----
@@ -111,9 +91,7 @@ async function writeEntryFile(root: FileSystemDirectoryHandle, e: Entry): Promis
 
 export class OpfsAdapter implements StorageAdapter {
   private root: FileSystemDirectoryHandle | null = null;
-  private lastKnownSaveId: string | undefined;
   private initialized = false;
-  private frozen = false;
 
   // In-memory index — populated on load, kept in sync with writes.
   private timelines = new Map<string, string>();
@@ -122,7 +100,6 @@ export class OpfsAdapter implements StorageAdapter {
   private async init(): Promise<void> {
     if (this.initialized) return;
     this.root = await getRoot();
-    this.lastKnownSaveId = await readSaveId(this.root);
 
     // Scan existing data into the in-memory index.
     const scan = await scanWorkspace(this.root);
@@ -137,68 +114,13 @@ export class OpfsAdapter implements StorageAdapter {
     return this.root!;
   }
 
-  async hasConflict(): Promise<boolean> {
-    if (this.frozen) return true;
+  // Every read is served from the in-memory index, so a write by another tab is
+  // invisible here until we re-scan the file tree.
+  async refresh(): Promise<void> {
     await this.init();
-    if (this.lastKnownSaveId === undefined) return false;
-    const onDisk = await readSaveId(this.root!);
-    if (onDisk !== undefined && onDisk !== this.lastKnownSaveId) {
-      this.frozen = true;
-      return true;
-    }
-    return false;
-  }
-
-  async mergeFromDisk(activeBase: Entry | null): Promise<{ duplicatedEntryId: string | null; importedCount: number }> {
-    await this.init();
-    this.frozen = false;
-
-    // Re-scan the full workspace from OPFS.
     const scan = await scanWorkspace(this.root!);
-
-    const diskTimelines: Timeline[] = [];
-    const diskEntries: Entry[] = [];
-    for (const text of scan.timelines.values()) diskTimelines.push(JSON.parse(text));
-    for (const text of scan.entries.values()) diskEntries.push(JSON.parse(text));
-
-    const outcome = mergeDiskState(diskTimelines, diskEntries, activeBase);
-
-    // Update the in-memory index to match the merged state.
-    this.timelines = new Map<string, string>();
-    for (const t of outcome.timelines) {
-      this.timelines.set(t.id, JSON.stringify(t, null, 2));
-    }
-    this.entries = new Map<string, string>();
-    for (const e of outcome.entries) {
-      this.entries.set(e.id, JSON.stringify(e, null, 2));
-    }
-
-    // Persist the merged state: write the duplicate and activeBase if needed.
-    if (outcome.duplicatedEntryId && activeBase) {
-      const dup = outcome.entries.find((e) => e.id === outcome.duplicatedEntryId)!;
-      await writeEntryFile(this.root!, dup);
-      await writeEntryFile(this.root!, activeBase);
-    }
-
-    // Bump saveId.
-    const next = uuid();
-    await writeSaveId(this.root!, next);
-    this.lastKnownSaveId = next;
-
-    return { duplicatedEntryId: outcome.duplicatedEntryId, importedCount: outcome.entries.length - this.entries.size };
-  }
-
-  async mergeConflictFiles(): Promise<{ importedCount: number; conflictCount: number }> {
-    // OPFS is a private sandbox — no external sync tools can drop conflict files.
-    return { importedCount: 0, conflictCount: 0 };
-  }
-
-  private async guardedWrite(op: () => Promise<void>): Promise<void> {
-    if (await this.hasConflict()) throw new ConflictError();
-    await op();
-    const next = uuid();
-    await writeSaveId(this.root!, next);
-    this.lastKnownSaveId = next;
+    this.timelines = scan.timelines;
+    this.entries = scan.entries;
   }
 
   // ----- Timelines -----
@@ -209,26 +131,24 @@ export class OpfsAdapter implements StorageAdapter {
   }
 
   async putTimeline(t: Timeline): Promise<void> {
-    await this.guardedWrite(async () => {
-      await writeTimelineFile(this.root!, t);
-      this.timelines.set(t.id, JSON.stringify(t, null, 2));
-    });
+    await this.init();
+    await writeTimelineFile(this.root!, t);
+    this.timelines.set(t.id, JSON.stringify(t, null, 2));
   }
 
   async deleteTimeline(id: string): Promise<void> {
-    await this.guardedWrite(async () => {
-      // Remove timeline folder recursively.
-      try {
-        const tlRoot = await this.root!.getDirectoryHandle('timelines');
-        await tlRoot.removeEntry(id, { recursive: true });
-      } catch { /* already gone */ }
-      this.timelines.delete(id);
-      // Remove all entries for this timeline from the index.
-      for (const [eid, text] of this.entries) {
-        const e = JSON.parse(text) as Entry;
-        if (e.timelineId === id) this.entries.delete(eid);
-      }
-    });
+    await this.init();
+    // Remove timeline folder recursively.
+    try {
+      const tlRoot = await this.root!.getDirectoryHandle('timelines');
+      await tlRoot.removeEntry(id, { recursive: true });
+    } catch { /* already gone */ }
+    this.timelines.delete(id);
+    // Remove all entries for this timeline from the index.
+    for (const [eid, text] of this.entries) {
+      const e = JSON.parse(text) as Entry;
+      if (e.timelineId === id) this.entries.delete(eid);
+    }
   }
 
   // ----- Entries -----
@@ -236,6 +156,12 @@ export class OpfsAdapter implements StorageAdapter {
   async getAllEntries(): Promise<Entry[]> {
     await this.init();
     return [...this.entries.values()].map((e) => JSON.parse(e));
+  }
+
+  async getEntry(id: string): Promise<Entry | undefined> {
+    await this.init();
+    const text = this.entries.get(id);
+    return text ? (JSON.parse(text) as Entry) : undefined;
   }
 
   async getEntriesForTimeline(timelineId: string): Promise<Entry[]> {
@@ -249,51 +175,48 @@ export class OpfsAdapter implements StorageAdapter {
   }
 
   async putEntry(e: Entry): Promise<void> {
-    await this.guardedWrite(async () => {
-      await writeEntryFile(this.root!, e);
-      // If the entry changed timelines, remove the old entry file.
-      const existing = this.entries.get(e.id);
-      if (existing) {
-        const parsed = JSON.parse(existing) as Entry;
-        if (parsed.timelineId !== e.timelineId) {
-          try {
-            const oldDir = await dirPath(this.root!, ['timelines', parsed.timelineId, 'entries'], false);
-            await removeFile(oldDir, `${e.id}.json`);
-          } catch { /* already gone */ }
-        }
+    await this.init();
+    await writeEntryFile(this.root!, e);
+    // If the entry changed timelines, remove the old entry file.
+    const existing = this.entries.get(e.id);
+    if (existing) {
+      const parsed = JSON.parse(existing) as Entry;
+      if (parsed.timelineId !== e.timelineId) {
+        try {
+          const oldDir = await dirPath(this.root!, ['timelines', parsed.timelineId, 'entries'], false);
+          await removeFile(oldDir, `${e.id}.json`);
+        } catch { /* already gone */ }
       }
-      this.entries.set(e.id, JSON.stringify(e, null, 2));
-    });
+    }
+    this.entries.set(e.id, JSON.stringify(e, null, 2));
   }
 
   async deleteEntry(id: string): Promise<void> {
-    await this.guardedWrite(async () => {
-      const text = this.entries.get(id);
-      let timelineId: string | undefined;
-      if (text) {
-        timelineId = (JSON.parse(text) as Entry).timelineId;
-      }
-      this.entries.delete(id);
-      if (timelineId) {
-        try {
-          const eDir = await dirPath(this.root!, ['timelines', timelineId, 'entries'], false);
-          await removeFile(eDir, `${id}.json`);
-        } catch { /* already gone */ }
-      }
-    });
+    await this.init();
+    const text = this.entries.get(id);
+    let timelineId: string | undefined;
+    if (text) {
+      timelineId = (JSON.parse(text) as Entry).timelineId;
+    }
+    this.entries.delete(id);
+    if (timelineId) {
+      try {
+        const eDir = await dirPath(this.root!, ['timelines', timelineId, 'entries'], false);
+        await removeFile(eDir, `${id}.json`);
+      } catch { /* already gone */ }
+    }
   }
 
   async deleteEntriesForTimeline(timelineId: string): Promise<void> {
-    await this.guardedWrite(async () => {
-      for (const [eid, text] of this.entries) {
-        const e = JSON.parse(text) as Entry;
-        if (e.timelineId === timelineId) this.entries.delete(eid);
-      }
-      try {
-        const tlDir = await dirPath(this.root!, ['timelines', timelineId], false);
-        await tlDir.removeEntry('entries', { recursive: true });
-      } catch { /* nothing to remove */ }
-    });
+    await this.init();
+    for (const [eid, text] of this.entries) {
+      const e = JSON.parse(text) as Entry;
+      if (e.timelineId === timelineId) this.entries.delete(eid);
+    }
+    try {
+      const tlDir = await dirPath(this.root!, ['timelines', timelineId], false);
+      await tlDir.removeEntry('entries', { recursive: true });
+    } catch { /* nothing to remove */ }
   }
 
   // ----- Blobs -----
@@ -311,17 +234,13 @@ export class OpfsAdapter implements StorageAdapter {
   }
 
   async putBlob(key: string, data: ArrayBuffer): Promise<void> {
-    await this.guardedWrite(async () => {
-      const dir = await this.blobDir();
-      await writeRaw(dir, `${key}.bin`, data);
-    });
+    const dir = await this.blobDir();
+    await writeRaw(dir, `${key}.bin`, data);
   }
 
   async deleteBlob(key: string): Promise<void> {
-    await this.guardedWrite(async () => {
-      const dir = await this.blobDir();
-      await removeFile(dir, `${key}.bin`);
-    });
+    const dir = await this.blobDir();
+    await removeFile(dir, `${key}.bin`);
   }
 
   async getAllBlobKeys(): Promise<string[]> {

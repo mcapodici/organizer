@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { Timeline, Entry } from '../../types';
-import { useStorage } from '../../context/StorageContext';
 import { EntryCard } from '../EntryCard/EntryCard';
 import { EntryComposer } from '../EntryComposer/EntryComposer';
 import { Modal } from '../Modal/Modal';
@@ -30,7 +29,6 @@ export function TimelineView({
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(timeline.name);
   const [editingTags, setEditingTags] = useState(false);
-  const { registerActiveEdit } = useStorage();
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Entry | null>(null);
   const [composerHasContent, setComposerHasContent] = useState(false);
@@ -77,13 +75,6 @@ export function TimelineView({
       if (container) container.scrollTop = container.scrollHeight;
     }
   }, [entries, timeline.id, scrollTarget]);
-
-  // Tell the storage layer which note is open in the editor so a merge can
-  // preserve both the in-progress edit and any disk-side version of the same note.
-  useEffect(() => {
-    registerActiveEdit(editingEntry);
-    return () => registerActiveEdit(null);
-  }, [editingEntry, registerActiveEdit]);
 
   function handleCopy(entry: Entry) {
     if (composerHasContent || editingEntry) {

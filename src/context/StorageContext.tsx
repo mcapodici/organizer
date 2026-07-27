@@ -1,42 +1,43 @@
 import { createContext, useContext, useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import type { Entry } from '../types';
 import { IdbAdapter } from '../storage/idbAdapter';
 import { OpfsAdapter } from '../storage/opfsAdapter';
-import { ConflictError, type StorageAdapter } from '../storage/interface';
+import type { StorageAdapter } from '../storage/interface';
+import { createChangeChannel } from '../storage/changeChannel';
 import { ToastStack, type ToastItem } from '../components/Toast/Toast';
-
-export type StorageMode = 'opfs' | 'idb';
 
 export type Phase =
   | { tag: 'booting' }
   | { tag: 'readyOpfs'; adapter: StorageAdapter }
-  | { tag: 'readyIdb'; adapter: StorageAdapter; lastSaved: string | null };
+  | { tag: 'readyIdb'; adapter: StorageAdapter };
 
 interface StorageCtxValue {
   adapter: StorageAdapter;
   lastSaved: string | null;
   markSaved: () => void;
-  registerActiveEdit: (entry: Entry | null) => void;
+  notifyMergedCopy: () => void;
 }
 
 const StorageContext = createContext<StorageCtxValue | null>(null);
 
-function withErrorCapture(
+function withWriteTracking(
   inner: StorageAdapter,
   onError: () => void,
-  onConflict: () => void,
+  onWrite: () => void,
 ): StorageAdapter {
   async function wrap<T>(fn: () => Promise<T>): Promise<T> {
-    try { return await fn(); }
+    let result: T;
+    try { result = await fn(); }
     catch (e) {
-      if (e instanceof ConflictError) onConflict();
-      else onError();
+      onError();
       throw e;
     }
+    onWrite();
+    return result;
   }
   return {
     getAllTimelines: () => inner.getAllTimelines(),
     getAllEntries: () => inner.getAllEntries(),
+    getEntry: id => inner.getEntry(id),
     getEntriesForTimeline: id => inner.getEntriesForTimeline(id),
     getBlob: k => inner.getBlob(k),
     getAllBlobKeys: () => inner.getAllBlobKeys(),
@@ -48,9 +49,7 @@ function withErrorCapture(
     deleteEntriesForTimeline: id => wrap(() => inner.deleteEntriesForTimeline(id)),
     putBlob: (k, d) => wrap(() => inner.putBlob(k, d)),
     deleteBlob: k => wrap(() => inner.deleteBlob(k)),
-    hasConflict: () => inner.hasConflict(),
-    mergeFromDisk: active => inner.mergeFromDisk(active),
-    mergeConflictFiles: () => inner.mergeConflictFiles(),
+    refresh: () => inner.refresh(),
   };
 }
 
@@ -69,11 +68,14 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
   const [reconnecting, setReconnecting] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastSeqRef = useRef(0);
-  const mergeInFlightRef = useRef(false);
-  const [mergeNonce, setMergeNonce] = useState(0);
-  const activeEditRef = useRef<Entry | null>(null);
-  const registerActiveEdit = useCallback((entry: Entry | null) => {
-    activeEditRef.current = entry;
+  const [lastSaved, setLastSaved] = useState(() => localStorage.getItem('lastSaved'));
+  const [storeVersion, setStoreVersion] = useState(0);
+  // One handle for the life of the provider. It re-opens itself after the
+  // subscribe effect below closes it, so a StrictMode remount is harmless.
+  const [channel] = useState(createChangeChannel);
+
+  const notifyMergedCopy = useCallback(() => {
+    setToasts(list => [...list, { id: (toastSeqRef.current += 1) }]);
   }, []);
 
   useEffect(() => {
@@ -84,68 +86,60 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
       if (hasOpfs) {
         setPhase({ tag: 'readyOpfs', adapter: new OpfsAdapter() });
       } else {
-        setPhase({ tag: 'readyIdb', adapter: new IdbAdapter(), lastSaved: localStorage.getItem('lastSaved') });
+        setPhase({ tag: 'readyIdb', adapter: new IdbAdapter() });
       }
     }
     boot();
   }, []);
 
-  // No remaining methods that trigger mode-switching or workspace changes —
-  // removed: chooseIdb, chooseFile, pickFolder, handleReopen, selectWorkspace,
-  // createWorkspace, openSwitcher, goToChoose, goHome, resetStorage.
-
-  // resetStorage is intentionally omitted — there is no storage choice to reset.
-  // Users clear data via Settings → Clear all data.
-
   function markSaved() {
     const ts = new Date().toISOString();
     localStorage.setItem('lastSaved', ts);
-    setPhase(prev => prev.tag === 'readyIdb' ? { ...prev, lastSaved: ts } : prev);
+    setLastSaved(ts);
   }
 
-  // Auto-merge any external changes (another tab saving) — runs silently with
-  // no blocking dialog, driven by the 2s poll below.
-  const runMerge = useCallback(async () => {
-    if (mergeInFlightRef.current) return;
+  // Pull in whatever another tab wrote. Bumping storeVersion is what makes the
+  // hooks re-read — see the safeAdapter memo below.
+  const refreshFromStore = useCallback(async () => {
     const adapter = phase.tag === 'readyOpfs' || phase.tag === 'readyIdb' ? phase.adapter : null;
     if (!adapter) return;
-    mergeInFlightRef.current = true;
     try {
-      let imported = 0;
-      const conflicts = 0;
-      let merged = false;
-      if (await adapter.hasConflict()) {
-        const r = await adapter.mergeFromDisk(activeEditRef.current);
-        imported += r.importedCount;
-        merged = true;
-      }
-      // OPFS and IndexedDB have no external conflict files to scan,
-      // so mergeConflictFiles always returns zero.
-      if (merged) {
-        setMergeNonce(v => v + 1);
-        setToasts(list => [...list, { id: (toastSeqRef.current += 1), imported, conflicts }]);
-      }
-    } catch { /* transient read/write failure — the next poll tick retries */ }
-    finally { mergeInFlightRef.current = false; }
+      await adapter.refresh();
+      setStoreVersion(v => v + 1);
+    } catch { /* transient read failure — the next message or focus retries */ }
   }, [phase]);
 
+  // A new adapter *object* is what re-runs the useCallback-memoized reload() in
+  // useEntries / useTimelines / useTodoCounts, so bumping storeVersion here is
+  // how a cross-tab change reaches the UI. Don't "clean up" this dependency list.
   const safeAdapter = useMemo<StorageAdapter | null>(() => {
     if (phase.tag === 'readyOpfs') {
-      return withErrorCapture(phase.adapter, () => setWriteError(true), () => { /* poll auto-merges */ });
+      return withWriteTracking(phase.adapter, () => setWriteError(true), () => channel.post());
     }
     if (phase.tag === 'readyIdb') {
-      return withErrorCapture(phase.adapter, () => { /* idb writes don't have a recoverable error path */ }, () => { /* poll auto-merges */ });
+      return withWriteTracking(phase.adapter, () => { /* idb writes don't have a recoverable error path */ }, () => channel.post());
     }
     return null;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, mergeNonce]);
+  }, [phase, storeVersion]);
 
+  // Live path: a message from another tab. Catch-up path: coming back to a tab
+  // that was backgrounded (and may have been suspended, missing the message).
   useEffect(() => {
     const isReady = phase.tag === 'readyOpfs' || phase.tag === 'readyIdb';
     if (!isReady) return;
-    const id = setInterval(() => { void runMerge(); }, 2000);
-    return () => clearInterval(id);
-  }, [phase, runMerge]);
+    const onVisible = () => { if (document.visibilityState === 'visible') void refreshFromStore(); };
+    const onFocus = () => { void refreshFromStore(); };
+    const unsubscribe = channel.subscribe(() => { void refreshFromStore(); });
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      unsubscribe();
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onFocus);
+      channel.close();
+    };
+  }, [phase, refreshFromStore, channel]);
 
   if (phase.tag === 'booting') {
     return (
@@ -159,10 +153,9 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
   }
 
   const adapter = safeAdapter!;
-  const lastSaved = phase.tag === 'readyIdb' ? phase.lastSaved : null;
 
   return (
-    <StorageContext.Provider value={{ adapter, lastSaved, markSaved, registerActiveEdit }}>
+    <StorageContext.Provider value={{ adapter, lastSaved, markSaved, notifyMergedCopy }}>
       {children}
       {writeError && (
         <div style={{
@@ -175,7 +168,8 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
           }}>
             <h2 style={{ margin: '0 0 8px', fontSize: '1.1rem' }}>Unable to save</h2>
             <p style={{ margin: '0 0 4px', color: '#374151' }}>
-              A write error occurred. Your data is safe — the next poll will retry automatically.
+              A write error occurred, so your most recent change may not have been
+              saved. Everything saved before it is safe — try the change again.
             </p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
               <button
@@ -186,7 +180,7 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
                     if (phase.tag === 'readyOpfs') {
                       setPhase({ tag: 'readyOpfs', adapter: new OpfsAdapter() });
                     } else if (phase.tag === 'readyIdb') {
-                      setPhase({ tag: 'readyIdb', adapter: new IdbAdapter(), lastSaved: null });
+                      setPhase({ tag: 'readyIdb', adapter: new IdbAdapter() });
                     }
                     setWriteError(false);
                   } finally {

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { IDBFactory } from 'fake-indexeddb';
 import { IdbAdapter } from './idbAdapter';
-import { ConflictError } from './interface';
 import { resetDB } from '../db/schema';
 import type { Timeline, Entry } from '../types';
 
@@ -40,46 +39,20 @@ describe('IdbAdapter — CRUD passthrough', () => {
     await a.deleteTimeline('t1');
     expect(await a.getAllTimelines()).toEqual([]);
   });
-});
 
-describe('IdbAdapter — conflict guard', () => {
-  it('reports no conflict for a single adapter writing to its own store', async () => {
+  it('reads a single entry by id, or undefined when there is none', async () => {
     const a = new IdbAdapter();
-    expect(await a.hasConflict()).toBe(false);
-    await a.putTimeline(tl('t1'));
-    expect(await a.hasConflict()).toBe(false);
+    await a.putEntry(en('e1', 't1'));
+    expect((await a.getEntry('e1'))?.id).toBe('e1');
+    expect(await a.getEntry('nope')).toBeUndefined();
   });
 
-  it('freezes and rejects writes once another instance changes the saveId', async () => {
-    const seed = new IdbAdapter();
-    await seed.putTimeline(tl('t1'));
-
+  // IndexedDB is shared between tabs and nothing is cached here, so refresh()
+  // has nothing to do — but it must stay safe to call and leave reads working.
+  it('refresh() is a safe no-op', async () => {
     const a = new IdbAdapter();
-    const b = new IdbAdapter();
-    expect(await a.hasConflict()).toBe(false); // initialises lastKnownSaveId
-    expect(await b.hasConflict()).toBe(false);
-
-    await b.putEntry(en('e1', 't1')); // bumps saveId on shared store
-
-    expect(await a.hasConflict()).toBe(true);
-    await expect(a.putEntry(en('e2', 't1'))).rejects.toBeInstanceOf(ConflictError);
-  });
-
-  it('stays frozen on repeated checks until merged', async () => {
-    const seed = new IdbAdapter();
-    await seed.putTimeline(tl('t1'));
-    const a = new IdbAdapter();
-    const b = new IdbAdapter();
-    await a.hasConflict();
-    await b.hasConflict();
-
-    await b.putEntry(en('e1', 't1'));
-    expect(await a.hasConflict()).toBe(true);
-    expect(await a.hasConflict()).toBe(true);
-
-    // After merging with nothing open, A unfreezes and can write again.
-    await a.mergeFromDisk(null);
-    expect(await a.hasConflict()).toBe(false);
-    await expect(a.putEntry(en('e2', 't1'))).resolves.toBeUndefined();
+    await a.putEntry(en('e1', 't1'));
+    await expect(a.refresh()).resolves.toBeUndefined();
+    expect((await a.getAllEntries()).map((e) => e.id)).toEqual(['e1']);
   });
 });

@@ -1,5 +1,6 @@
 import type { Entry } from '../types';
 import type { StorageAdapter } from '../storage/interface';
+import { saveEntry } from '../storage/saveEntry';
 import { formatDueDate } from './dateFormat';
 
 /**
@@ -26,12 +27,13 @@ export function describeTodoChange(prev: Entry, next: Entry): string | null {
 /**
  * Puts dueDate/isDone back to their pre-change values. Deliberately field-scoped
  * rather than a full snapshot restore: within the undo window the same entry can
- * be edited in the composer or overwritten by the cross-device merge poll, and
- * undoing a due-date change must not discard that. A deleted entry is a no-op.
+ * be edited in the composer or in another tab, and undoing a due-date change must
+ * not discard that. A deleted entry is a no-op. The write goes through saveEntry
+ * so the revert mints a fresh rev like any other save.
  */
 export async function revertTodoFields(adapter: StorageAdapter, prev: Entry): Promise<void> {
   const entries = await adapter.getEntriesForTimeline(prev.timelineId);
   const current = entries.find((e) => e.id === prev.id);
   if (!current) return;
-  await adapter.putEntry({ ...current, dueDate: prev.dueDate, isDone: prev.isDone });
+  await saveEntry(adapter, { ...current, dueDate: prev.dueDate, isDone: prev.isDone });
 }

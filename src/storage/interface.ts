@@ -1,18 +1,12 @@
 import type { Timeline, Entry } from '../types';
 
-export class ConflictError extends Error {
-  constructor() {
-    super('Workspace was modified by another tab');
-    this.name = 'ConflictError';
-  }
-}
-
 export interface StorageAdapter {
   getAllTimelines(): Promise<Timeline[]>;
   putTimeline(timeline: Timeline): Promise<void>;
   deleteTimeline(id: string): Promise<void>;
 
   getAllEntries(): Promise<Entry[]>;
+  getEntry(id: string): Promise<Entry | undefined>;
   getEntriesForTimeline(timelineId: string): Promise<Entry[]>;
   putEntry(entry: Entry): Promise<void>;
   deleteEntry(id: string): Promise<void>;
@@ -24,10 +18,7 @@ export interface StorageAdapter {
   getAllBlobKeys(): Promise<string[]>;
   getAllBlobs(): Promise<Record<string, ArrayBuffer>>;
 
-  hasConflict(): Promise<boolean>;
-  mergeFromDisk(activeBase: Entry | null): Promise<{ duplicatedEntryId: string | null; importedCount: number }>;
-  // Scan for and merge any external conflict files (e.g. Syncthing
-  // `.sync-conflict-*` files), renaming each to `.done` once processed. Adapters
-  // without a file backing return zero counts.
-  mergeConflictFiles(): Promise<{ importedCount: number; conflictCount: number }>;
+  // Re-read whatever the adapter caches from its backing store, so a write made
+  // by another tab becomes visible here. A no-op for adapters that read through.
+  refresh(): Promise<void>;
 }

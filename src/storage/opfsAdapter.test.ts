@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { OpfsAdapter } from './opfsAdapter';
-import { ConflictError } from './interface';
 import { MockDir } from '../test-utils/mockDir';
 import type { Timeline, Entry } from '../types';
 
@@ -41,8 +40,7 @@ describe('OpfsAdapter — basic persistence', () => {
     await a.putTimeline(TL('t1'));
     await a.putEntry(EN('e1', 't1'));
 
-    // Layout: meta/, timelines/<id>/, entries/<id>.json
-    expect(mockRoot.dirs.has('meta')).toBe(true);
+    // Layout: timelines/<id>/timeline.json, timelines/<id>/entries/<id>.json
     expect(mockRoot.dirs.get('timelines')!.dirs.has('t1')).toBe(true);
     expect(mockRoot.dirs.get('timelines')!.dirs.get('t1')!.files.has('timeline.json')).toBe(true);
     expect(mockRoot.dirs.get('timelines')!.dirs.get('t1')!.dirs.get('entries')!.files.has('e1.json')).toBe(true);
@@ -134,43 +132,40 @@ describe('OpfsAdapter — blobs', () => {
   });
 });
 
-describe('OpfsAdapter — conflict guard', () => {
-  it('reports no conflict for a single adapter writing to its own store', async () => {
+describe('OpfsAdapter — refreshing the cached index', () => {
+  it('reads a single entry by id, or undefined when there is none', async () => {
     const a = new OpfsAdapter();
-    expect(await a.hasConflict()).toBe(false);
-    await a.putTimeline(TL('t1'));
-    expect(await a.hasConflict()).toBe(false);
+    await a.putEntry(EN('e1', 't1'));
+    expect((await a.getEntry('e1'))?.id).toBe('e1');
+    expect(await a.getEntry('nope')).toBeUndefined();
   });
 
-  it('freezes and rejects writes once another instance changes the saveId', async () => {
-    const seed = new OpfsAdapter();
-    await seed.putTimeline(TL('t1'));
-
+  // Every read is served from the in-memory index built at init(), so another
+  // tab's write is invisible until refresh() re-scans the file tree. Without
+  // refresh() the cache has nothing to invalidate it at all.
+  it('picks up another adapter\'s write only after refresh()', async () => {
     const a = new OpfsAdapter();
+    await a.putEntry(EN('e1', 't1'));
+
+    // A second adapter over the same root stands in for another tab.
     const b = new OpfsAdapter();
-    expect(await a.hasConflict()).toBe(false);
-    expect(await b.hasConflict()).toBe(false);
+    await b.putEntry(EN('e2', 't1'));
 
-    await b.putEntry(EN('e1', 't1'));
-
-    expect(await a.hasConflict()).toBe(true);
-    await expect(a.putEntry(EN('e2', 't1'))).rejects.toBeInstanceOf(ConflictError);
+    expect((await a.getAllEntries()).map((e) => e.id)).toEqual(['e1']);
+    await a.refresh();
+    expect((await a.getAllEntries()).map((e) => e.id).sort()).toEqual(['e1', 'e2']);
+    expect((await a.getEntry('e2'))?.id).toBe('e2');
   });
 
-  it('stays frozen on repeated checks until merged', async () => {
-    const seed = new OpfsAdapter();
-    await seed.putTimeline(TL('t1'));
+  it('drops an entry another adapter deleted', async () => {
     const a = new OpfsAdapter();
+    await a.putEntry(EN('e1', 't1'));
+    await a.putEntry(EN('e2', 't1'));
+
     const b = new OpfsAdapter();
-    await a.hasConflict();
-    await b.hasConflict();
+    await b.deleteEntry('e1');
 
-    await b.putEntry(EN('e1', 't1'));
-    expect(await a.hasConflict()).toBe(true);
-    expect(await a.hasConflict()).toBe(true);
-
-    await a.mergeFromDisk(null);
-    expect(await a.hasConflict()).toBe(false);
-    await expect(a.putEntry(EN('e2', 't1'))).resolves.toBeUndefined();
+    await a.refresh();
+    expect((await a.getAllEntries()).map((e) => e.id)).toEqual(['e2']);
   });
 });

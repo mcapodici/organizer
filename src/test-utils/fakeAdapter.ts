@@ -10,8 +10,8 @@ export class FakeAdapter implements StorageAdapter {
   timelines: Timeline[] = [];
   entries: Entry[] = [];
   blobs = new Map<string, ArrayBuffer>();
-  conflict = false;
-  mergeResult: { duplicatedEntryId: string | null; importedCount: number } = { duplicatedEntryId: null, importedCount: 0 };
+  /** How many times refresh() was called — lets provider tests assert a re-read. */
+  refreshCount = 0;
 
   async getAllTimelines(): Promise<Timeline[]> { return [...this.timelines]; }
 
@@ -25,6 +25,10 @@ export class FakeAdapter implements StorageAdapter {
   }
 
   async getAllEntries(): Promise<Entry[]> { return [...this.entries]; }
+
+  async getEntry(id: string): Promise<Entry | undefined> {
+    return this.entries.find((e) => e.id === id);
+  }
 
   async getEntriesForTimeline(id: string): Promise<Entry[]> {
     return this.entries.filter((e) => e.timelineId === id);
@@ -54,7 +58,6 @@ export class FakeAdapter implements StorageAdapter {
     return out;
   }
 
-  async hasConflict(): Promise<boolean> { return this.conflict; }
-  async mergeFromDisk(): Promise<{ duplicatedEntryId: string | null; importedCount: number }> { return this.mergeResult; }
-  async mergeConflictFiles(): Promise<{ importedCount: number; conflictCount: number }> { return { importedCount: 0, conflictCount: 0 }; }
+  // Nothing is cached, so there is nothing to re-read — just record the call.
+  async refresh(): Promise<void> { this.refreshCount += 1; }
 }
