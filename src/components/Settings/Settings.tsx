@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Download, Upload, RotateCcw, Globe, BookOpen } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
 import { Modal } from '../Modal/Modal';
-import { exportData, importData } from '../../utils/exportImport';
+import { exportData, importData, clearAllData } from '../../utils/exportImport';
 import styles from './Settings.module.css';
 
 interface Props {
@@ -17,6 +17,7 @@ export function Settings({ onDataChanged }: Props) {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   async function handleExport() {
     await exportData(adapter);
@@ -36,8 +37,15 @@ export function Settings({ onDataChanged }: Props) {
     }
   }
 
-  function handleReset() {
-    setResetModalOpen(false);
+  async function handleReset() {
+    setClearing(true);
+    try {
+      await clearAllData(adapter);
+      await onDataChanged();
+    } finally {
+      setClearing(false);
+      setResetModalOpen(false);
+    }
     navigate('/', { replace: true });
   }
 
@@ -153,7 +161,7 @@ export function Settings({ onDataChanged }: Props) {
       )}
 
       {resetModalOpen && (
-        <Modal title="Clear all data" onClose={() => setResetModalOpen(false)}>
+        <Modal title="Clear all data" onClose={() => { if (!clearing) setResetModalOpen(false); }}>
           <p style={{ marginTop: 0 }}>
             This will delete <strong>all</strong> your timelines, entries, and attachments
             from this device permanently.
@@ -162,10 +170,16 @@ export function Settings({ onDataChanged }: Props) {
             Export your data first if you want to keep it.
           </p>
           <div className={styles.modalActions}>
-            <button className={styles.dangerBtn} onClick={handleReset}>
-              Clear everything
+            <button className={styles.dangerBtn} onClick={handleReset} disabled={clearing}>
+              {clearing ? 'Clearing…' : 'Clear everything'}
             </button>
-            <button className={styles.btnSecondary} onClick={() => setResetModalOpen(false)}>Cancel</button>
+            <button
+              className={styles.btnSecondary}
+              onClick={() => setResetModalOpen(false)}
+              disabled={clearing}
+            >
+              Cancel
+            </button>
           </div>
         </Modal>
       )}

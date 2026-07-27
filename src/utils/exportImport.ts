@@ -36,19 +36,25 @@ export async function exportData(adapter: StorageAdapter): Promise<void> {
   URL.revokeObjectURL(url);
 }
 
+// Wipe every timeline, entry, and attachment. Shared by "Replace all data" on
+// import and by Settings → Clear all data.
+export async function clearAllData(adapter: StorageAdapter): Promise<void> {
+  const existingTimelines = await adapter.getAllTimelines();
+  const existingEntries = await adapter.getAllEntries();
+  const existingBlobKeys = await adapter.getAllBlobKeys();
+  await Promise.all(existingTimelines.map((t) => adapter.deleteTimeline(t.id)));
+  await Promise.all(existingEntries.map((e) => adapter.deleteEntry(e.id)));
+  // Clear blobs too — a true replace starts from a clean slate, and leaving the
+  // old attachment data behind would orphan it (and stray .bin files on disk).
+  await Promise.all(existingBlobKeys.map((k) => adapter.deleteBlob(k)));
+}
+
 export async function importData(adapter: StorageAdapter, file: File, mode: 'replace' | 'merge'): Promise<void> {
   const text = await file.text();
   const data: ExportData = JSON.parse(text);
 
   if (mode === 'replace') {
-    const existingTimelines = await adapter.getAllTimelines();
-    const existingEntries = await adapter.getAllEntries();
-    const existingBlobKeys = await adapter.getAllBlobKeys();
-    await Promise.all(existingTimelines.map((t) => adapter.deleteTimeline(t.id)));
-    await Promise.all(existingEntries.map((e) => adapter.deleteEntry(e.id)));
-    // Clear blobs too — a true replace starts from a clean slate, and leaving the
-    // old attachment data behind would orphan it (and stray .bin files on disk).
-    await Promise.all(existingBlobKeys.map((k) => adapter.deleteBlob(k)));
+    await clearAllData(adapter);
   }
 
   const existing = mode === 'merge'
