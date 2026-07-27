@@ -330,8 +330,21 @@
   background: var(--danger);
 }
 
-.emptyBtn {
+/* Row holding the empty state's primary and secondary actions. Wraps rather
+   than overflowing on narrow screens. */
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin-top: 4px;
+}
+
+.emptyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: var(--accent);
   color: #fff;
   border: none;
@@ -344,6 +357,26 @@
 
 .emptyBtn:hover {
   background: var(--accent-hover);
+}
+
+/* Secondary sibling of .emptyBtn — 8px vertical padding (vs 9px) so the 1px
+   border doesn't make it taller than the primary button beside it. */
+.emptyTodosBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 8px 20px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.emptyTodosBtn:hover {
+  background: var(--hover-surface);
 }
 
 .emptyRestoreBtn {
