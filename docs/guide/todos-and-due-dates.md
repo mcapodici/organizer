@@ -36,7 +36,8 @@ a record, shown with a completed style.
 
 ## The Todos page
 
-Open **Todos** from the header (or the mobile menu) to see every outstanding
+Open **Todos** from the header, the mobile menu, or the **View Todos** button on
+the home screen to see every outstanding
 follow-up across **all** timelines, grouped by urgency:
 
 | Section | What's in it |
