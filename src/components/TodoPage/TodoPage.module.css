@@ -29,16 +29,11 @@
   border-bottom: 2px solid currentColor;
 }
 
-/* Section headers use the app palette only — danger red for overdue, the indigo
- * accent (stronger → lighter) for today/soon, and neutral gray for the rest. */
-.overdue {
-  color: var(--danger);
-  border-color: var(--danger-border);
-}
-
-.today {
-  color: var(--accent-hover);
-  border-color: var(--accent);
+/* Section headers use the app palette only — purple for what's due now, the
+ * indigo accent for the coming week, and neutral gray for everything beyond. */
+.dueNow {
+  color: var(--accent-ink-soft);
+  border-color: var(--accent-ink-soft);
 }
 
 .soon {

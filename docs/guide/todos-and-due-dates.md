@@ -41,16 +41,17 @@ follow-up across **all** timelines, grouped by urgency:
 
 | Section | What's in it |
 | --- | --- |
-| **Overdue** | Due before today |
-| **Due Today** | Due today |
+| **Due Now** | Overdue items and anything due today |
 | **Due Within 7 Days** | The coming week |
 | **Due Within 30 Days** | The coming month |
 | **Due Later** | Everything further out |
 
 Within each group, items are sorted soonest-first. Each card shows a preview of
-the entry and the timeline it belongs to.
+the entry and the timeline it belongs to. Inside **Due Now** that ordering floats
+the most-overdue items to the top, and every card keeps its own OVERDUE / TODAY
+badge so you can still tell late work from today's at a glance.
 
-![The Todos page listing outstanding follow-ups grouped into Overdue, Due Today, Due Within 7 Days, and Due Later.](/screenshots/todos.png)
+![The Todos page listing outstanding follow-ups grouped into Due Now, Due Within 7 Days, and Due Later.](/screenshots/todos.png)
 
 - **Click a card** to jump to that entry's timeline in context.
 - **Click the check** on the left of a card to mark it done — it disappears from
@@ -64,7 +65,7 @@ When nothing is pending, you'll see **"All caught up!"**.
 ## A simple workflow
 
 1. As you log entries, add a due date to anything that needs follow-up.
-2. Start your day on the **Todos** page and work top-down from **Overdue**.
+2. Start your day on the **Todos** page and work top-down from **Due Now**.
 3. Check items off, or reschedule the ones that need to slip.
 
 ## Related

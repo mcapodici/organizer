@@ -13,8 +13,7 @@ interface TodoItem {
 }
 
 interface Sections {
-  overdue: TodoItem[];
-  today: TodoItem[];
+  dueNow: TodoItem[];
   week: TodoItem[];
   month: TodoItem[];
   later: TodoItem[];
@@ -31,12 +30,11 @@ function buildSections(todos: TodoItem[]): Sections {
   d30.setDate(d30.getDate() + 30);
   const in30 = toLocalDateString(d30);
 
-  const result: Sections = { overdue: [], today: [], week: [], month: [], later: [] };
+  const result: Sections = { dueNow: [], week: [], month: [], later: [] };
 
   for (const item of todos) {
     const due = item.entry.dueDate!;
-    if (due < todayStr) result.overdue.push(item);
-    else if (due === todayStr) result.today.push(item);
+    if (due <= todayStr) result.dueNow.push(item);
     else if (due <= in7) result.week.push(item);
     else if (due <= in30) result.month.push(item);
     else result.later.push(item);
@@ -74,7 +72,7 @@ interface Props {
 export function TodoPage({ onEntryChanged }: Props) {
   const { adapter } = useStorage();
   const navigate = useNavigate();
-  const [sections, setSections] = useState<Sections>({ overdue: [], today: [], week: [], month: [], later: [] });
+  const [sections, setSections] = useState<Sections>({ dueNow: [], week: [], month: [], later: [] });
   const [loading, setLoading] = useState(true);
 
   const reload = useCallback(async () => {
@@ -114,8 +112,8 @@ export function TodoPage({ onEntryChanged }: Props) {
     return <div className={styles.loading}>Loading…</div>;
   }
 
-  const { overdue, today, week, month, later } = sections;
-  const isEmpty = !overdue.length && !today.length && !week.length && !month.length && !later.length;
+  const { dueNow, week, month, later } = sections;
+  const isEmpty = !dueNow.length && !week.length && !month.length && !later.length;
 
   if (isEmpty) {
     return (
@@ -132,11 +130,8 @@ export function TodoPage({ onEntryChanged }: Props) {
   return (
     <div className={styles.page}>
       <h1 className={styles.pageTitle}>Todos</h1>
-      {overdue.length > 0 && (
-        <TodoSection title="Overdue" items={overdue} variant="overdue" onToggle={handleToggle} onUpdate={handleUpdate} onGoToTimeline={goToTimeline} />
-      )}
-      {today.length > 0 && (
-        <TodoSection title="Due Today" items={today} variant="today" onToggle={handleToggle} onUpdate={handleUpdate} onGoToTimeline={goToTimeline} />
+      {dueNow.length > 0 && (
+        <TodoSection title="Due Now" items={dueNow} variant="dueNow" onToggle={handleToggle} onUpdate={handleUpdate} onGoToTimeline={goToTimeline} />
       )}
       {week.length > 0 && (
         <TodoSection title="Due Within 7 Days" items={week} variant="soon" onToggle={handleToggle} onUpdate={handleUpdate} onGoToTimeline={goToTimeline} />
@@ -161,7 +156,7 @@ function TodoSection({
 }: {
   title: string;
   items: TodoItem[];
-  variant: 'overdue' | 'today' | 'soon' | 'normal';
+  variant: 'dueNow' | 'soon' | 'normal';
   onToggle: (entry: Entry) => void;
   onUpdate: (entry: Entry) => void | Promise<void>;
   onGoToTimeline: (timelineId: string, entryId: string) => void;
