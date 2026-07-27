@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { UndoProvider } from '../../context/UndoContext';
 import { FakeAdapter } from '../../test-utils/fakeAdapter';
 import { todayDateString, toLocalDateString } from '../../utils/dateFormat';
 import type { Timeline, Entry } from '../../types';
@@ -27,7 +28,9 @@ beforeEach(() => { h.adapter = new FakeAdapter(); });
 function renderTodos() {
   return render(
     <MemoryRouter>
-      <TodoPage onEntryChanged={() => {}} />
+      <UndoProvider>
+        <TodoPage onEntryChanged={() => {}} />
+      </UndoProvider>
     </MemoryRouter>,
   );
 }
@@ -100,5 +103,35 @@ describe('TodoPage', () => {
     renderTodos();
     await waitFor(() => expect(screen.getByText('Call the dentist')).toBeTruthy());
     expect(screen.getByText('Tasks')).toBeTruthy();
+  });
+});
+
+describe('TodoPage undo', () => {
+  async function renderOneTodo() {
+    await h.adapter.putTimeline(tl('t1', 'Tasks'));
+    await h.adapter.putEntry({ ...en('e1', 't1', { dueDate: '2000-01-01' }), content: doc('Call the dentist') });
+    renderTodos();
+    await waitFor(() => expect(screen.getByText('Call the dentist')).toBeTruthy());
+  }
+
+  it('removes the row and offers an undo when marked done', async () => {
+    await renderOneTodo();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mark as done' }));
+
+    await waitFor(() => expect(screen.getByText('All caught up!')).toBeTruthy());
+    expect(screen.getByText('Marked done')).toBeTruthy();
+    expect(h.adapter.entries[0].isDone).toBe(true);
+  });
+
+  it('brings the row back when the undo is used', async () => {
+    await renderOneTodo();
+    fireEvent.click(screen.getByRole('button', { name: 'Mark as done' }));
+    await waitFor(() => expect(screen.getByText('Marked done')).toBeTruthy());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+
+    await waitFor(() => expect(screen.getByText('Call the dentist')).toBeTruthy());
+    expect(h.adapter.entries[0].isDone).toBeFalsy();
   });
 });

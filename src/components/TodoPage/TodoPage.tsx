@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, CheckCircle2 } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
+import { useUndo } from '../../context/UndoContext';
 import type { Entry, Timeline } from '../../types';
 import { formatDueDate, toLocalDateString, todayDateString, getDueDateStatus } from '../../utils/dateFormat';
+import { describeTodoChange, revertTodoFields } from '../../utils/todoUndo';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
 import styles from './TodoPage.module.css';
 
@@ -71,6 +73,7 @@ interface Props {
 
 export function TodoPage({ onEntryChanged }: Props) {
   const { adapter } = useStorage();
+  const { registerUndo } = useUndo();
   const navigate = useNavigate();
   const [sections, setSections] = useState<Sections>({ dueNow: [], week: [], month: [], later: [] });
   const [loading, setLoading] = useState(true);
@@ -92,16 +95,28 @@ export function TodoPage({ onEntryChanged }: Props) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { reload(); }, [reload]);
 
-  async function handleToggle(entry: Entry) {
-    await adapter.putEntry({ ...entry, isDone: true });
+  // The write lands immediately — nothing is deferred, so closing the tab can't
+  // lose it — and the undo bar offers a compensating revert for 10 seconds.
+  async function applyTodoChange(prev: Entry, next: Entry) {
+    await adapter.putEntry(next);
     onEntryChanged();
     await reload();
+    const label = describeTodoChange(prev, next);
+    if (label) {
+      registerUndo(label, async () => {
+        await revertTodoFields(adapter, prev);
+        onEntryChanged();
+        await reload();
+      });
+    }
   }
 
-  async function handleUpdate(entry: Entry) {
-    await adapter.putEntry(entry);
-    onEntryChanged();
-    await reload();
+  function handleToggle(entry: Entry) {
+    return applyTodoChange(entry, { ...entry, isDone: true });
+  }
+
+  function handleUpdate(next: Entry, prev: Entry) {
+    return applyTodoChange(prev, next);
   }
 
   function goToTimeline(timelineId: string, entryId: string) {
@@ -158,7 +173,7 @@ function TodoSection({
   items: TodoItem[];
   variant: 'dueNow' | 'soon' | 'normal';
   onToggle: (entry: Entry) => void;
-  onUpdate: (entry: Entry) => void | Promise<void>;
+  onUpdate: (next: Entry, prev: Entry) => void | Promise<void>;
   onGoToTimeline: (timelineId: string, entryId: string) => void;
 }) {
   return (
@@ -190,7 +205,7 @@ function TodoRow({
   entry: Entry;
   timeline: Timeline | undefined;
   onToggle: (entry: Entry) => void;
-  onUpdate: (entry: Entry) => void | Promise<void>;
+  onUpdate: (next: Entry, prev: Entry) => void | Promise<void>;
   onGoToTimeline: (timelineId: string, entryId: string) => void;
 }) {
   const [dueAnchor, setDueAnchor] = useState<DOMRect | null>(null);
@@ -241,7 +256,7 @@ function TodoRow({
             <DueDatePopover
               entry={entry}
               anchorRect={dueAnchor}
-              onUpdate={onUpdate}
+              onUpdate={(next) => onUpdate(next, entry)}
               onClose={() => setDueAnchor(null)}
             />
           )}

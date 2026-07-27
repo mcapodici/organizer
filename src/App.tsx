@@ -7,12 +7,14 @@ import { useEntries } from './hooks/useEntries';
 import { useTags } from './hooks/useTags';
 import { useTodoCounts } from './hooks/useTodoCounts';
 import { useStorage } from './context/StorageContext';
+import { useUndo } from './context/UndoContext';
 import { TimelineList } from './components/TimelineList/TimelineList';
 import { TimelineView } from './components/TimelineView/TimelineView';
 import { TodoPage } from './components/TodoPage/TodoPage';
 import { Settings } from './components/Settings/Settings';
 import { SearchBox } from './components/SearchBox/SearchBox';
 import { exportData } from './utils/exportImport';
+import { describeTodoChange, revertTodoFields } from './utils/todoUndo';
 import { WELCOME_KEY, WELCOME_CONTENT } from './utils/welcome';
 import type { Entry } from './types';
 import styles from './App.module.css';
@@ -21,6 +23,7 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
     const { adapter, markSaved } = useStorage();
+  const { registerUndo } = useUndo();
   const { timelines, loading, createTimeline, updateTimeline, removeTimeline, reload: reloadTimelines } = useTimelines();
 
   const isTodoPage = location.pathname === '/todos';
@@ -88,6 +91,26 @@ export default function App() {
   // what matters; this is just ordering metadata.
   function touchActiveTimeline() {
     if (activeTimeline) void updateTimeline(activeTimeline);
+  }
+
+  // Every timeline-side entry write funnels through here — the EntryCard todo
+  // lozenge, its due-date popover and the composer alike — so this is also the
+  // single place the timeline registers a todo undo. Content-only saves return
+  // null from describeTodoChange and register nothing.
+  async function handleUpdateEntry(entry: Entry) {
+    const prev = entries.find((e) => e.id === entry.id);
+    await updateEntry(entry);
+    reloadTodoCounts();
+    touchActiveTimeline();
+    const label = prev && describeTodoChange(prev, entry);
+    if (prev && label) {
+      registerUndo(label, async () => {
+        await revertTodoFields(adapter, prev);
+        await reloadEntries();
+        reloadTodoCounts();
+        touchActiveTimeline();
+      });
+    }
   }
 
   async function reloadAfterImport() {
@@ -299,7 +322,7 @@ export default function App() {
               allTags={allTags}
               onUpdateTimeline={updateTimeline}
               onAddEntry={async (data) => { const created = await addEntry(data); reloadTodoCounts(); touchActiveTimeline(); return created; }}
-              onUpdateEntry={async (entry) => { await updateEntry(entry); reloadTodoCounts(); touchActiveTimeline(); }}
+              onUpdateEntry={handleUpdateEntry}
               onDeleteEntry={async (entry) => { await removeEntry(entry); reloadTodoCounts(); touchActiveTimeline(); }}
             />
           ) : (

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { UndoProvider } from './context/UndoContext';
 import { FakeAdapter } from './test-utils/fakeAdapter';
 import { WELCOME_KEY } from './utils/welcome';
 import type { Timeline } from './types';
@@ -41,7 +42,9 @@ beforeEach(async () => {
 async function renderHome() {
   render(
     <MemoryRouter initialEntries={['/']}>
-      <App />
+      <UndoProvider>
+        <App />
+      </UndoProvider>
     </MemoryRouter>,
   );
   await waitFor(() => expect(screen.getByText('No timeline selected')).toBeTruthy());

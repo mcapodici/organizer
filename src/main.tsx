@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { StorageProvider } from './context/StorageContext';
+import { UndoProvider } from './context/UndoContext';
 import './index.css';
 import App from './App';
 
@@ -20,7 +21,11 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HashRouter>
       <StorageProvider>
-        <App />
+        {/* Above App on purpose: the 2s merge poll in StorageContext re-renders
+            App's hooks, and a pending undo must survive that. */}
+        <UndoProvider>
+          <App />
+        </UndoProvider>
       </StorageProvider>
     </HashRouter>
     <Analytics />
