@@ -247,10 +247,20 @@ async function tick(): Promise<void> {
   }
 }
 
+/** Resolves the current sleep() early, set while a sleep is in flight. */
+let wakeEarly: (() => void) | undefined
+
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => {
-    const t = setTimeout(resolve, ms)
-    t.unref?.()
+    const t = setTimeout(() => {
+      wakeEarly = undefined
+      resolve()
+    }, ms)
+    wakeEarly = () => {
+      clearTimeout(t)
+      wakeEarly = undefined
+      resolve()
+    }
   })
 
 async function main(): Promise<void> {
@@ -270,6 +280,7 @@ async function main(): Promise<void> {
       if (stopping) process.exit(130)
       stopping = true
       log(`${sig} received — finishing the current step, press again to force quit`)
+      wakeEarly?.()
     })
   }
 
