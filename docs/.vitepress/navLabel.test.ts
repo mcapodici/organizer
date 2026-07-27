@@ -28,8 +28,21 @@ describe('.icon-label in theme/custom.css', () => {
     const rule = css.match(/\.icon-label\s*\{([^}]*)\}/);
 
     expect(rule).not.toBeNull();
-    expect(rule![1]).toContain('vertical-align: middle');
+    // Baseline-aligning the text is what puts the group on the same line as the
+    // plain-text nav items; centring it instead left "Source" ~1px low, which
+    // read as "Open App" sitting slightly too high.
+    expect(rule![1]).toContain('align-items: baseline');
     expect(rule![1]).toContain('line-height: 1');
-    expect(rule![1]).toContain('align-items: center');
+  });
+
+  // The SVG must opt out of that baseline alignment, otherwise it hangs off the
+  // text baseline instead of sitting centred on the row — and, being the first
+  // flex item, it would supply the synthesised baseline that caused issue #9.
+  it('centres the icon rather than baseline-aligning it', () => {
+    const css = readFileSync(new URL('./theme/custom.css', import.meta.url), 'utf8');
+    const rule = css.match(/\.icon-label > svg\s*\{([^}]*)\}/);
+
+    expect(rule).not.toBeNull();
+    expect(rule![1]).toContain('align-self: center');
   });
 });

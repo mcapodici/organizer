@@ -149,21 +149,30 @@
 /* An inline SVG paired with a text label: the "Source" nav item (built in
  * .vitepress/navLabel.ts) and the repo link on source.md.
  *
- * `vertical-align: middle` is the load-bearing property. An inline-flex box
- * with `align-items: center` has no baseline-participating child, so browsers
- * synthesise its baseline from the first flex item's border-box bottom edge —
- * the bottom of the 16px SVG. Aligning that to the nav's 64px line box lifted
- * the whole group ~3px above the sibling nav items (issue #9). Positioning by
- * the box's own midpoint instead fixes it.
+ * `align-items: baseline` is the load-bearing property. An inline-flex box
+ * whose items are all centre-aligned has no baseline-participating child, so
+ * browsers synthesise its baseline from the first flex item's border-box
+ * bottom edge — the bottom of the 16px SVG. Aligning that to the nav's 64px
+ * line box lifted the whole group ~3px above the sibling nav items (issue #9).
+ * Baseline-aligning the label text instead makes the group's baseline the
+ * text's own, so "Source" sits on exactly the same line as Guide / Tutorials /
+ * Use cases / Blog / Open App — no font-metric fudge, no residual offset.
+ *
+ * The SVG opts out with `align-self: center` so it stays centred on the row
+ * rather than hanging off the text baseline, and so it no longer supplies the
+ * synthesised baseline the bug came from.
  *
  * `line-height: 1` keeps the group at icon height so it never grows the 24px
  * line box in the mobile nav screen. */
 .icon-label {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
   line-height: 1;
-  vertical-align: middle;
+}
+
+.icon-label > svg {
+  align-self: center;
 }
 
 /* Shrink the hero text line ("Timelines for everything…") — VitePress sizes

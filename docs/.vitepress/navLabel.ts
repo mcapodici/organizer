@@ -12,7 +12,8 @@ export const octocatSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
 // parent sets `line-height: var(--vp-nav-height)` (64px). An inline-flex label
 // with no extra rules takes its baseline from the SVG's bottom border edge
 // rather than from the text, which lifts the whole group ~3px above its
-// neighbours — that was issue #9.
+// neighbours — that was issue #9. The stylesheet baseline-aligns the label text
+// so the group shares its neighbours' baseline exactly.
 export function iconLabel(icon: string, text: string): string {
   return `<span class="icon-label">${icon} ${text}</span>`;
 }
