@@ -332,9 +332,14 @@ export default function App() {
                     ))}
                   </div>
                 )}
-                <button className={styles.emptyBtn} onClick={handleNewFromHome}>
-                  + New Timeline
-                </button>
+                <div className={styles.emptyActions}>
+                  <button className={styles.emptyBtn} onClick={handleNewFromHome}>
+                    <Plus size={16} />New Timeline
+                  </button>
+                  <button className={styles.emptyTodosBtn} onClick={() => navigate('/todos')}>
+                    <CheckSquare size={16} />View Todos
+                  </button>
+                </div>
                 {timelines.length === 0 && localStorage.getItem(WELCOME_KEY) && (
                   <button className={styles.emptyRestoreBtn} onClick={seedWelcomeTimeline}>
                     Restore welcome guide
