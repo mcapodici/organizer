@@ -233,8 +233,14 @@
 }
 
 .emptyIcon {
-  color: var(--accent-300);
   line-height: 1;
+}
+
+/* Matches the 40px footprint of the lucide icon the logo replaced. */
+.emptyLogo {
+  width: 40px;
+  height: 40px;
+  display: block;
 }
 
 .emptyHeading {
