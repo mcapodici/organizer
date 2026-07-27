@@ -59,6 +59,7 @@ If you are an agent invoked *by* that pipeline, your prompt already tells you wh
 
 - **UI standards**: see `UI_STANDARDS.md` for design tokens, component conventions, and accessibility rules.
 - **Review process**: see `CHANGES_REVIEW.md` for the change-log and review expectations.
+- **Idea backlog**: see `IDEAS.md` for parked UX ideas from call-for-ideas issues (nothing there is committed work).
 - **Tests**: Vitest + Testing Library + `fake-indexeddb`. Run `npm test` before declaring anything done.
 - **Build**: `npm run build` (runs tests → tsc → VitePress docs → Vite app).
 - **Lint**: `npm run lint` (ESLint). Note that repo-wide lint is **currently red on `main`** (~21 pre-existing errors, mostly `src/hooks/useTodoCounts.ts` and `vite.config.ts`). Don't take fixing those on as a side quest — just keep the files *you* touch clean: `npx eslint <your changed files>`.
