@@ -34,6 +34,22 @@ Click the circle/check on an entry's lozenge — or **Mark done** in the popover
 to complete it. Done items drop off the Todos page but stay in their timeline as
 a record, shown with a completed style.
 
+## Undoing a change
+
+Ticked the wrong thing? For **10 seconds** after any todo change, a small bar
+appears in the bottom-left corner with a countdown and an **Undo** button. Click
+it and the change is rolled back.
+
+The window covers marking something done or not done, and setting, changing or
+removing a due date — from the Todos page *and* from an entry's lozenge in the
+timeline. Ordinary entry edits aren't included; they're saved as normal and have
+no undo bar.
+
+There's only ever one pending undo: making another todo change replaces it, and
+the earlier change becomes permanent. Letting the countdown run out (or clicking
+the **×**) does the same thing. The change itself is saved immediately either
+way, so nothing is lost if you close the tab while the bar is up.
+
 ## The Todos page
 
 Open **Todos** from the header, the mobile menu, or the **View Todos** button on
@@ -60,6 +76,8 @@ badge so you can still tell late work from today's at a glance.
 - **Click the due date** on a card to reschedule it without leaving the page.
   The same OVERDUE / TODAY / DUE SOON badge shown on the entry's lozenge also
   appears here, right on the due-date button.
+- **Changed your mind?** Use the undo bar that appears for 10 seconds after any
+  of these — see [Undoing a change](#undoing-a-change).
 
 When nothing is pending, you'll see **"All caught up!"**.
 
