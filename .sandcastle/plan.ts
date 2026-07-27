@@ -16,7 +16,8 @@ import {
   REPO_DIR,
   BASE_BRANCH,
   PLAN_MARKER,
-  APPROVE_MARKER,
+  PLAN_FOOTER_MARKER,
+  LABELS,
 } from './config.ts'
 import { addComment, type Comment, type Issue } from './github.ts'
 
@@ -54,13 +55,13 @@ const PlanSchema = z.object({
 
 export type Plan = z.infer<typeof PlanSchema>
 
-/** Strip interactive checkboxes from agent text so only ours stays clickable. */
+/** Strip interactive checkboxes from agent text so a plan never renders one. */
 export const deCheckbox = (s: string) => s.replace(/^(\s*)[-*]\s+\[[ xX]\]\s+/gm, '$1- ')
 
 const bullets = (items: string[]) =>
   items.length === 0 ? '_none_' : items.map((i) => `- ${deCheckbox(i)}`).join('\n')
 
-/** Render a plan into the comment body, including the approval checkbox. */
+/** Render a plan into the comment body, including the approval instructions. */
 export function renderPlan(issue: number, revision: number, plan: Plan): string {
   const choices =
     plan.openQuestions.length === 0
@@ -96,8 +97,8 @@ ${bullets(plan.testPlan)}
 ${bullets(plan.risks)}
 
 ---
-<!-- ${APPROVE_MARKER} -->
-- [ ] **Approve this plan** — tick this box to start implementation
+<!-- ${PLAN_FOOTER_MARKER} -->
+**To proceed:** add the \`${LABELS.proceed}\` label to this issue to approve this plan and start implementation.
 
 Not right? Reply with feedback in a comment and a revised plan will be posted.
 `
@@ -113,25 +114,10 @@ export function revisionOf(comment: Comment): number {
   return m ? Number(m[1]) : 1
 }
 
-/**
- * True when the approval box in a plan comment is ticked.
- *
- * Deliberately scoped to the first checkbox after the approve marker rather
- * than searching the whole body, so a plan that merely *discusses* checkboxes
- * can never read as an approval.
- */
-export function isApproved(body: string): boolean {
-  const idx = body.indexOf(`<!-- ${APPROVE_MARKER} -->`)
-  if (idx === -1) return false
-  const after = body.slice(idx)
-  const checkbox = after.match(/^\s*[-*]\s+\[([ xX])\]/m)
-  return checkbox ? checkbox[1].toLowerCase() === 'x' : false
-}
-
 /** Extract the human-readable plan text to hand to the implementer. */
 export function planBodyForImplementer(comment: Comment): string {
   const start = comment.body.indexOf('###')
-  const end = comment.body.indexOf(`<!-- ${APPROVE_MARKER} -->`)
+  const end = comment.body.indexOf(`<!-- ${PLAN_FOOTER_MARKER} -->`)
   if (start === -1) return comment.body
   return comment.body.slice(start, end === -1 ? undefined : end).trim()
 }

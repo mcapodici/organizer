@@ -9,7 +9,14 @@ import { docker } from '@ai-hero/sandcastle/sandboxes/docker'
 import { claudeCode } from '@ai-hero/sandcastle'
 import type { SandboxProvider, AgentProvider, ClaudeCodeOptions } from '@ai-hero/sandcastle'
 
-/** Labels that make up the state machine. Order matters for reconciliation. */
+/**
+ * Labels that make up the state machine. Order matters for reconciliation.
+ *
+ * `proceed` is not a state — it's a human-applied trigger, checked and then
+ * stripped by `doReview`. It rides in this same map (rather than its own
+ * type) purely so it gets created by `--setup` and typechecks through
+ * `setState`/`addLabels` like everything else.
+ */
 export const LABELS = {
   queued: 'agent:queued',
   planning: 'agent:planning',
@@ -18,6 +25,7 @@ export const LABELS = {
   implementing: 'agent:implementing',
   done: 'agent:done',
   blocked: 'agent:blocked',
+  proceed: 'agent:proceed',
 } as const
 
 export type StateLabel = (typeof LABELS)[keyof typeof LABELS]
@@ -33,6 +41,10 @@ export const LABEL_META: Record<StateLabel, { color: string; description: string
   [LABELS.implementing]: { color: 'c2e0c6', description: 'Implementation agent is running (in flight)' },
   [LABELS.done]: { color: '5319e7', description: 'Pull request opened' },
   [LABELS.blocked]: { color: 'b60205', description: 'Needs a human — see the issue comments' },
+  [LABELS.proceed]: {
+    color: '0e8a16',
+    description: 'Apply to a needs-review issue to approve its plan and start implementation',
+  },
 }
 
 /**
@@ -46,7 +58,8 @@ export const IN_FLIGHT: Partial<Record<StateLabel, StateLabel>> = {
 
 /** Markers embedded in comments so the orchestrator can find its own output. */
 export const PLAN_MARKER = 'sandcastle:plan'
-export const APPROVE_MARKER = 'sandcastle:approve'
+/** Marks where the plan text ends and the human-instructions footer begins. */
+export const PLAN_FOOTER_MARKER = 'sandcastle:footer'
 
 /**
  * Stamped on every comment the orchestrator posts. The orchestrator writes as

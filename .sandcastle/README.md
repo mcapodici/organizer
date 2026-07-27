@@ -59,7 +59,7 @@ npm run agent -- --once --issue 42
 
 **3. Approve or steer.**
 
-- **Approve** — tick the `- [ ] Approve this plan` checkbox at the bottom of the plan comment. One click. The orchestrator notices on its next poll and mirrors an `agent:approved` label onto the issue so it's visible in issue lists.
+- **Approve** — add the `agent:proceed` label to the issue. The orchestrator notices on its next poll, swaps it for `agent:approved`, and starts implementation. Deliberately a label rather than a checkbox: GitHub lets anyone with mere read access toggle a checkbox in a comment, but only accounts with Triage role or above can add or remove a label — so the trust boundary is enforced by GitHub itself, not by application code.
 - **Steer** — just reply in a comment. Any comment you post after the newest plan triggers a revision, and a new plan comment appears (revisions are new comments, so the history stays readable). Repeat as many times as you like.
 
 Only comments from accounts with write access (`OWNER`, `MEMBER`, `COLLABORATOR`) can steer — a stranger commenting on this public repo is logged and ignored.
@@ -140,4 +140,4 @@ Runtime artefacts land in `worktrees/`, `logs/` and `patches/` here, all gitigno
 
 **Agents never get GitHub credentials.** Every `gh` call happens on the host in `github.ts`; issue text and plans reach the agent through sandcastle's `promptArgs`. This also closes an injection hole: sandcastle expands `` !`cmd` `` blocks in prompt *files* by running them, but it marks the file's own blocks before substitution and strips that marker from injected values — so `` !`rm -rf ~` `` in an issue body is inert. Keep untrusted text in `promptArgs`; never concatenate it into a prompt file.
 
-**Approval detection is anchored, not searched.** `isApproved()` only looks at the first checkbox after the `sandcastle:approve` marker, and every checkbox in agent-written text is flattened to a bullet before posting. Otherwise a plan that merely *discussed* checkboxes could read as an approval. There are tests for exactly this in `plan.test.ts`.
+**Every checkbox in agent-written text is flattened to a bullet before posting.** Approval no longer runs through the plan comment at all — it's the `agent:proceed` label — but a plan is still free-form LLM output, and a stray `- [ ] ...` in it would otherwise render as a second, meaningless clickable box. `deCheckbox()` neutralises those. There are tests for exactly this in `plan.test.ts`.

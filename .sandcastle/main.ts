@@ -35,7 +35,6 @@ import {
   runPlanner,
   latestPlanComment,
   revisionOf,
-  isApproved,
   planBodyForImplementer,
 } from './plan.ts'
 import { implementIssue } from './implement.ts'
@@ -95,9 +94,15 @@ async function doReview(issue: Issue): Promise<void> {
     return
   }
 
-  if (isApproved(plan.body)) {
-    log(`#${issue.number} approved (revision ${revisionOf(plan)})`)
-    await setState(issue.number, { add: [LABELS.approved], remove: [LABELS.needsReview] })
+  // Approval is a label, not a checkbox: only accounts with Triage+ access on
+  // the repo can add labels, whereas GitHub lets any read-access user toggle
+  // a checkbox in a comment. Applying `agent:proceed` is the trust boundary.
+  if (issue.labels.includes(LABELS.proceed)) {
+    log(`#${issue.number} approved via ${LABELS.proceed} (revision ${revisionOf(plan)})`)
+    await setState(issue.number, {
+      add: [LABELS.approved],
+      remove: [LABELS.needsReview, LABELS.proceed],
+    })
     return
   }
 
