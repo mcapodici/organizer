@@ -233,37 +233,23 @@
 }
 
 .emptyIcon {
-  color: var(--accent-300);
   line-height: 1;
 }
 
+/* Matches the 40px footprint of the lucide icon the logo replaced. */
+.emptyLogo {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+
+/* The bottom margin stands in for the supporting paragraph that used to sit
+   here: its ~17px line box plus one 12px .emptyInner gap. */
 .emptyHeading {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-secondary);
-  margin: 0;
-}
-
-.emptyText {
-  font-size: 0.9rem;
-  color: var(--text-subtle);
-  margin: 0;
-}
-
-/* Inline "sidebar" link in the empty state — opens the mobile drawer. */
-.sidebarLink {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-
-.sidebarLink:hover {
-  color: var(--accent-hover);
+  margin: 0 0 29px;
 }
 
 .recentList {

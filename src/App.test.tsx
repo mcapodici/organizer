@@ -26,6 +26,7 @@ const tl = (id: string, name: string): Timeline => ({
 
 beforeEach(async () => {
   h.adapter = new FakeAdapter();
+  localStorage.clear();
   // jsdom has no matchMedia; App reads it in a useState initializer.
   vi.stubGlobal('matchMedia', () => ({
     matches: true,
@@ -38,25 +39,48 @@ beforeEach(async () => {
   localStorage.setItem(WELCOME_KEY, '1');
 });
 
+// Resolves once the empty state has replaced App's initial "Loading…" paint,
+// and returns its heading — which doubles as the handle on the container the
+// scoped queries below need.
 async function renderHome() {
   render(
     <MemoryRouter initialEntries={['/']}>
       <App />
     </MemoryRouter>,
   );
-  await waitFor(() => expect(screen.getByText('No timeline selected')).toBeTruthy());
+  return await screen.findByRole('heading', { name: 'What to smash next?' });
 }
 
 describe('App home empty state', () => {
+  it('shows the new home heading', async () => {
+    await renderHome();
+    expect(screen.queryByText('No timeline selected')).toBeNull();
+  });
+
+  it('no longer shows the supporting paragraph', async () => {
+    await renderHome();
+    expect(screen.queryByText(/Pick one from the/)).toBeNull();
+  });
+
+  it('shows the official logo instead of a lucide icon', async () => {
+    const heading = await renderHome();
+    // Scope to the icon slot above the heading: the action buttons below it
+    // render lucide icons of their own, so the whole empty state is not a
+    // usable handle for "no <svg>".
+    const iconSlot = heading.parentElement!.firstElementChild!;
+    expect(iconSlot.querySelector('img')?.getAttribute('src')).toBe('/logo.svg');
+    expect(iconSlot.querySelector('svg')).toBeNull();
+  });
+
   it('shows a Todos button next to the New Timeline button', async () => {
     await renderHome();
     expect(screen.getByRole('button', { name: /view todos/i })).toBeTruthy();
   });
 
   it('places the Todos button after the New Timeline button', async () => {
-    await renderHome();
+    const heading = await renderHome();
     // Scope to the empty state — the sidebar renders its own New Timeline control.
-    const emptyInner = screen.getByText('No timeline selected').parentElement!;
+    const emptyInner = heading.parentElement!;
     const buttons = within(emptyInner).getAllByRole('button');
     const newTimeline = within(emptyInner).getByRole('button', { name: /new timeline/i });
     const viewTodos = within(emptyInner).getByRole('button', { name: /view todos/i });

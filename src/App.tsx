@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { CheckSquare, Settings as SettingsIcon, Menu, CircleDot, Plus, Filter, BookOpen } from 'lucide-react';
+import { CheckSquare, Settings as SettingsIcon, Menu, Plus, Filter, BookOpen } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { useTimelines } from './hooks/useTimelines';
@@ -305,19 +305,8 @@ export default function App() {
           ) : (
             <div className={styles.empty}>
               <div className={styles.emptyInner}>
-                <div className={styles.emptyIcon}><CircleDot size={40} /></div>
-                <h2 className={styles.emptyHeading}>No timeline selected</h2>
-                <p className={styles.emptyText}>
-                  Pick one from the{' '}
-                  {isDesktop ? (
-                    'sidebar'
-                  ) : (
-                    <button className={styles.sidebarLink} onClick={() => setDrawerOpen(true)}>
-                      sidebar
-                    </button>
-                  )}
-                  {timelines.length > 0 ? ', below,' : ''} or start fresh.
-                </p>
+                <div className={styles.emptyIcon}><img src="/logo.svg" alt="" className={styles.emptyLogo} /></div>
+                <h2 className={styles.emptyHeading}>What to smash next?</h2>
                 {timelines.length > 0 && (
                   <div className={styles.recentList}>
                     {timelines.slice(0, 5).map((t) => (
