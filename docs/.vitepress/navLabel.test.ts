@@ -17,6 +17,13 @@ describe('iconLabel', () => {
   it('carries no inline styles', () => {
     expect(iconLabel(octocatSvg, 'Source')).not.toContain('style=');
   });
+
+  // `.icon-label` sets its leading to the mark's height so the icon centres on
+  // the text rather than on a row the icon itself made taller. Resizing the
+  // mark here without following it there would put the octocat back off-centre.
+  it('renders the mark at the 16px the stylesheet assumes', () => {
+    expect(octocatSvg).toContain('width="16" height="16"');
+  });
 });
 
 describe('.icon-label in theme/custom.css', () => {
@@ -32,7 +39,10 @@ describe('.icon-label in theme/custom.css', () => {
     // plain-text nav items; centring it instead left "Source" ~1px low, which
     // read as "Open App" sitting slightly too high.
     expect(rule![1]).toContain('align-items: baseline');
-    expect(rule![1]).toContain('line-height: 1');
+    // Leading equal to the icon's own height, not `1`: at the nav's 14px the
+    // shorter text box let the icon centre on a row it had inflated itself,
+    // leaving the octocat 1.3px below the text's cap-height midpoint.
+    expect(rule![1]).toContain('line-height: 16px');
   });
 
   // The SVG must opt out of that baseline alignment, otherwise it hangs off the

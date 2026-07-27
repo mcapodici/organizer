@@ -162,13 +162,19 @@
  * rather than hanging off the text baseline, and so it no longer supplies the
  * synthesised baseline the bug came from.
  *
- * `line-height: 1` keeps the group at icon height so it never grows the 24px
- * line box in the mobile nav screen. */
+ * `line-height` is the 16px icon height rather than `1` so that "centred on
+ * the row" means "centred on the text". With `line-height: 1` the 14px nav
+ * label was shorter than the icon, so the icon centred on a row its own height
+ * had set and sat 1.3px below the text's cap-height midpoint — visibly low.
+ * Matching the leading to the mark pins the text box and the icon box to the
+ * same 16px, and since the group is positioned by the text's baseline it is
+ * the icon that moves up, not the label. It also keeps the group at icon
+ * height so it never grows the 24px line box in the mobile nav screen. */
 .icon-label {
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
-  line-height: 1;
+  line-height: 16px;
 }
 
 .icon-label > svg {

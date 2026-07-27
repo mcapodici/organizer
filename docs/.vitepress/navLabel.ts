@@ -13,7 +13,8 @@ export const octocatSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
 // with no extra rules takes its baseline from the SVG's bottom border edge
 // rather than from the text, which lifts the whole group ~3px above its
 // neighbours — that was issue #9. The stylesheet baseline-aligns the label text
-// so the group shares its neighbours' baseline exactly.
+// so the group shares its neighbours' baseline exactly, and matches the label's
+// leading to the 16px mark below so the icon centres on the text.
 export function iconLabel(icon: string, text: string): string {
   return `<span class="icon-label">${icon} ${text}</span>`;
 }
