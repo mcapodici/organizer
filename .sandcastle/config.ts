@@ -23,6 +23,8 @@ export const LABELS = {
   needsReview: 'agent:needs-review',
   approved: 'agent:approved',
   implementing: 'agent:implementing',
+  prOpen: 'agent:pr-open',
+  prUpdating: 'agent:pr-updating',
   done: 'agent:done',
   blocked: 'agent:blocked',
   proceed: 'agent:proceed',
@@ -39,7 +41,15 @@ export const LABEL_META: Record<StateLabel, { color: string; description: string
   [LABELS.needsReview]: { color: 'fbca04', description: 'Plan posted — awaiting human approval' },
   [LABELS.approved]: { color: '0e8a16', description: 'Plan approved — implementation queued' },
   [LABELS.implementing]: { color: 'c2e0c6', description: 'Implementation agent is running (in flight)' },
-  [LABELS.done]: { color: '5319e7', description: 'Pull request opened' },
+  [LABELS.prOpen]: {
+    color: '5319e7',
+    description: 'Pull request open — watching for follow-up comments from the allowed author',
+  },
+  [LABELS.prUpdating]: {
+    color: 'c2e0c6',
+    description: 'Pushing a revision to the open pull request (in flight)',
+  },
+  [LABELS.done]: { color: '0e8a16', description: 'Pull request merged or closed' },
   [LABELS.blocked]: { color: 'b60205', description: 'Needs a human — see the issue comments' },
   [LABELS.proceed]: {
     color: '0e8a16',
@@ -54,12 +64,15 @@ export const LABEL_META: Record<StateLabel, { color: string; description: string
 export const IN_FLIGHT: Partial<Record<StateLabel, StateLabel>> = {
   [LABELS.planning]: LABELS.queued,
   [LABELS.implementing]: LABELS.approved,
+  [LABELS.prUpdating]: LABELS.prOpen,
 }
 
 /** Markers embedded in comments so the orchestrator can find its own output. */
 export const PLAN_MARKER = 'sandcastle:plan'
 /** Marks where the plan text ends and the human-instructions footer begins. */
 export const PLAN_FOOTER_MARKER = 'sandcastle:footer'
+/** Marks the orchestrator's acknowledgement comment on a PR, once feedback is pushed. */
+export const PR_ACK_MARKER = 'sandcastle:pr-ack'
 
 /**
  * Stamped on every comment the orchestrator posts. The orchestrator writes as
@@ -81,6 +94,10 @@ export const REPO_DIR = process.env.AGENT_REPO_DIR ?? process.cwd()
  * This is the second lock: the issue must also have been opened by you.
  *
  * Set AGENT_ISSUE_AUTHORS to a comma-separated list to widen it.
+ *
+ * Also gates who can steer an open pull request with follow-up comments
+ * (`doWatchPr` in main.ts) — deliberately the same allowlist, not the wider
+ * OWNER/MEMBER/COLLABORATOR check used for plan-steering comments.
  */
 export const ISSUE_AUTHORS: string[] | undefined = process.env.AGENT_ISSUE_AUTHORS?.split(',')
   .map((s) => s.trim().toLowerCase())

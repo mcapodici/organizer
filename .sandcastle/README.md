@@ -5,9 +5,11 @@ Turns GitHub issues into pull requests, with **you approving the plan before any
 ```
 you label an issue          agent:queued
   → agent drafts a plan     agent:planning     → posts a plan comment
-  → you review it           agent:needs-review → tick the box, or reply with feedback
+  → you review it           agent:needs-review → agent:proceed label, or reply with feedback
   → agent implements        agent:approved / agent:implementing
-  → PR opened               agent:done
+  → PR opened, watching     agent:pr-open      → comment to steer it further
+    (revising)               agent:pr-updating
+  → PR merged or closed     agent:done
                             agent:blocked      ← anything went wrong
 ```
 
@@ -21,7 +23,7 @@ You need `gh` authenticated (`gh auth status`), Node 24, and a Claude login. Eve
 
 ```bash
 npm install
-npm run agent:setup      # creates the seven agent:* labels on the repo
+npm run agent:setup      # creates the agent:* labels on the repo
 ```
 
 That's it for the default (host) sandbox — it reuses your existing Claude login. See [Docker](#switching-to-docker) if you want isolation.
@@ -64,11 +66,17 @@ npm run agent -- --once --issue 42
 
 Only comments from accounts with write access (`OWNER`, `MEMBER`, `COLLABORATOR`) can steer — a stranger commenting on this public repo is logged and ignored.
 
-**4. Implementation.** On approval the agent gets a fresh worktree branched from the latest `origin/main`, implements the approved plan, and must get `npm run check` green. If it fails, it gets up to two fix rounds. Only then does the branch get pushed and a PR opened against `main` with `Closes #<n>`.
+**4. Implementation.** On approval the agent gets a fresh worktree branched from the latest `origin/main`, implements the approved plan, and must get `npm run check` green. If it fails, it gets up to two fix rounds. Only then does the branch get pushed and a PR opened against `main` with `Closes #<n>`, and the issue moves to `agent:pr-open`.
 
 If it can't get green, the issue goes to `agent:blocked` with the failure output in a comment and **no PR is opened**.
 
-**5. Review and deploy.** Normal PR review. Deployment is deliberately not automated — run `npm run deploy:preview` yourself when you want to look at it.
+**5. Steer the PR.** While an issue sits in `agent:pr-open`, every poll checks the pull request for new comments from an allowed author — both general conversation comments and inline comments on specific lines of the diff. Fresh ones (posted after the pipeline's last reply) are bundled into feedback, the issue moves to `agent:pr-updating`, and the agent pushes a further commit addressing it, re-running the same `npm run check` gate first. It then posts one comment on the PR acknowledging what it addressed and goes back to `agent:pr-open` for the next round.
+
+Only comments from an allowed author (the same allowlist from step 1, not the wider `OWNER`/`MEMBER`/`COLLABORATOR` check plan-steering uses) are picked up; anyone else's comment on this public repo is logged and ignored. If a revision can't get the gate green, the issue goes to `agent:blocked` just like a failed initial implementation.
+
+Once the PR is merged or closed, the next poll notices and moves the issue to `agent:done` — no more watching.
+
+**6. Review and deploy.** Normal PR review. Deployment is deliberately not automated — run `npm run deploy:preview` yourself when you want to look at it.
 
 ## Recovering a blocked issue
 
@@ -76,7 +84,7 @@ Read the comment explaining what happened, then either take it over by hand, or 
 
 ## Crash recovery
 
-If the process dies mid-run, the issue is left in `agent:planning` or `agent:implementing`. On the next startup the orchestrator spots those, comments to say the run was interrupted, and resets the issue to its previous state so it gets retried. It never silently re-runs.
+If the process dies mid-run, the issue is left in `agent:planning`, `agent:implementing`, or `agent:pr-updating`. On the next startup the orchestrator spots those, comments to say the run was interrupted, and resets the issue to its previous state (`agent:queued`, `agent:approved`, or `agent:pr-open` respectively) so it gets retried. It never silently re-runs.
 
 ## Configuration
 
@@ -129,10 +137,11 @@ If you clean up the repo-wide lint later, move `npm run lint` into `GATE` in `im
 | `main.ts` | Poll loop, state machine, startup reconciliation, `--setup` |
 | `config.ts` | Labels, markers, env-var config, sandbox and agent selection |
 | `github.ts` | Every `gh` call. All GitHub I/O is host-side |
-| `plan.ts` | Planner/reviser runs, plan rendering, approval detection |
+| `plan.ts` | Planner/reviser runs, plan rendering |
 | `plan.test.ts` | Unit tests for the pure predicates (runs in `npm run check`) |
-| `implement.ts` | Implementation run, gate, fix rounds, push, PR |
-| `prompts/*.md` | The four agent prompts |
+| `implement.ts` | Implementation and revision runs, shared gate, fix rounds, push, PR |
+| `pr-review.ts` | Watches an open PR's comments, formats feedback, renders the ack |
+| `prompts/*.md` | The agent prompts |
 
 Runtime artefacts land in `worktrees/`, `logs/` and `patches/` here, all gitignored.
 

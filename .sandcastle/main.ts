@@ -18,17 +18,21 @@ import {
   POLL_SECONDS,
   REPO_DIR,
   BASE_BRANCH,
+  branchFor,
+  isAllowedAuthor,
   type StateLabel,
 } from './config.ts'
 import {
   listAgentIssues,
   listComments,
+  listReviewComments,
   addComment,
   setState,
   ensureLabels,
   isBotComment,
   isTrusted,
   allowedAuthors,
+  prStatus,
   type Issue,
 } from './github.ts'
 import {
@@ -37,7 +41,8 @@ import {
   revisionOf,
   planBodyForImplementer,
 } from './plan.ts'
-import { implementIssue } from './implement.ts'
+import { implementIssue, reviseImplementation } from './implement.ts'
+import { latestAckComment, formatFeedback, renderPrAck } from './pr-review.ts'
 
 const args = process.argv.slice(2)
 const flag = (name: string) => args.includes(`--${name}`)
@@ -163,8 +168,8 @@ async function doImplement(issue: Issue): Promise<void> {
         issue.number,
         `### ✅ Pull request opened\n\n${result.prUrl}\n\n\`npm run check\` passed on \`agent/issue-${issue.number}\` before it was opened.${lintNote}`,
       )
-      await setState(issue.number, { add: [LABELS.done], remove: [LABELS.implementing] })
-      log(`#${issue.number} → done: ${result.prUrl}`)
+      await setState(issue.number, { add: [LABELS.prOpen], remove: [LABELS.implementing] })
+      log(`#${issue.number} → pr-open: ${result.prUrl}`)
     } else {
       await block(issue, LABELS.implementing, result.failure ?? 'Implementation failed.')
     }
@@ -173,6 +178,73 @@ async function doImplement(issue: Issue): Promise<void> {
       issue,
       LABELS.implementing,
       `The implementation run failed:\n\n\`\`\`\n${errText(err)}\n\`\`\``,
+    )
+  }
+}
+
+async function doWatchPr(issue: Issue): Promise<void> {
+  const branch = branchFor(issue.number)
+  const pr = await prStatus(branch)
+
+  if (!pr) {
+    await block(issue, LABELS.prOpen, `No pull request was found for branch \`${branch}\`.`)
+    return
+  }
+
+  if (pr.state !== 'OPEN') {
+    log(`#${issue.number} PR #${pr.number} is ${pr.state.toLowerCase()} → done`)
+    await setState(issue.number, { add: [LABELS.done], remove: [LABELS.prOpen] })
+    return
+  }
+
+  const [general, review] = await Promise.all([
+    listComments(pr.number),
+    listReviewComments(pr.number),
+  ])
+  const since = latestAckComment(general)?.createdAt ?? pr.createdAt
+  const allowed = await allowedAuthors()
+
+  // Same allowlist that gates issue admission — deliberately narrower than
+  // the OWNER/MEMBER/COLLABORATOR check plan-steering comments use, since the
+  // user asked for this to track "the author configured," not any collaborator.
+  const isFresh = (c: { createdAt: string }) => new Date(c.createdAt) > new Date(since)
+  const freshGeneral = general.filter(
+    (c) => isFresh(c) && !isBotComment(c) && isAllowedAuthor(c.author, allowed),
+  )
+  const freshReview = review.filter((c) => isFresh(c) && isAllowedAuthor(c.author, allowed))
+
+  const ignored = [
+    ...general.filter((c) => isFresh(c) && !isBotComment(c) && !isAllowedAuthor(c.author, allowed)),
+    ...review.filter((c) => isFresh(c) && !isAllowedAuthor(c.author, allowed)),
+  ]
+  for (const c of ignored) {
+    log(`#${issue.number} ignoring PR comment from unapproved author @${c.author}`)
+  }
+
+  if (freshGeneral.length === 0 && freshReview.length === 0) return
+
+  const feedback = formatFeedback(freshGeneral, freshReview)
+  const count = freshGeneral.length + freshReview.length
+  log(`#${issue.number} revising PR #${pr.number} from ${count} comment(s)`)
+  await setState(issue.number, { add: [LABELS.prUpdating], remove: [LABELS.prOpen] })
+
+  const plan = latestPlanComment(await listComments(issue.number))
+  const approvedPlan = plan ? planBodyForImplementer(plan) : '(no plan comment found)'
+
+  try {
+    const result = await reviseImplementation(issue, approvedPlan, feedback)
+    if (result.ok) {
+      await addComment(pr.number, renderPrAck(feedback, result.lintNote))
+      await setState(issue.number, { add: [LABELS.prOpen], remove: [LABELS.prUpdating] })
+      log(`#${issue.number} → pr-open (pushed a revision to PR #${pr.number})`)
+    } else {
+      await block(issue, LABELS.prUpdating, result.failure ?? 'Revision failed.')
+    }
+  } catch (err) {
+    await block(
+      issue,
+      LABELS.prUpdating,
+      `The revision run failed:\n\n\`\`\`\n${errText(err)}\n\`\`\``,
     )
   }
 }
@@ -233,12 +305,18 @@ async function tick(): Promise<void> {
 
     // Terminal and in-flight states need no action.
     if (labels.has(LABELS.done) || labels.has(LABELS.blocked)) continue
-    if (labels.has(LABELS.planning) || labels.has(LABELS.implementing)) continue
+    if (
+      labels.has(LABELS.planning) ||
+      labels.has(LABELS.implementing) ||
+      labels.has(LABELS.prUpdating)
+    )
+      continue
 
     try {
       if (labels.has(LABELS.queued)) await doPlan(issue)
       else if (labels.has(LABELS.needsReview)) await doReview(issue)
       else if (labels.has(LABELS.approved)) await doImplement(issue)
+      else if (labels.has(LABELS.prOpen)) await doWatchPr(issue)
     } catch (err) {
       // A transition failed outside its own handler (e.g. the GitHub call that
       // sets the in-flight label). Leave the state alone and retry next pass.
