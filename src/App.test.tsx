@@ -57,6 +57,11 @@ describe('App home empty state', () => {
     expect(screen.queryByText('No timeline selected')).toBeNull();
   });
 
+  it('no longer shows the supporting paragraph', async () => {
+    await renderHome();
+    expect(screen.queryByText(/Pick one from the/)).toBeNull();
+  });
+
   it('shows the official logo instead of a lucide icon', async () => {
     const heading = await renderHome();
     // Scope to the icon slot above the heading: the action buttons below it

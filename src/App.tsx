@@ -307,17 +307,6 @@ export default function App() {
               <div className={styles.emptyInner}>
                 <div className={styles.emptyIcon}><img src="/logo.svg" alt="" className={styles.emptyLogo} /></div>
                 <h2 className={styles.emptyHeading}>What to smash next?</h2>
-                <p className={styles.emptyText}>
-                  Pick one from the{' '}
-                  {isDesktop ? (
-                    'sidebar'
-                  ) : (
-                    <button className={styles.sidebarLink} onClick={() => setDrawerOpen(true)}>
-                      sidebar
-                    </button>
-                  )}
-                  {timelines.length > 0 ? ', below,' : ''} or start fresh.
-                </p>
                 {timelines.length > 0 && (
                   <div className={styles.recentList}>
                     {timelines.slice(0, 5).map((t) => (
