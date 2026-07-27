@@ -43,7 +43,7 @@ urgency. Work them top-down and check them off as you go.
 ## 5. Run your week from the Todos page
 
 Open **Todos** to see every outstanding action from every project in one place.
-Start with **Overdue**, reschedule what needs to slip, and tick off what's done.
+Start with **Due Now**, reschedule what needs to slip, and tick off what's done.
 
 ## 6. Wrap up and archive
 
