@@ -137,6 +137,58 @@ export async function listComments(issue: number): Promise<Comment[]> {
     .map((line) => JSON.parse(line) as Comment)
 }
 
+/** A review comment left on a specific line of a pull request's diff. */
+export interface ReviewComment {
+  id: number
+  body: string
+  createdAt: string
+  author: string
+  authorAssociation: string
+  /** File the comment is anchored to. */
+  path: string
+  /** Line in the current diff, or null once the underlying line has been outdated by a later push. */
+  line: number | null
+}
+
+/** Inline, line-anchored comments on a pull request's diff — distinct from its general conversation. */
+export async function listReviewComments(pr: number): Promise<ReviewComment[]> {
+  const raw = await gh([
+    'api',
+    '--paginate',
+    `repos/{owner}/{repo}/pulls/${pr}/comments`,
+    '--jq',
+    '.[] | {id: .id, body: .body, createdAt: .created_at, author: .user.login, authorAssociation: .author_association, path: .path, line: (.line // .original_line)}',
+  ])
+  return raw
+    .split('\n')
+    .filter((line) => line.trim() !== '')
+    .map((line) => JSON.parse(line) as ReviewComment)
+}
+
+export interface PrStatus {
+  number: number
+  state: 'OPEN' | 'CLOSED' | 'MERGED'
+  createdAt: string
+}
+
+/** Status of the pull request opened from `branch`, however it was left (open, merged, or closed). */
+export async function prStatus(branch: string): Promise<PrStatus | undefined> {
+  const raw = await gh([
+    'pr',
+    'list',
+    '--head',
+    branch,
+    '--state',
+    'all',
+    '--json',
+    'number,state,createdAt',
+    '--limit',
+    '1',
+  ])
+  const [pr] = JSON.parse(raw) as PrStatus[]
+  return pr
+}
+
 /**
  * Post a comment as the orchestrator. Always stamped with the bot marker so
  * steering detection can tell the pipeline's own output from a human reply.

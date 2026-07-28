@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import {
   deCheckbox,
   renderPlan,
-  isApproved,
   latestPlanComment,
   revisionOf,
   planBodyForImplementer,
@@ -81,25 +80,22 @@ describe('deCheckbox', () => {
 })
 
 describe('renderPlan', () => {
-  it('emits exactly one interactive checkbox — the approval box', () => {
+  it('tells the reviewer to apply the proceed label, with no checkbox', () => {
     const body = renderPlan(42, 1, plan)
-    expect(body.match(/^\s*[-*]\s+\[[ xX]\]/gm)).toHaveLength(1)
-    expect(body).toContain('Approve this plan')
-  })
-
-  it('renders unticked, so a fresh plan is never already approved', () => {
-    expect(isApproved(renderPlan(42, 1, plan))).toBe(false)
+    expect(body.match(/^\s*[-*]\s+\[[ xX]\]/gm)).toBeNull()
+    expect(body).toContain('agent:proceed')
   })
 
   it('neutralises checkboxes coming from the agent', () => {
-    // A plan about checkbox UI must not smuggle in a second clickable box.
+    // A plan about checkbox UI must not smuggle in a clickable box — approval
+    // is a label now, so agent-written text must never render as one either.
     const sneaky: Plan = {
       ...plan,
       summary: 'Render todos as:\n- [x] done\n- [ ] pending',
       steps: ['- [x] step one'],
     }
     const body = renderPlan(42, 1, sneaky)
-    expect(body.match(/^\s*[-*]\s+\[[ xX]\]/gm)).toHaveLength(1)
+    expect(body.match(/^\s*[-*]\s+\[[ xX]\]/gm)).toBeNull()
   })
 
   it('records the issue number and revision for later lookup', () => {
@@ -117,29 +113,6 @@ describe('renderPlan', () => {
   it('says so explicitly when nothing was ambiguous', () => {
     const body = renderPlan(42, 1, { ...plan, openQuestions: [] })
     expect(body).toContain('None — the issue was unambiguous.')
-  })
-})
-
-describe('isApproved', () => {
-  it('is true only once the approval box is ticked', () => {
-    const body = renderPlan(42, 1, plan)
-    expect(isApproved(body)).toBe(false)
-    expect(isApproved(body.replace('- [ ] **Approve', '- [x] **Approve'))).toBe(true)
-    expect(isApproved(body.replace('- [ ] **Approve', '- [X] **Approve'))).toBe(true)
-  })
-
-  it('ignores ticked boxes that appear before the approve marker', () => {
-    // The whole point of anchoring to the marker: plan content above it must
-    // never be able to read as an approval.
-    const body = renderPlan(42, 1, plan).replace(
-      '### Plan for',
-      '- [x] some earlier ticked box\n\n### Plan for',
-    )
-    expect(isApproved(body)).toBe(false)
-  })
-
-  it('is false for a comment with no approve marker at all', () => {
-    expect(isApproved('- [x] ticked, but not a plan comment')).toBe(false)
   })
 })
 
@@ -162,11 +135,11 @@ describe('latestPlanComment', () => {
 })
 
 describe('planBodyForImplementer', () => {
-  it('keeps the plan and drops the approval widget', () => {
+  it('keeps the plan and drops the human-instructions footer', () => {
     const body = planBodyForImplementer(comment({ body: renderPlan(42, 1, plan) }))
     expect(body).toContain('### Plan for #42')
     expect(body).toContain('Add the script')
-    expect(body).not.toContain('Approve this plan')
-    expect(body).not.toContain('sandcastle:approve')
+    expect(body).not.toContain('agent:proceed')
+    expect(body).not.toContain('sandcastle:footer')
   })
 })
