@@ -18,6 +18,12 @@ supported agent harness is [Atomic](https://github.com/bastani/atomic).
 
 2. Make changes in the worktree directory, commit, push.
 
+3. **Always open a pull request.** Martin reviews code on GitHub as a PR — not
+   as a terminal diff, and not as a summary in chat. Finish every piece of work
+   with `gh pr create` and hand back the URL. This applies to chores and
+   one-line fixes as much as to features; do not ask whether a change is small
+   enough to skip the PR.
+
 ### Delegated and parallel work
 
 If you split work across subagents or workflow stages, create (or reuse) **one
@@ -36,7 +42,9 @@ Project skills live in `.atomic/skills/`. Currently:
 
 ### Before completing any task
 
-3. **Run all checks** before finishing — lint, tests, TypeScript, docs build, and app build:
+Run the checks **before** opening the PR, so review never lands on a red branch:
+
+4. **Run all checks** — lint, tests, TypeScript, docs build, and app build:
    ```bash
    npm run check
    ```
@@ -44,7 +52,7 @@ Project skills live in `.atomic/skills/`. Currently:
 
 ### When ready for human review (preview)
 
-4. **Deploy a preview** so the human can test the changes live:
+5. **Deploy a preview** so the human can test the changes live:
    ```bash
    npm run deploy:preview
    ```
@@ -52,7 +60,7 @@ Project skills live in `.atomic/skills/`. Currently:
 
 ### Production deployment
 
-5. **Deploy to production** when the feature is approved:
+6. **Deploy to production** when the feature is approved:
    ```bash
    bash scripts/deploy.sh
    ```
