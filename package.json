@@ -19,9 +19,7 @@
     "docs:preview": "vitepress preview docs",
     "docs:shots": "node scripts/seed-and-shoot.mjs",
     "docs:video": "node scripts/record-demo.mjs",
-    "deploy:preview": "bash scripts/deploy-preview.sh",
-    "agent": "tsx .sandcastle/main.ts",
-    "agent:setup": "tsx .sandcastle/main.ts --setup"
+    "deploy:preview": "bash scripts/deploy-preview.sh"
   },
   "dependencies": {
     "@tiptap/extension-code": "^3.22.5",
@@ -47,7 +45,6 @@
     "vite-plugin-pwa": "^1.3.0"
   },
   "devDependencies": {
-    "@ai-hero/sandcastle": "^0.12.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
     "@testing-library/dom": "^10.4.1",

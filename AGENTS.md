@@ -1,6 +1,7 @@
 # Agent Instructions for Organizer
 
-This file provides conventions for AI agents (Hermes, Claude Code, etc.) working on this repo.
+This file provides conventions for AI agents working on this repo. The only
+supported agent harness is [Atomic](https://github.com/bastani/atomic).
 
 ## Workflow
 
@@ -17,19 +18,21 @@ This file provides conventions for AI agents (Hermes, Claude Code, etc.) working
 
 2. Make changes in the worktree directory, commit, push.
 
-### Automated task-list runs (`markdown-tasks:do-one-task` / `markdown-tasks:do-all-tasks`)
+### Delegated and parallel work
 
-The `do-task` agent's own completion step normally runs `/orchestration:finish` to handle worktrees, commits, and rebasing — but that command isn't installed in this environment, so `do-task` silently falls back to committing directly on `main` if not told otherwise. This violates rule 1 above. To avoid that:
+If you split work across subagents or workflow stages, create (or reuse) **one
+shared worktree for the whole run** — not one per task — and tell every child to
+`cd` into it. All tasks in a run land as separate commits on the same branch,
+ready for a single push/PR/preview at the end.
 
-- Before dispatching any `do-task` agent, the orchestrating agent must first create (or reuse) **one shared worktree for the whole run** — same command as rule 1 — not a separate worktree per task.
-- Each `do-task` agent must be explicitly told to `cd` into that worktree directory and do all its work there.
-- All tasks processed in one run land as separate commits on that same branch, ready for one push/PR/preview at the end.
+Never let a delegated agent commit to `main`.
 
-### Issue-driven runs (the `.sandcastle/` pipeline)
+### Skills
 
-Work can also arrive as a GitHub issue labelled `agent:queued`, handled by the local orchestrator in `.sandcastle/` (see `.sandcastle/README.md`). That pipeline plans first, waits for a human to tick an approval checkbox on the plan comment, and only then implements — on a worktree branched from the latest `origin/main`, gated on `npm run check`.
+Project skills live in `.atomic/skills/`. Currently:
 
-If you are an agent invoked *by* that pipeline, your prompt already tells you what to do; follow it rather than this section.
+- **`doc-check`** — detects when `docs/` has drifted out of date relative to
+  `src/` changes and proposes a plan. It never edits files itself.
 
 ### Before completing any task
 
