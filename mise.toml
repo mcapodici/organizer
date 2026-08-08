@@ -1,0 +1,7 @@
+[tools]
+node = "26"
+
+# The test suite runs clean on 22, 24 and 26. Node 26 exposes a built-in
+# `localStorage` global that shadows jsdom's and reads back as `undefined`;
+# src/test-setup.ts shims around it. Read the comment there before touching
+# the test environment.

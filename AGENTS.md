@@ -60,8 +60,31 @@ Project skills live in `.atomic/skills/`. Currently:
 
 ## Project conventions
 
+- **Node version**: `mise.toml` selects **26**. The suite is verified on 22, 24
+  and 26, so `engines.node` is `>=22` and Vercel may pick any of them. Use
+  `mise x -- npm …` if your shell resolves something else.
 - **UI standards**: see `UI_STANDARDS.md` for design tokens, component conventions, and accessibility rules.
 - **Review process**: see `CHANGES_REVIEW.md` for the change-log and review expectations.
 - **Tests**: Vitest + Testing Library + `fake-indexeddb`. Run `npm test` before declaring anything done.
 - **Build**: `npm run build` (runs tests → tsc → VitePress docs → Vite app).
-- **Lint**: `npm run lint` (ESLint). Note that repo-wide lint is **currently red on `main`** (~21 pre-existing errors, mostly `src/hooks/useTodoCounts.ts` and `vite.config.ts`). Don't take fixing those on as a side quest — just keep the files *you* touch clean: `npx eslint <your changed files>`.
+- **Lint**: `npm run lint` (ESLint). Currently clean.
+
+## The localStorage trap
+
+Node 26 exposes the built-in Web Storage API as a global, so `localStorage` is
+an own property of `globalThis` before jsdom ever loads — and it reads back as
+`undefined` unless the process was started with `--localstorage-file`. (Node
+22.23.2 and 24.19.0 are unaffected; 26.7.0 is affected.)
+
+Vitest builds its jsdom global via `populateGlobal`, which skips any key already
+present on the global object unless that key is in its own allow-list. That
+allow-list does not include `localStorage`, so Node's inert version wins and
+jsdom's real `Storage` is never installed. `window.localStorage` is undefined
+too, because Vitest sets `global.window = global`.
+
+The symptom is `TypeError: Cannot read properties of undefined (reading 'clear')`
+in `src/App.test.tsx`, and it looks nothing like a Node upgrade.
+
+`src/test-setup.ts` installs an in-memory `Storage` when the global is missing
+or inert, and no-ops where jsdom's own survives. `src/test-setup.test.ts` guards
+it. If you change the test environment, keep both.
