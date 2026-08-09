@@ -24,6 +24,23 @@ supported agent harness is [Atomic](https://github.com/bastani/atomic).
    one-line fixes as much as to features; do not ask whether a change is small
    enough to skip the PR.
 
+### After the PR is merged
+
+Once a PR is merged, its worktree has served its purpose — delete it without
+asking:
+
+```bash
+git worktree remove .worktrees/my-feature
+git branch -d my-feature            # already merged, so -d is safe
+```
+
+Use `git worktree remove` rather than `rm -rf`, so git's administrative record
+is cleaned up too; run `git worktree prune` if a directory was removed by hand.
+
+Only do this once the merge is confirmed. `git worktree remove` refuses to run
+while there are uncommitted changes, which is the safety net — do not force past
+it, since anything it is protecting was never pushed and exists nowhere else.
+
 ### Delegated and parallel work
 
 If you split work across subagents or workflow stages, create (or reuse) **one
