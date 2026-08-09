@@ -1,6 +1,7 @@
 # Agent Instructions for Organizer
 
-This file provides conventions for AI agents (Hermes, Claude Code, etc.) working on this repo.
+This file provides conventions for AI agents working on this repo. The only
+supported agent harness is [Atomic](https://github.com/bastani/atomic).
 
 ## Workflow
 
@@ -17,23 +18,33 @@ This file provides conventions for AI agents (Hermes, Claude Code, etc.) working
 
 2. Make changes in the worktree directory, commit, push.
 
-### Automated task-list runs (`markdown-tasks:do-one-task` / `markdown-tasks:do-all-tasks`)
+3. **Always open a pull request.** Martin reviews code on GitHub as a PR — not
+   as a terminal diff, and not as a summary in chat. Finish every piece of work
+   with `gh pr create` and hand back the URL. This applies to chores and
+   one-line fixes as much as to features; do not ask whether a change is small
+   enough to skip the PR.
 
-The `do-task` agent's own completion step normally runs `/orchestration:finish` to handle worktrees, commits, and rebasing — but that command isn't installed in this environment, so `do-task` silently falls back to committing directly on `main` if not told otherwise. This violates rule 1 above. To avoid that:
+### Delegated and parallel work
 
-- Before dispatching any `do-task` agent, the orchestrating agent must first create (or reuse) **one shared worktree for the whole run** — same command as rule 1 — not a separate worktree per task.
-- Each `do-task` agent must be explicitly told to `cd` into that worktree directory and do all its work there.
-- All tasks processed in one run land as separate commits on that same branch, ready for one push/PR/preview at the end.
+If you split work across subagents or workflow stages, create (or reuse) **one
+shared worktree for the whole run** — not one per task — and tell every child to
+`cd` into it. All tasks in a run land as separate commits on the same branch,
+ready for a single push/PR/preview at the end.
 
-### Issue-driven runs (the `.sandcastle/` pipeline)
+Never let a delegated agent commit to `main`.
 
-Work can also arrive as a GitHub issue labelled `agent:queued`, handled by the local orchestrator in `.sandcastle/` (see `.sandcastle/README.md`). That pipeline plans first, waits for a human to tick an approval checkbox on the plan comment, and only then implements — on a worktree branched from the latest `origin/main`, gated on `npm run check`.
+### Skills
 
-If you are an agent invoked *by* that pipeline, your prompt already tells you what to do; follow it rather than this section.
+Project skills live in `.atomic/skills/`. Currently:
+
+- **`doc-check`** — detects when `docs/` has drifted out of date relative to
+  `src/` changes and proposes a plan. It never edits files itself.
 
 ### Before completing any task
 
-3. **Run all checks** before finishing — lint, tests, TypeScript, docs build, and app build:
+Run the checks **before** opening the PR, so review never lands on a red branch:
+
+4. **Run all checks** — lint, tests, TypeScript, docs build, and app build:
    ```bash
    npm run check
    ```
@@ -41,7 +52,7 @@ If you are an agent invoked *by* that pipeline, your prompt already tells you wh
 
 ### When ready for human review (preview)
 
-4. **Deploy a preview** so the human can test the changes live:
+5. **Deploy a preview** so the human can test the changes live:
    ```bash
    npm run deploy:preview
    ```
@@ -49,7 +60,7 @@ If you are an agent invoked *by* that pipeline, your prompt already tells you wh
 
 ### Production deployment
 
-5. **Deploy to production** when the feature is approved:
+6. **Deploy to production** when the feature is approved:
    ```bash
    bash scripts/deploy.sh
    ```
@@ -57,8 +68,31 @@ If you are an agent invoked *by* that pipeline, your prompt already tells you wh
 
 ## Project conventions
 
+- **Node version**: `mise.toml` selects **26**. The suite is verified on 22, 24
+  and 26, so `engines.node` is `>=22` and Vercel may pick any of them. Use
+  `mise x -- npm …` if your shell resolves something else.
 - **UI standards**: see `UI_STANDARDS.md` for design tokens, component conventions, and accessibility rules.
 - **Review process**: see `CHANGES_REVIEW.md` for the change-log and review expectations.
 - **Tests**: Vitest + Testing Library + `fake-indexeddb`. Run `npm test` before declaring anything done.
 - **Build**: `npm run build` (runs tests → tsc → VitePress docs → Vite app).
-- **Lint**: `npm run lint` (ESLint). Note that repo-wide lint is **currently red on `main`** (~21 pre-existing errors, mostly `src/hooks/useTodoCounts.ts` and `vite.config.ts`). Don't take fixing those on as a side quest — just keep the files *you* touch clean: `npx eslint <your changed files>`.
+- **Lint**: `npm run lint` (ESLint). Currently clean.
+
+## The localStorage trap
+
+Node 26 exposes the built-in Web Storage API as a global, so `localStorage` is
+an own property of `globalThis` before jsdom ever loads — and it reads back as
+`undefined` unless the process was started with `--localstorage-file`. (Node
+22.23.2 and 24.19.0 are unaffected; 26.7.0 is affected.)
+
+Vitest builds its jsdom global via `populateGlobal`, which skips any key already
+present on the global object unless that key is in its own allow-list. That
+allow-list does not include `localStorage`, so Node's inert version wins and
+jsdom's real `Storage` is never installed. `window.localStorage` is undefined
+too, because Vitest sets `global.window = global`.
+
+The symptom is `TypeError: Cannot read properties of undefined (reading 'clear')`
+in `src/App.test.tsx`, and it looks nothing like a Node upgrade.
+
+`src/test-setup.ts` installs an in-memory `Storage` when the global is missing
+or inert, and no-ops where jsdom's own survives. `src/test-setup.test.ts` guards
+it. If you change the test environment, keep both.

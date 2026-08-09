@@ -38,7 +38,4 @@ docs/.vitepress/cache
 .demo-profile/
 .demo-frames/
 
-.hermes/
 .worktrees/
-.backlog/
-.llm/
