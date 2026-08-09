@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig, configDefaults } from 'vitest/config';
 import type { Connect, Plugin, PreviewServer, ViteDevServer } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -136,5 +136,7 @@ export default defineConfig({
     // (a fresh OS process + module resolution per worker) times out on
     // startup. `threads` share one process/module cache, avoiding that cost.
     pool: 'threads',
+    // Playwright specs live in e2e/ and must never run under Vitest.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
   },
 });

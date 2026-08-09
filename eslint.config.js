@@ -42,4 +42,14 @@ export default defineConfig([
       globals: { ...globals.node, ...globals.browser },
     },
   },
+  {
+    // Playwright E2E suite. Node code (the test runner, playwright.config.ts)
+    // interleaved with page.evaluate / page.addInitScript callbacks that run
+    // in the browser, so both global sets are needed.
+    files: ['e2e/**/*.ts', 'playwright.config.ts'],
+    extends: [js.configs.recommended, tseslint.configs.recommended],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
+    },
+  },
 ])

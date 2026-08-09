@@ -61,11 +61,11 @@ Project skills live in `.atomic/skills/`. Currently:
 
 Run the checks **before** opening the PR, so review never lands on a red branch:
 
-4. **Run all checks** — lint, tests, TypeScript, docs build, and app build:
+4. **Run all checks** — lint, tests, TypeScript, docs build, app build, and E2E:
    ```bash
    npm run check
    ```
-   This runs `scripts/check.sh` (lint → tests → TypeScript → VitePress docs build → Vite app build). Everything must pass.
+   This runs `scripts/check.sh` (lint → tests → TypeScript → VitePress docs build → Vite app build → Playwright E2E). Everything must pass.
 
 ### When ready for human review (preview)
 
@@ -91,6 +91,10 @@ Run the checks **before** opening the PR, so review never lands on a red branch:
 - **UI standards**: see `UI_STANDARDS.md` for design tokens, component conventions, and accessibility rules.
 - **Review process**: see `CHANGES_REVIEW.md` for the change-log and review expectations.
 - **Tests**: Vitest + Testing Library + `fake-indexeddb`. Run `npm test` before declaring anything done.
+- **E2E tests**: Playwright, Chromium only. Specs live in `e2e/*.spec.ts`; run
+  them with `npm run test:e2e`. Playwright starts the Vite dev server on port
+  5174 itself (and reuses one that is already running). On a fresh machine run
+  `npx playwright install chromium` once first. Vitest ignores `e2e/`.
 - **Build**: `npm run build` (runs tests → tsc → VitePress docs → Vite app).
 - **Lint**: `npm run lint` (ESLint). Currently clean.
 

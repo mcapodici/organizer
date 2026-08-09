@@ -55,6 +55,7 @@ Vite will print the local URLs for each. If you only want the app, run
 | `npm run docs:dev` | Docs dev server only (VitePress) |
 | `npm test` | Run the test suite once (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |
+| `npm run test:e2e` | Run browser E2E tests (Playwright, Chromium) |
 | `npm run lint` | Lint with ESLint |
 | `npm run build` | Full production build: tests → `tsc -b` → build docs → build app |
 | `npm run preview` | Preview the built app locally |
@@ -129,6 +130,10 @@ opportunistically.
 - IndexedDB is faked with **`fake-indexeddb`** so storage code is testable
   without a browser.
 - Run `npm test` (one-off) or `npm run test:watch` while developing.
+- Browser end-to-end tests run on **Playwright** (Chromium only) from
+  `e2e/*.spec.ts` — `npm run test:e2e`. Playwright starts the Vite dev server
+  on port 5174 itself. First time on a machine: `npx playwright install
+  chromium`.
 - The storage/merge layer is the most safety-critical area — keep its coverage
   intact when changing it.
 

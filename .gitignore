@@ -39,3 +39,10 @@ docs/.vitepress/cache
 .demo-frames/
 
 .worktrees/
+
+# Playwright E2E artifacts
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+.atomic/

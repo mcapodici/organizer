@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ── Checks for Organizer ───────────────────────────────────────────────
 # Runs all local checks before deploying or completing a task:
-#   lint, tests, TypeScript, VitePress docs build, Vite app build.
+#   lint, tests, TypeScript, VitePress docs build, Vite app build, E2E tests.
 # Exits non-zero on first failure.
 #
 # Usage:  bash scripts/check.sh
@@ -29,3 +29,7 @@ npx vitepress build docs
 echo ""
 echo "=== 5. Building Vite app ==="
 npx vite build
+
+echo ""
+echo "=== 6. End-to-end tests (Playwright) ==="
+npm run test:e2e
