@@ -87,7 +87,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[Medium] Image lightbox: closable by keyboard** — overlay closes on
       click only (no Escape/dialog role). Route through the shared `Modal`.
       `src/components/EntryCard/EntryCard.tsx:144`
-- [ ] **[Low] Standardize UI glyphs to lucide icons** — ✕/×/✎/+ text glyphs used
+- [x] **[Low] Standardize UI glyphs to lucide icons** — ✕/×/✎/+ text glyphs used
       as chrome (UI_STANDARDS #5). Use lucide `X`.
 - [ ] **[Low] Toast: use design tokens** — hard-codes hex instead of the
       `index.css` tokens (UI_STANDARDS #1). `src/components/Toast/Toast.tsx:36-52`

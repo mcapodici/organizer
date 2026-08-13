@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Pencil, Plus } from 'lucide-react';
 import type { Timeline, Entry } from '../../types';
 import { useStorage } from '../../context/StorageContext';
 import { EntryCard } from '../EntryCard/EntryCard';
@@ -141,7 +142,7 @@ export function TimelineView({
                 aria-label="Rename timeline"
                 onClick={() => { setNameInput(timeline.name); setEditingName(true); }}
               >
-                ✎ Rename
+                <Pencil size={14} /> Rename
               </button>
             </>
           )}
@@ -151,7 +152,9 @@ export function TimelineView({
             <span key={tag} className={styles.tagChip}>{tag}</span>
           ))}
           <button className={styles.editTagsBtn} onClick={() => setEditingTags(true)}>
-            {timeline.tags.length === 0 ? '+ Add tags' : '✎ Edit tags'}
+            {timeline.tags.length === 0
+              ? <><Plus size={14} /> Add tags</>
+              : <><Pencil size={14} /> Edit tags</>}
           </button>
         </div>
       </div>

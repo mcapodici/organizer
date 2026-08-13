@@ -1,3 +1,5 @@
+import { X } from 'lucide-react';
+
 export interface ToastItem {
   id: number;
   imported: number;
@@ -48,10 +50,10 @@ export function ToastStack({ toasts, onDismiss }: { toasts: ToastItem[]; onDismi
               aria-label="Dismiss"
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: '#9ca3af', fontSize: '1.05rem', lineHeight: 1, padding: '0 2px',
+                color: '#9ca3af', display: 'flex', alignItems: 'center', padding: '0 2px',
               }}
             >
-              ×
+              <X size={16} />
             </button>
           </div>
         );
