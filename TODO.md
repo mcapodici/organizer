@@ -72,7 +72,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[Medium] Overdue badge not distinguished by color alone** — add an
       `aria-label` (e.g. "3 todos, 2 overdue") + a non-color glyph (WCAG 1.4.1).
       `src/components/TimelineList/TimelineList.tsx:116`
-- [ ] **[Low] Composer date/time inputs: add aria-labels** — inputs lack a
+- [x] **[Low] Composer date/time inputs: add aria-labels** — inputs lack a
       programmatic name; due-date block has one ambiguous label.
       `src/components/EntryComposer/EntryComposer.tsx:261-315`
 - [ ] **[Low] Attachment thumbnail: real button + real alt** — clickable `<img>`

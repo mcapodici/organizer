@@ -264,6 +264,7 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
                 value={timestamp}
                 onChange={(e) => setTimestamp(e.target.value)}
                 className={styles.dateInput}
+                aria-label="Custom time"
               />
               {!editing && (
                 <button
@@ -294,6 +295,7 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
                 className={styles.dateInput}
+                aria-label="Due date"
               />
               <label className={styles.doneLabel}>
                 <input
