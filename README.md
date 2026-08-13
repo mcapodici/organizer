@@ -4,7 +4,8 @@ A local-first app for keeping chronological logs of anything — client
 follow-ups, project progress, journals, research notes. Instead of files and
 folders, you work with **timelines**: named logs you add timestamped rich-text
 **entries** to over time. There's no account and no server; data lives in the
-browser (IndexedDB) or in a folder you pick on your own machine.
+browser — in the origin private file system (OPFS) where available, falling
+back to IndexedDB.
 
 > **Just want to use the app?** This README is for people working on the code.
 > For how to *use* Organizer, read the user guide:
@@ -20,7 +21,7 @@ browser (IndexedDB) or in a folder you pick on your own machine.
 | Build / dev | Vite |
 | Routing | React Router |
 | Rich text | TipTap (StarterKit + tables, tasks, links, code, highlight…) |
-| Local storage | IndexedDB via [`idb`](https://github.com/jakearchibald/idb), plus File System Access API |
+| Local storage | Origin Private File System (OPFS), with [`idb`](https://github.com/jakearchibald/idb) IndexedDB fallback |
 | Icons | lucide-react |
 | Tests | Vitest + Testing Library + `fake-indexeddb` |
 | Docs site | VitePress |
@@ -77,9 +78,8 @@ src/
     StorageContext.tsx   App-wide storage provider; wires the active adapter to the UI
   storage/         The storage abstraction (see below)
     interface.ts     StorageAdapter interface + ConflictError
-    idbAdapter.ts    IndexedDB-backed adapter (default, "browser" storage)
-    fileAdapter.ts   File System Access API adapter ("folder on disk" storage)
-    handleStore.ts   Persists the chosen directory handle
+    opfsAdapter.ts   Origin Private File System adapter (primary)
+    idbAdapter.ts    IndexedDB-backed adapter (fallback)
     merge.ts         Cross-tab / cross-source merge logic (has unit + integration tests)
   db/              Low-level IndexedDB schema and stores (timelines, entries, blobs)
   hooks/           Reusable React hooks
@@ -97,13 +97,16 @@ public/            Static assets (logo, icons, favicon)
 
 - **Two storage backends behind one interface.** Everything in the app talks to
   a `StorageAdapter` (`src/storage/interface.ts`). Two implementations exist:
-  - `idbAdapter` — stores timelines, entries, and binary attachments
-    ("blobs") in IndexedDB. This is the default.
-  - `fileAdapter` — stores the same data in a user-selected folder via the
-    File System Access API, so the user owns the files directly.
+  - `opfsAdapter` — stores timelines, entries, and binary attachments
+    ("blobs") as files in the browser's Origin Private File System. This is
+    the primary backend, used wherever OPFS is available (Chrome 86+,
+    Safari 15.2+, Edge 86+).
+  - `idbAdapter` — stores the same data in IndexedDB. This is the fallback
+    for browsers without OPFS (e.g. Firefox).
 
-  When adding storage operations, add them to the interface **and both
-  adapters** so the two backends stay in lockstep.
+  `StorageContext` boots OPFS-first and falls back to IndexedDB automatically;
+  the user makes no storage choice. When adding storage operations, add them
+  to the interface **and both adapters** so the two backends stay in lockstep.
 
 - **`StorageContext` is the seam.** UI components don't import adapters
   directly; they consume the active adapter through `StorageContext`. Prefer

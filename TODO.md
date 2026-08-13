@@ -137,7 +137,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Docs accuracy
 
-- [ ] **[High] Rewrite the README storage architecture** — README still
+- [x] **[High] Rewrite the README storage architecture** — README still
       describes `fileAdapter`/`handleStore`/File System Access API that no longer
       exist; actual is OPFS-primary + IDB fallback. `README.md:7,23,80,99`
 - [ ] **[Low] README: "Node.js 20+" → "22+"** — `engines` is `>=22`; AGENTS
