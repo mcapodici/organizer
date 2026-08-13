@@ -9,7 +9,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Security
 
-- [ ] **[High] Validate imported JSON before any write** — add runtime schema
+- [x] **[High] Validate imported JSON before any write** — add runtime schema
       validation (zod is installed but unused) and stage validation *before* the
       destructive `replace` wipe. `src/utils/exportImport.ts:40`
 - [ ] **[High] EntryCard fallback: render text, not HTML** — the `catch` branch

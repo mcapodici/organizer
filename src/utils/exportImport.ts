@@ -1,5 +1,40 @@
+import { z } from 'zod';
 import type { StorageAdapter } from '../storage/interface';
 import type { ExportData } from '../types';
+
+const attachmentSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  mimeType: z.string(),
+  size: z.number(),
+  blobKey: z.string(),
+});
+
+const timelineSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string().optional(),
+  tags: z.array(z.string()),
+});
+
+const entrySchema = z.object({
+  id: z.string(),
+  timelineId: z.string(),
+  content: z.string(),
+  timestamp: z.string(),
+  attachments: z.array(attachmentSchema),
+  isStart: z.boolean(),
+  dueDate: z.string().optional(),
+  isDone: z.boolean().optional(),
+});
+
+const exportDataSchema = z.object({
+  version: z.number(),
+  timelines: z.array(timelineSchema),
+  entries: z.array(entrySchema),
+  blobs: z.record(z.string(), z.string()).optional(),
+});
 
 function arrayBufferToBase64(buf: ArrayBuffer): string {
   const bytes = new Uint8Array(buf);
@@ -38,7 +73,22 @@ export async function exportData(adapter: StorageAdapter): Promise<void> {
 
 export async function importData(adapter: StorageAdapter, file: File, mode: 'replace' | 'merge'): Promise<void> {
   const text = await file.text();
-  const data: ExportData = JSON.parse(text);
+
+  // Validate the untrusted file BEFORE any destructive write. Import is the one
+  // channel where outside data enters this local-first app: a malformed file
+  // must not crash mid-loop (which, in replace mode, would leave storage
+  // half-wiped) nor smuggle unexpected fields into storage.
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error('Import failed: the selected file is not valid JSON.');
+  }
+  const result = exportDataSchema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error('Import failed: the file is not a valid Organizer export.');
+  }
+  const data = result.data;
 
   if (mode === 'replace') {
     const existingTimelines = await adapter.getAllTimelines();
