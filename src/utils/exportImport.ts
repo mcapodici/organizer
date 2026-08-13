@@ -82,7 +82,9 @@ export async function exportData(adapter: StorageAdapter): Promise<void> {
   a.href = url;
   a.download = `timelines-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
-  URL.revokeObjectURL(url);
+  // Some browsers cancel an in-flight download if its object URL is revoked
+  // synchronously after click(); defer the revoke to let the download start.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export async function importData(adapter: StorageAdapter, file: File, mode: 'replace' | 'merge'): Promise<void> {

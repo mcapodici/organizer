@@ -54,7 +54,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
       already ran. `src/utils/exportImport.ts`
 - [x] **[Low] Guard export/import blob codecs** — full in-memory base64; `atob`
       throws on bad input, no guards. `src/utils/exportImport.ts:4-37`
-- [ ] **[Low] Defer `URL.revokeObjectURL` after download** — revokes
+- [x] **[Low] Defer `URL.revokeObjectURL` after download** — revokes
       synchronously after `a.click()`, can cancel the download.
       `src/utils/exportImport.ts:31-36`
 
