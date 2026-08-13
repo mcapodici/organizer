@@ -43,7 +43,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[High] Surface IDB write/quota failures** — IDB has a no-op `onError`;
       `QuotaExceededError` bubbles to an uncaught handler with no UI.
       `src/context/StorageContext.tsx:136`
-- [ ] **[High] Fix the misleading "auto-retry" save modal** — copy promises a
+- [x] **[High] Fix the misleading "auto-retry" save modal** — copy promises a
       retry the poll never performs; implement replay or correct the copy.
       `src/context/StorageContext.tsx:177`
 - [ ] **[Medium] Make `guardedWrite` atomic** — data can commit while the

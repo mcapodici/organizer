@@ -176,7 +176,9 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
           }}>
             <h2 style={{ margin: '0 0 8px', fontSize: '1.1rem' }}>Unable to save</h2>
             <p style={{ margin: '0 0 4px', color: '#374151' }}>
-              A write error occurred. Your data is safe — the next poll will retry automatically.
+              A write error occurred and your latest change was not saved. Your
+              existing data is safe. Press Retry to reconnect storage and save
+              again — background syncing does not replay a failed write on its own.
             </p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
               <button
