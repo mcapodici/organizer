@@ -13,7 +13,6 @@ import { TimelineView } from './components/TimelineView/TimelineView';
 import { TodoPage } from './components/TodoPage/TodoPage';
 import { Settings } from './components/Settings/Settings';
 import { SearchBox } from './components/SearchBox/SearchBox';
-import { exportData } from './utils/exportImport';
 import { describeTodoChange, revertTodoFields } from './utils/todoUndo';
 import { WELCOME_KEY, WELCOME_CONTENT } from './utils/welcome';
 import type { Entry } from './types';
@@ -22,7 +21,7 @@ import styles from './App.module.css';
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
-    const { adapter, markSaved } = useStorage();
+  const { adapter } = useStorage();
   const { registerUndo } = useUndo();
   const { timelines, loading, createTimeline, updateTimeline, removeTimeline, reload: reloadTimelines } = useTimelines();
 
@@ -119,8 +118,6 @@ export default function App() {
     reloadTodoCounts();
   }
 
-  const showNudge = false;
-
   useEffect(() => {
     if (!loading && urlId && !timelines.find((t) => t.id === urlId)) {
       navigate('/', { replace: true });
@@ -195,17 +192,6 @@ export default function App() {
         <div className={styles.headerSearch}>
           <SearchBox timelines={timelines} />
         </div>
-        {showNudge && (
-          <span className={styles.nudge}>
-            No backup ·{' '}
-            <button
-              className={styles.nudgeBtn}
-              onClick={() => { exportData(adapter); markSaved(); }}
-            >
-              Export now
-            </button>
-          </span>
-        )}
         <div className={`${styles.headerActions} ${styles.headerOnly}`}>
           <button
             className={`${styles.todosBtn} ${isTodoPage ? styles.todosBtnActive : ''}`}

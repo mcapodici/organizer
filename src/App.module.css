@@ -66,27 +66,6 @@
   background: var(--accent-200);
 }
 
-.nudge {
-  font-size: 0.78rem;
-  color: var(--text-subtle);
-  white-space: nowrap;
-}
-
-.nudgeBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.78rem;
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  padding: 0;
-}
-
-.nudgeBtn:hover {
-  color: var(--accent-hover);
-}
-
 .appHeader {
   display: flex;
   align-items: center;

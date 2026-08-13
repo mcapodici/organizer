@@ -124,7 +124,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
       stubs), `duplicatedEntryId`, and `mergeForeignState` are never consumed at
       runtime. Prune, or wire to a real consumer if planned.
       `src/storage/interface.ts`, `src/storage/merge.ts:34`
-- [ ] **[Low] Remove/re-enable the `showNudge` branch** — hard-coded `false`
+- [x] **[Low] Remove/re-enable the `showNudge` branch** — hard-coded `false`
       makes the export-nudge branch unreachable.
 
 ## Architecture & maintainability
