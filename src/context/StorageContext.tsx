@@ -51,7 +51,6 @@ function withErrorCapture(
     clearAll: () => wrap(() => inner.clearAll()),
     hasConflict: () => inner.hasConflict(),
     mergeFromDisk: active => inner.mergeFromDisk(active),
-    mergeConflictFiles: () => inner.mergeConflictFiles(),
   };
 }
 
@@ -120,8 +119,6 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
         imported += r.importedCount;
         merged = true;
       }
-      // OPFS and IndexedDB have no external conflict files to scan,
-      // so mergeConflictFiles always returns zero.
       if (merged) {
         setMergeNonce(v => v + 1);
         setToasts(list => [...list, { id: (toastSeqRef.current += 1), imported, conflicts }]);

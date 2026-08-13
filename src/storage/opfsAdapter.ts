@@ -196,7 +196,7 @@ export class OpfsAdapter implements StorageAdapter {
     return false;
   }
 
-  async mergeFromDisk(activeBase: Entry | null): Promise<{ duplicatedEntryId: string | null; importedCount: number }> {
+  async mergeFromDisk(activeBase: Entry | null): Promise<{ importedCount: number }> {
     await this.init();
     this.frozen = false;
 
@@ -232,12 +232,7 @@ export class OpfsAdapter implements StorageAdapter {
     await writeSaveId(this.root!, next);
     this.lastKnownSaveId = next;
 
-    return { duplicatedEntryId: outcome.duplicatedEntryId, importedCount: outcome.entries.length - this.entries.size };
-  }
-
-  async mergeConflictFiles(): Promise<{ importedCount: number; conflictCount: number }> {
-    // OPFS is a private sandbox — no external sync tools can drop conflict files.
-    return { importedCount: 0, conflictCount: 0 };
+    return { importedCount: outcome.entries.length - this.entries.size };
   }
 
   // Bump the saveId BEFORE the data write so the change marker can never lag

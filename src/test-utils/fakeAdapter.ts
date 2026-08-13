@@ -11,7 +11,7 @@ export class FakeAdapter implements StorageAdapter {
   entries: Entry[] = [];
   blobs = new Map<string, ArrayBuffer>();
   conflict = false;
-  mergeResult: { duplicatedEntryId: string | null; importedCount: number } = { duplicatedEntryId: null, importedCount: 0 };
+  mergeResult: { importedCount: number } = { importedCount: 0 };
 
   async getAllTimelines(): Promise<Timeline[]> { return [...this.timelines]; }
 
@@ -60,6 +60,5 @@ export class FakeAdapter implements StorageAdapter {
   }
 
   async hasConflict(): Promise<boolean> { return this.conflict; }
-  async mergeFromDisk(): Promise<{ duplicatedEntryId: string | null; importedCount: number }> { return this.mergeResult; }
-  async mergeConflictFiles(): Promise<{ importedCount: number; conflictCount: number }> { return { importedCount: 0, conflictCount: 0 }; }
+  async mergeFromDisk(): Promise<{ importedCount: number }> { return this.mergeResult; }
 }

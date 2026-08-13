@@ -46,7 +46,7 @@ describe('StorageProvider', () => {
 
   it('merges and toasts on a poll tick when the adapter reports a conflict', async () => {
     h.adapter.conflict = true;
-    h.adapter.mergeResult = { duplicatedEntryId: null, importedCount: 2 };
+    h.adapter.mergeResult = { importedCount: 2 };
     const mergeSpy = vi.spyOn(h.adapter, 'mergeFromDisk');
     await renderProvider();
 

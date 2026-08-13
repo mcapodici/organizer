@@ -50,7 +50,7 @@ describe('IdbAdapter merge — two tabs on shared storage', () => {
 
     // Merge with nothing open in the editor: adopt, no duplicate.
     const result = await a.mergeFromDisk(null);
-    expect(result.duplicatedEntryId).toBeNull();
+    expect(result.importedCount).toBe(0);
 
     // Unfrozen, and B's note is now visible to A.
     expect(await a.hasConflict()).toBe(false);
@@ -69,13 +69,13 @@ describe('IdbAdapter merge — two tabs on shared storage', () => {
     expect(await a.hasConflict()).toBe(true);
 
     const result = await a.mergeFromDisk(activeBase);
-    expect(result.duplicatedEntryId).not.toBeNull();
+    expect(result.importedCount).toBe(1);
 
     const entries = await a.getAllEntries();
     // n1 is restored to A's pre-edit base so A's in-progress edit can save over it.
     expect(entries.find((e) => e.id === 'n1')?.content).toBe(activeBase.content);
     // The disk version survives as a new, marked duplicate.
-    const dup = entries.find((e) => e.id === result.duplicatedEntryId);
+    const dup = entries.find((e) => e.content.includes('Merged copy from another device'));
     expect(dup?.content).toContain('Merged copy from another device');
     expect(dup?.content).toContain('CHANGED on disk by Tab B');
 
@@ -83,7 +83,7 @@ describe('IdbAdapter merge — two tabs on shared storage', () => {
     await a.putEntry({ ...activeBase, content: doc('A saved edit') });
     const after = await a.getAllEntries();
     expect(after.find((e) => e.id === 'n1')?.content).toBe(doc('A saved edit'));
-    expect(after.find((e) => e.id === result.duplicatedEntryId)?.content).toContain('CHANGED on disk by Tab B');
+    expect(after.find((e) => e.content.includes('Merged copy from another device'))?.content).toContain('CHANGED on disk by Tab B');
   });
 
   it('Case 3: editing a different note — adopts the change, no duplicate', async () => {
@@ -95,7 +95,7 @@ describe('IdbAdapter merge — two tabs on shared storage', () => {
     expect(await a.hasConflict()).toBe(true);
 
     const result = await a.mergeFromDisk(noteB);
-    expect(result.duplicatedEntryId).toBeNull();
+    expect(result.importedCount).toBe(0);
 
     const entries = await a.getAllEntries();
     expect(entries).toHaveLength(2); // no duplicate created

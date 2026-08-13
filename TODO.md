@@ -120,7 +120,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 - [x] **[Medium] Remove unused `AppBanner` component + CSS** — only
       self-references (proven by grep).
-- [ ] **[Medium] Prune dead interface surface** — `mergeConflictFiles` (zero
+- [x] **[Medium] Prune dead interface surface** — `mergeConflictFiles` (zero
       stubs), `duplicatedEntryId`, and `mergeForeignState` are never consumed at
       runtime. Prune, or wire to a real consumer if planned.
       `src/storage/interface.ts`, `src/storage/merge.ts:34`
