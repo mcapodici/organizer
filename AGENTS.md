@@ -57,6 +57,26 @@ Project skills live in `.atomic/skills/`. Currently:
 - **`doc-check`** — detects when `docs/` has drifted out of date relative to
   `src/` changes and proposes a plan. It never edits files itself.
 
+### Workflows
+
+Project workflows live in `.atomic/workflows/`. Currently:
+
+- **`checked-change`** — the default way to run a non-trivial change end to end.
+  It wraps the builtin `ralph` implement/review loop, then gates the branch on
+  the repo's real checks (`npm run check` by default) as a deterministic
+  `ctx.tool` node. A non-zero exit feeds the actual log into a repair stage and
+  reruns, up to `max_check_repairs` rounds; only a green gate and a clean tree
+  may push and open the PR.
+
+  ```bash
+  /workflow checked-change \
+    prompt="…" branch=my-feature git_worktree_dir=.worktrees/my-feature
+  ```
+
+  This exists because ralph's own review gate is model-judged: a reviewer
+  decides it ran the right commands and that they passed. The tool node makes
+  that an exit code instead.
+
 ### Before completing any task
 
 Run the checks **before** opening the PR, so review never lands on a red branch:
