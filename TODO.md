@@ -66,7 +66,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[High] Make search results keyboard-selectable** — bound to
       `onMouseDown` only; Tab+Enter fires `click` and does nothing. Add
       `onClick`. `src/components/SearchBox/SearchBox.tsx:144`
-- [ ] **[Medium] Fix todo card nested-interactive `role="button"`** — a
+- [x] **[Medium] Fix todo card nested-interactive `role="button"`** — a
       `role=button` div wraps a real `<button>`; key handler misses Space.
       `src/components/TodoPage/TodoPage.tsx:224`
 - [ ] **[Medium] Overdue badge not distinguished by color alone** — add an

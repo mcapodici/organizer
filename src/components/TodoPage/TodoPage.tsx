@@ -221,14 +221,14 @@ function TodoRow({
       >
         <Check size={12} className={styles.checkIcon} />
       </button>
-      <div
-        className={styles.cardBody}
-        onClick={() => onGoToTimeline(entry.timelineId, entry.id)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter') onGoToTimeline(entry.timelineId, entry.id); }}
-      >
-        <div className={styles.cardText}>{entryPreview(entry.content)}</div>
+      <div className={styles.cardBody}>
+        <button
+          type="button"
+          className={styles.cardNav}
+          onClick={() => onGoToTimeline(entry.timelineId, entry.id)}
+        >
+          <div className={styles.cardText}>{entryPreview(entry.content)}</div>
+        </button>
         <div className={styles.cardMeta}>
           {timeline && <span className={styles.timelineChip}>{timeline.name}</span>}
           <button
