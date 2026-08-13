@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckSquare, Settings as SettingsIcon, Menu, Plus, Filter, BookOpen, AlertTriangle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
@@ -6,6 +6,8 @@ import { useTimelines } from './hooks/useTimelines';
 import { useEntries } from './hooks/useEntries';
 import { useTags } from './hooks/useTags';
 import { useTodoCounts } from './hooks/useTodoCounts';
+import { useSidebarResize } from './hooks/useSidebarResize';
+import { useWelcomeSeed } from './hooks/useWelcomeSeed';
 import { useStorage } from './context/StorageContext';
 import { useUndo } from './context/UndoContext';
 import { TimelineList } from './components/TimelineList/TimelineList';
@@ -14,7 +16,8 @@ import { TodoPage } from './components/TodoPage/TodoPage';
 import { Settings } from './components/Settings/Settings';
 import { SearchBox } from './components/SearchBox/SearchBox';
 import { describeTodoChange, revertTodoFields } from './utils/todoUndo';
-import { WELCOME_KEY, WELCOME_CONTENT } from './utils/welcome';
+import { parseRoute } from './utils/route';
+import { WELCOME_KEY } from './utils/welcome';
 import type { Entry } from './types';
 import styles from './App.module.css';
 
@@ -25,10 +28,7 @@ export default function App() {
   const { registerUndo } = useUndo();
   const { timelines, loading, createTimeline, updateTimeline, removeTimeline, reload: reloadTimelines } = useTimelines();
 
-  const isTodoPage = location.pathname === '/todos';
-  const isSettingsPage = location.pathname === '/settings';
-  const timelineMatch = location.pathname.match(/^\/timelines\/([^/]+)$/);
-  const urlId = timelineMatch ? timelineMatch[1] : null;
+  const { isTodoPage, isSettingsPage, urlId } = parseRoute(location.pathname);
   const activeTimeline = timelines.find((t) => t.id === urlId) ?? null;
 
   const { entries, addEntry, updateEntry, removeEntry, reload: reloadEntries } = useEntries(activeTimeline?.id ?? null);
@@ -41,49 +41,7 @@ export default function App() {
   // nav's Filter button can toggle the same panel the sidebar renders.
   const [showFilter, setShowFilter] = useState(false);
 
-  // Resizable sidebar (desktop only). The mobile drawer is full-width and ignores
-  // this — we only apply an explicit width when the desktop layout is active.
-  const SIDEBAR_MIN = 200;
-  const SIDEBAR_MAX = 600;
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const saved = Number(localStorage.getItem('sidebarWidth'));
-    return saved >= SIDEBAR_MIN && saved <= SIDEBAR_MAX ? saved : 280;
-  });
-  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 769px)').matches);
-  const bodyRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 769px)');
-    const onChange = () => setIsDesktop(mq.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('sidebarWidth', String(sidebarWidth));
-  }, [sidebarWidth]);
-
-  function clampWidth(w: number) {
-    return Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, w));
-  }
-
-  function startResize(e: React.MouseEvent) {
-    e.preventDefault();
-    const onMove = (ev: MouseEvent) => {
-      const left = bodyRef.current?.getBoundingClientRect().left ?? 0;
-      setSidebarWidth(clampWidth(ev.clientX - left));
-    };
-    const onUp = () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-  }
+  const { sidebarWidth, isDesktop, bodyRef, startResize, nudgeWidth } = useSidebarResize();
 
   // Bump the active timeline's "recently changed" stamp after an entry edit so
   // it floats to the top of the sidebar. Fire-and-forget — the entry write is
@@ -131,27 +89,13 @@ export default function App() {
     if (window.innerWidth < 768) setDrawerOpen(false);
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (loading || timelines.length > 0) return;
-    if (localStorage.getItem(WELCOME_KEY)) return;
-    seedWelcomeTimeline();
-  // seedWelcomeTimeline is a hoisted declaration that runs once, guarded by WELCOME_KEY.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, timelines.length]);
-
-  async function seedWelcomeTimeline() {
-    localStorage.setItem(WELCOME_KEY, '1');
-    const timeline = await createTimeline('Getting Started');
-    await adapter.putEntry({
-      id: uuid(),
-      timelineId: timeline.id,
-      content: JSON.stringify(WELCOME_CONTENT),
-      timestamp: timeline.createdAt,
-      attachments: [],
-      isStart: true,
-    });
-    navigate(`/timelines/${timeline.id}`, { replace: true });
-  }
+  const { seedWelcomeTimeline } = useWelcomeSeed({
+    loading,
+    timelineCount: timelines.length,
+    adapter,
+    createTimeline,
+    navigate,
+  });
 
   async function handleCreate(name: string) {
     const timeline = await createTimeline(name);
@@ -286,8 +230,8 @@ export default function App() {
             className={styles.resizer}
             onMouseDown={startResize}
             onKeyDown={(e) => {
-              if (e.key === 'ArrowLeft') { e.preventDefault(); setSidebarWidth((w) => clampWidth(w - 16)); }
-              if (e.key === 'ArrowRight') { e.preventDefault(); setSidebarWidth((w) => clampWidth(w + 16)); }
+              if (e.key === 'ArrowLeft') { e.preventDefault(); nudgeWidth(-16); }
+              if (e.key === 'ArrowRight') { e.preventDefault(); nudgeWidth(16); }
             }}
             role="separator"
             aria-orientation="vertical"

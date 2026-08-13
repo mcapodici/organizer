@@ -129,7 +129,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Architecture & maintainability
 
-- [ ] **[High] Break up the `App.tsx` god component** — 367 lines mixing
+- [x] **[High] Break up the `App.tsx` god component** — 367 lines mixing
       routing, resize drag, welcome seeding, undo wiring, and responsive state.
       Extract into focused modules/hooks. `src/App.tsx`
 - [ ] **[Medium] De-duplicate `EditTagsModal` / `capitalize` / `extractText`** —
