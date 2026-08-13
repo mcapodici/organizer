@@ -37,6 +37,25 @@ async function removeFile(dir: FileSystemDirectoryHandle, name: string): Promise
   try { await dir.removeEntry(name); } catch { /* already gone */ }
 }
 
+// Move a corrupt/unparseable file out of the active tree into `quarantine/` so
+// it can never wedge a later JSON.parse. Best-effort: the file is copied under a
+// unique, timestamped name and then removed from its original location. If the
+// copy fails we still remove the original — a readable-but-invalid file must not
+// stay where scanWorkspace will keep re-reading it.
+async function quarantineFile(
+  root: FileSystemDirectoryHandle,
+  srcDir: FileSystemDirectoryHandle,
+  name: string,
+  label: string,
+): Promise<void> {
+  try {
+    const text = await readText(srcDir, name);
+    const qDir = await dirPath(root, ['quarantine'], true);
+    await writeRaw(qDir, `${Date.now()}-${label}-${name}`, text);
+  } catch { /* best-effort copy; still remove the original below */ }
+  await removeFile(srcDir, name);
+}
+
 // ----- save-id helpers -----
 
 async function readSaveId(root: FileSystemDirectoryHandle): Promise<string | undefined> {
@@ -58,17 +77,19 @@ async function writeSaveId(root: FileSystemDirectoryHandle, id: string): Promise
 interface FileMeta {
   timelines: Map<string, string>;  // timelineId → serialized JSON
   entries: Map<string, string>;    // entryId → serialized JSON
+  quarantined: number;             // count of corrupt files moved aside
 }
 
 async function scanWorkspace(root: FileSystemDirectoryHandle): Promise<FileMeta> {
   const timelines = new Map<string, string>();
   const entries = new Map<string, string>();
+  let quarantined = 0;
 
   let tlRoot: FileSystemDirectoryHandle;
   try {
     tlRoot = await root.getDirectoryHandle('timelines');
   } catch {
-    return { timelines, entries };
+    return { timelines, entries, quarantined };
   }
 
   for await (const [tid, th] of tlRoot.entries()) {
@@ -76,7 +97,15 @@ async function scanWorkspace(root: FileSystemDirectoryHandle): Promise<FileMeta>
     const tlDir = th as FileSystemDirectoryHandle;
     try {
       const text = await readText(tlDir, 'timeline.json');
-      timelines.set(tid, text);
+      // Validate at scan time: a corrupt timeline.json is quarantined rather
+      // than indexed, so downstream JSON.parse never throws.
+      try {
+        JSON.parse(text);
+        timelines.set(tid, text);
+      } catch {
+        await quarantineFile(root, tlDir, 'timeline.json', `timeline-${tid}`);
+        quarantined++;
+      }
     } catch { /* no timeline.json */ }
 
     let eDir: FileSystemDirectoryHandle;
@@ -84,15 +113,33 @@ async function scanWorkspace(root: FileSystemDirectoryHandle): Promise<FileMeta>
       eDir = await tlDir.getDirectoryHandle('entries');
     } catch { continue; }
 
+    // Snapshot names first: quarantining mutates the directory as we go.
+    const entryFiles: string[] = [];
     for await (const [fn, eh] of eDir.entries()) {
       if (eh.kind !== 'file' || !fn.endsWith('.json')) continue;
+      entryFiles.push(fn);
+    }
+    for (const fn of entryFiles) {
+      let text: string;
       try {
-        entries.set(fn.slice(0, -5), await readText(eDir, fn));
-      } catch { /* unreadable entry */ }
+        text = await readText(eDir, fn);
+      } catch { continue; /* unreadable entry */ }
+      // Validate at scan time: a corrupt entry file is quarantined, not indexed.
+      try {
+        JSON.parse(text);
+        entries.set(fn.slice(0, -5), text);
+      } catch {
+        await quarantineFile(root, eDir, fn, 'entry');
+        quarantined++;
+      }
     }
   }
 
-  return { timelines, entries };
+  if (quarantined > 0) {
+    console.warn(`[opfs] quarantined ${quarantined} corrupt file(s) into quarantine/`);
+  }
+
+  return { timelines, entries, quarantined };
 }
 
 // ----- Write helpers -----
