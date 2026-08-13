@@ -135,7 +135,7 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
       return withErrorCapture(phase.adapter, () => setWriteError(true), () => { /* poll auto-merges */ });
     }
     if (phase.tag === 'readyIdb') {
-      return withErrorCapture(phase.adapter, () => { /* idb writes don't have a recoverable error path */ }, () => { /* poll auto-merges */ });
+      return withErrorCapture(phase.adapter, () => setWriteError(true), () => { /* poll auto-merges */ });
     }
     return null;
   // eslint-disable-next-line react-hooks/exhaustive-deps

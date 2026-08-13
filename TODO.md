@@ -40,7 +40,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Error handling & resilience
 
-- [ ] **[High] Surface IDB write/quota failures** — IDB has a no-op `onError`;
+- [x] **[High] Surface IDB write/quota failures** — IDB has a no-op `onError`;
       `QuotaExceededError` bubbles to an uncaught handler with no UI.
       `src/context/StorageContext.tsx:136`
 - [ ] **[High] Fix the misleading "auto-retry" save modal** — copy promises a
