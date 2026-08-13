@@ -75,7 +75,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[Low] Composer date/time inputs: add aria-labels** — inputs lack a
       programmatic name; due-date block has one ambiguous label.
       `src/components/EntryComposer/EntryComposer.tsx:261-315`
-- [ ] **[Low] Attachment thumbnail: real button + real alt** — clickable `<img>`
+- [x] **[Low] Attachment thumbnail: real button + real alt** — clickable `<img>`
       has no keyboard access; lightbox alt is "Full size" though
       `attachment.name` is available. `src/components/EntryCard/EntryCard.tsx:214`
 

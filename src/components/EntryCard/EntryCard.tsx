@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, onUpdate }: Props) {
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
   const [dueAnchor, setDueAnchor] = useState<DOMRect | null>(null);
 
   let html: string | null;
@@ -145,13 +145,13 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
         {entry.attachments.length > 0 && (
           <AttachmentList
             attachments={entry.attachments}
-            onLightbox={setLightboxSrc}
+            onLightbox={(src, alt) => setLightbox({ src, alt })}
           />
         )}
       </div>
-      {lightboxSrc && (
-        <div className={styles.lightbox} onClick={() => setLightboxSrc(null)}>
-          <img src={lightboxSrc} alt="Full size" className={styles.lightboxImg} />
+      {lightbox && (
+        <div className={styles.lightbox} onClick={() => setLightbox(null)}>
+          <img src={lightbox.src} alt={lightbox.alt} className={styles.lightboxImg} />
         </div>
       )}
     </div>
@@ -186,7 +186,7 @@ function toggleTaskItem(node: TiptapNode, targetIndex: number): boolean {
   return walk(node);
 }
 
-function AttachmentList({ attachments, onLightbox }: { attachments: Attachment[]; onLightbox: (src: string) => void }) {
+function AttachmentList({ attachments, onLightbox }: { attachments: Attachment[]; onLightbox: (src: string, alt: string) => void }) {
   return (
     <div className={styles.attachments}>
       {attachments.map((att) => (
@@ -196,7 +196,7 @@ function AttachmentList({ attachments, onLightbox }: { attachments: Attachment[]
   );
 }
 
-function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; onLightbox: (src: string) => void }) {
+function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; onLightbox: (src: string, alt: string) => void }) {
   const { adapter } = useStorage();
   const [url, setUrl] = useState<string | null>(null);
   const isImage = attachment.mimeType.startsWith('image/');
@@ -219,13 +219,15 @@ function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; on
 
   if (isImage) {
     return (
-      <img
-        src={url}
-        alt={attachment.name}
-        className={styles.thumbnail}
-        onClick={() => onLightbox(url)}
+      <button
+        type="button"
+        className={styles.thumbnailBtn}
+        onClick={() => onLightbox(url, attachment.name)}
         title={attachment.name}
-      />
+        aria-label={`View ${attachment.name} full size`}
+      >
+        <img src={url} alt={attachment.name} className={styles.thumbnail} />
+      </button>
     );
   }
 
