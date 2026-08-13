@@ -52,7 +52,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[Medium] Handle import `ConflictError` / partial apply** — the
       `importData` loop has no conflict handling; in replace mode the wipe
       already ran. `src/utils/exportImport.ts`
-- [ ] **[Low] Guard export/import blob codecs** — full in-memory base64; `atob`
+- [x] **[Low] Guard export/import blob codecs** — full in-memory base64; `atob`
       throws on bad input, no guards. `src/utils/exportImport.ts:4-37`
 - [ ] **[Low] Defer `URL.revokeObjectURL` after download** — revokes
       synchronously after `a.click()`, can cancel the download.
