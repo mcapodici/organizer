@@ -46,7 +46,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[High] Fix the misleading "auto-retry" save modal** — copy promises a
       retry the poll never performs; implement replay or correct the copy.
       `src/context/StorageContext.tsx:177`
-- [ ] **[Medium] Make `guardedWrite` atomic** — data can commit while the
+- [x] **[Medium] Make `guardedWrite` atomic** — data can commit while the
       `saveId` bump fails, drifting data from its change marker.
       `src/storage/opfsAdapter.ts:196`, `src/storage/idbAdapter.ts:71`
 - [ ] **[Medium] Handle import `ConflictError` / partial apply** — the

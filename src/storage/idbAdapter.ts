@@ -68,12 +68,17 @@ export class IdbAdapter implements StorageAdapter {
     return { importedCount: 0, conflictCount: 0 };
   }
 
+  // Bump the saveId BEFORE the data write so the change marker can never lag
+  // behind committed data. If writeSaveId fails, nothing is written and
+  // lastKnownSaveId is untouched (consistent). If op fails after the marker
+  // moved, the marker is merely ahead of the data — a harmless merge that finds
+  // no new data — never behind, which would hide the change from other tabs.
   private async guardedWrite(op: () => Promise<void>): Promise<void> {
     if (await this.hasConflict()) throw new ConflictError();
-    await op();
     const next = uuid();
     await writeSaveId(next);
     this.lastKnownSaveId = next;
+    await op();
   }
 
   getAllTimelines(): Promise<Timeline[]> { return db.getAllTimelines(); }
