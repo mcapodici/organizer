@@ -196,7 +196,7 @@ export class OpfsAdapter implements StorageAdapter {
     return false;
   }
 
-  async mergeFromDisk(activeBase: Entry | null): Promise<{ importedCount: number }> {
+  async mergeFromDisk(activeBase: Entry | null): Promise<{ mergedCopies: number }> {
     await this.init();
     this.frozen = false;
 
@@ -232,7 +232,9 @@ export class OpfsAdapter implements StorageAdapter {
     await writeSaveId(this.root!, next);
     this.lastKnownSaveId = next;
 
-    return { importedCount: outcome.entries.length - this.entries.size };
+    // The only local change that can diverge from disk is an in-progress edit
+    // preserved as a marked duplicate; report that as the conflict-copy count.
+    return { mergedCopies: outcome.duplicatedEntryId ? 1 : 0 };
   }
 
   // Bump the saveId BEFORE the data write so the change marker can never lag

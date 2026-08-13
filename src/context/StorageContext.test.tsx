@@ -46,7 +46,7 @@ describe('StorageProvider', () => {
 
   it('merges and toasts on a poll tick when the adapter reports a conflict', async () => {
     h.adapter.conflict = true;
-    h.adapter.mergeResult = { importedCount: 2 };
+    h.adapter.mergeResult = { mergedCopies: 1 };
     const mergeSpy = vi.spyOn(h.adapter, 'mergeFromDisk');
     await renderProvider();
 
@@ -56,7 +56,8 @@ describe('StorageProvider', () => {
     await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
 
     expect(mergeSpy).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('Merged 2 notes from another device')).toBeTruthy();
+    expect(screen.getByText('Loaded the latest changes from another device')).toBeTruthy();
+    expect(screen.getByText(/both versions kept/)).toBeTruthy();
   });
 
   it('does not toast when a poll tick finds no conflict', async () => {
@@ -65,7 +66,7 @@ describe('StorageProvider', () => {
 
     await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
 
-    expect(screen.queryByText(/Merged/)).toBeNull();
+    expect(screen.queryByText(/Loaded the latest changes/)).toBeNull();
   });
 });
 

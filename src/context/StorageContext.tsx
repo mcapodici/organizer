@@ -111,17 +111,16 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
     if (!adapter) return;
     mergeInFlightRef.current = true;
     try {
-      let imported = 0;
-      const conflicts = 0;
+      let conflicts = 0;
       let merged = false;
       if (await adapter.hasConflict()) {
         const r = await adapter.mergeFromDisk(activeEditRef.current);
-        imported += r.importedCount;
+        conflicts += r.mergedCopies;
         merged = true;
       }
       if (merged) {
         setMergeNonce(v => v + 1);
-        setToasts(list => [...list, { id: (toastSeqRef.current += 1), imported, conflicts }]);
+        setToasts(list => [...list, { id: (toastSeqRef.current += 1), conflicts }]);
       }
     } catch { /* transient read/write failure — the next poll tick retries */ }
     finally { mergeInFlightRef.current = false; }

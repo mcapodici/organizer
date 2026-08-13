@@ -50,7 +50,7 @@ describe('IdbAdapter merge — two tabs on shared storage', () => {
 
     // Merge with nothing open in the editor: adopt, no duplicate.
     const result = await a.mergeFromDisk(null);
-    expect(result.importedCount).toBe(0);
+    expect(result.mergedCopies).toBe(0);
 
     // Unfrozen, and B's note is now visible to A.
     expect(await a.hasConflict()).toBe(false);
@@ -69,7 +69,7 @@ describe('IdbAdapter merge — two tabs on shared storage', () => {
     expect(await a.hasConflict()).toBe(true);
 
     const result = await a.mergeFromDisk(activeBase);
-    expect(result.importedCount).toBe(1);
+    expect(result.mergedCopies).toBe(1);
 
     const entries = await a.getAllEntries();
     // n1 is restored to A's pre-edit base so A's in-progress edit can save over it.
@@ -95,7 +95,7 @@ describe('IdbAdapter merge — two tabs on shared storage', () => {
     expect(await a.hasConflict()).toBe(true);
 
     const result = await a.mergeFromDisk(noteB);
-    expect(result.importedCount).toBe(0);
+    expect(result.mergedCopies).toBe(0);
 
     const entries = await a.getAllEntries();
     expect(entries).toHaveLength(2); // no duplicate created

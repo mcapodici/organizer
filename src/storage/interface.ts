@@ -26,5 +26,5 @@ export interface StorageAdapter {
   getAllBlobs(): Promise<Record<string, ArrayBuffer>>;
 
   hasConflict(): Promise<boolean>;
-  mergeFromDisk(activeBase: Entry | null): Promise<{ importedCount: number }>;
+  mergeFromDisk(activeBase: Entry | null): Promise<{ mergedCopies: number }>;
 }

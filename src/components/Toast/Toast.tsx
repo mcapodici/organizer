@@ -2,21 +2,19 @@ import { X } from 'lucide-react';
 
 export interface ToastItem {
   id: number;
-  imported: number;
   conflicts: number;
 }
 
 function describe(t: ToastItem): { title: string; sub?: string } {
-  if (t.imported > 0) {
-    const noun = t.imported === 1 ? 'note' : 'notes';
+  const title = 'Loaded the latest changes from another device';
+  if (t.conflicts > 0) {
+    const noun = t.conflicts === 1 ? 'note' : 'notes';
     return {
-      title: `Merged ${t.imported} ${noun} from another device`,
-      sub: t.conflicts > 0
-        ? `${t.conflicts} had a conflicting version — both versions kept.`
-        : undefined,
+      title,
+      sub: `${t.conflicts} ${noun} you were editing changed elsewhere — both versions kept.`,
     };
   }
-  return { title: 'Loaded the latest changes from another device' };
+  return { title };
 }
 
 // Bottom-right stack of merge announcements. Each stays until the user

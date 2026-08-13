@@ -152,7 +152,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
       `tsc` + test while preview runs full `check.sh`. Make prod no weaker.
 - [x] **[Low] Cap `engines` to `>=22 <27`** — open `>=22` could auto-select an
       untested future major on Vercel; `mise` pins 26. `package.json`
-- [ ] **[Low/Medium] Fix import-count toasts** — OPFS `importedCount` is
+- [x] **[Low/Medium] Fix import-count toasts** — OPFS `importedCount` is
       structurally always 0; IDB merge count is a constant `1`/`0`, so the toast
       number is wrong/meaningless across backends.
       `src/storage/opfsAdapter.ts:188`, `src/storage/idbAdapter.ts:59`

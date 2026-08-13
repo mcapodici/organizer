@@ -42,7 +42,7 @@ export class IdbAdapter implements StorageAdapter {
   // already holds the other tab's writes — adopt its saveId and unfreeze. If a note
   // open in the editor (activeBase) was changed by the other tab, preserve that
   // version as a marked duplicate and restore the editor's note under its own id.
-  async mergeFromDisk(activeBase: Entry | null): Promise<{ importedCount: number }> {
+  async mergeFromDisk(activeBase: Entry | null): Promise<{ mergedCopies: number }> {
     await this.init();
     this.frozen = false;
     if (activeBase) {
@@ -54,11 +54,11 @@ export class IdbAdapter implements StorageAdapter {
         const next = uuid();
         await writeSaveId(next);
         this.lastKnownSaveId = next;
-        return { importedCount: 1 };
+        return { mergedCopies: 1 };
       }
     }
     this.lastKnownSaveId = await readSaveId();
-    return { importedCount: 0 };
+    return { mergedCopies: 0 };
   }
 
   // Bump the saveId BEFORE the data write so the change marker can never lag
