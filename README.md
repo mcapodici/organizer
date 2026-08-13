@@ -29,7 +29,7 @@ back to IndexedDB.
 
 ## Prerequisites
 
-- **Node.js 20+** (the toolchain targets current Node; `@types/node` is on v24).
+- **Node.js 22+** (the toolchain targets current Node; `@types/node` is on v24).
 - npm (the repo ships a `package-lock.json`).
 
 ## Getting started
