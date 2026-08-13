@@ -12,7 +12,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[High] Validate imported JSON before any write** — add runtime schema
       validation (zod is installed but unused) and stage validation *before* the
       destructive `replace` wipe. `src/utils/exportImport.ts:40`
-- [ ] **[High] EntryCard fallback: render text, not HTML** — the `catch` branch
+- [x] **[High] EntryCard fallback: render text, not HTML** — the `catch` branch
       injects raw `entry.content` via `dangerouslySetInnerHTML` (stored-XSS
       sink). `src/components/EntryCard/EntryCard.tsx:34-46`
 - [ ] **[High] Add CSP + security headers on Vercel** — no CSP / `nosniff` /

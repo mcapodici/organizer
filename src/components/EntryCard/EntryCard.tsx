@@ -31,7 +31,8 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [dueAnchor, setDueAnchor] = useState<DOMRect | null>(null);
 
-  let html: string;
+  let html: string | null;
+  let fallbackText: string | null = null;
   try {
     const json = JSON.parse(entry.content);
     html = generateHTML(json, [
@@ -42,7 +43,8 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
       Highlight,
     ]);
   } catch {
-    html = entry.content;
+    html = null;
+    fallbackText = entry.content;
   }
 
   function handleContentClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -129,11 +131,17 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
             </div>
           )}
         </div>
-        <div
-          className={styles.content}
-          onClick={handleContentClick}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        {html !== null ? (
+          <div
+            className={styles.content}
+            onClick={handleContentClick}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        ) : (
+          <div className={styles.content} onClick={handleContentClick}>
+            {fallbackText}
+          </div>
+        )}
         {entry.attachments.length > 0 && (
           <AttachmentList
             attachments={entry.attachments}
