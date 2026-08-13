@@ -15,7 +15,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[High] EntryCard fallback: render text, not HTML** — the `catch` branch
       injects raw `entry.content` via `dangerouslySetInnerHTML` (stored-XSS
       sink). `src/components/EntryCard/EntryCard.tsx:34-46`
-- [ ] **[High] Add CSP + security headers on Vercel** — no CSP / `nosniff` /
+- [x] **[High] Add CSP + security headers on Vercel** — no CSP / `nosniff` /
       `Referrer-Policy` / `frame-ancestors`. `vercel.json`
 - [ ] **[Medium] Fix dependency vulnerabilities** — `npm audit fix`, bump
       `vite` / `react-router-dom`, re-run `scripts/check.sh`.
