@@ -100,7 +100,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Data integrity & persistence (continued)
 
-- [ ] **[Low] Normalize timestamp ordering** — `useEntries`/`useTimelines`/
+- [x] **[Low] Normalize timestamp ordering** — `useEntries`/`useTimelines`/
       `merge` string-compare ISO timestamps; breaks on mixed offsets/precision
       from imported data. `src/hooks/useEntries.ts:15`, `src/storage/merge.ts:19`
 

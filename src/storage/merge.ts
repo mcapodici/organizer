@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import type { Timeline, Entry } from '../types';
+import { compareTimestamps } from '../utils/dateFormat';
 
 export interface MergeOutcome {
   timelines: Timeline[];
@@ -14,12 +15,13 @@ export interface ForeignMergeOutcome {
   conflictCount: number;
 }
 
-// ISO timestamps compare correctly lexicographically. A missing incoming stamp
-// never wins; a missing current stamp always loses to a present incoming one.
+// Compare by instant (parsing mixed offsets/precision), not raw string bytes.
+// A missing incoming stamp never wins; a missing current stamp always loses to
+// a present incoming one.
 function isNewer(incoming?: string, current?: string): boolean {
   if (!incoming) return false;
   if (!current) return true;
-  return incoming > current;
+  return compareTimestamps(incoming, current) > 0;
 }
 
 // Merge an independently-saved ("foreign") set of timelines/entries — e.g. a
