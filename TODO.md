@@ -27,7 +27,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
       `src/storage/opfsAdapter.ts:161`
 - [x] **[Medium] Guard import against missing `timelines`/`entries` arrays** —
       unguarded iteration crashes the importer. `src/utils/exportImport.ts:61-66`
-- [ ] **[Medium] Import: honor `version`; fix blob overwrite in merge mode** —
+- [x] **[Medium] Import: honor `version`; fix blob overwrite in merge mode** —
       `version` ignored; blobs overwrite even when entries are skipped.
       `src/utils/exportImport.ts:41,67`
 

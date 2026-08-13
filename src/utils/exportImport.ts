@@ -50,6 +50,11 @@ function base64ToArrayBuffer(b64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
+// The one export format this app writes and understands. Bump when the on-disk
+// shape changes; refuse anything newer so a future export can't be silently
+// half-imported by an older build.
+const SUPPORTED_VERSION = 1;
+
 export async function exportData(adapter: StorageAdapter): Promise<void> {
   const timelines = await adapter.getAllTimelines();
   const entries = await adapter.getAllEntries();
@@ -90,6 +95,12 @@ export async function importData(adapter: StorageAdapter, file: File, mode: 'rep
   }
   const data = result.data;
 
+  if (data.version > SUPPORTED_VERSION) {
+    throw new Error(
+      `Import failed: this file was created by a newer version (format ${data.version}); please update Organizer.`,
+    );
+  }
+
   if (mode === 'replace') {
     const existingTimelines = await adapter.getAllTimelines();
     const existingEntries = await adapter.getAllEntries();
@@ -108,6 +119,12 @@ export async function importData(adapter: StorageAdapter, file: File, mode: 'rep
       ])
     : new Set<string>();
 
+  // In merge mode, existing blobs must not be clobbered: a colliding key belongs
+  // to a local entry we keep, so its bytes win just like its timeline/entry do.
+  const existingBlobKeys = mode === 'merge'
+    ? new Set(await adapter.getAllBlobKeys())
+    : new Set<string>();
+
   for (const timeline of data.timelines) {
     if (!existing.has(timeline.id)) await adapter.putTimeline(timeline);
   }
@@ -115,6 +132,7 @@ export async function importData(adapter: StorageAdapter, file: File, mode: 'rep
     if (!existing.has(entry.id)) await adapter.putEntry(entry);
   }
   for (const [key, b64] of Object.entries(data.blobs || {})) {
+    if (existingBlobKeys.has(key)) continue;
     await adapter.putBlob(key, base64ToArrayBuffer(b64));
   }
 }
