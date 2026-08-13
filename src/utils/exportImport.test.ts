@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { exportData, importData } from './exportImport';
 import { FakeAdapter } from '../test-utils/fakeAdapter';
+import { ConflictError } from '../storage/interface';
 import type { Timeline, Entry, ExportData } from '../types';
 
 const tl = (id: string, over: Partial<Timeline> = {}): Timeline => ({
@@ -135,5 +136,34 @@ describe('importData — merge mode', () => {
     const payload = { version: 1, timelines: [tl('t')], entries: [] } as unknown as ExportData;
     await expect(importData(a, makeFile(payload), 'merge')).resolves.toBeUndefined();
     expect(await a.getAllTimelines()).toHaveLength(1);
+  });
+});
+
+describe('importData — conflict handling', () => {
+  it('aborts before the destructive replace wipe when a conflict is already present', async () => {
+    const a = new FakeAdapter();
+    await a.putTimeline(tl('keep'));
+    await a.putEntry(en('keepE', 'keep'));
+    a.conflict = true;
+
+    const payload: ExportData = {
+      version: 1, timelines: [tl('new')], entries: [en('newE', 'new')], blobs: {},
+    };
+    await expect(importData(a, makeFile(payload), 'replace')).rejects.toThrow(/changed in another tab/i);
+
+    // Nothing was wiped: the existing data survives untouched.
+    expect((await a.getAllTimelines()).map((t) => t.id)).toEqual(['keep']);
+    expect((await a.getAllEntries()).map((e) => e.id)).toEqual(['keepE']);
+  });
+
+  it('translates a ConflictError raised mid-import into a clear message', async () => {
+    const a = new FakeAdapter();
+    // Race a conflict in after the up-front check: the first write throws.
+    a.putTimeline = async () => { throw new ConflictError(); };
+
+    const payload: ExportData = {
+      version: 1, timelines: [tl('new')], entries: [], blobs: {},
+    };
+    await expect(importData(a, makeFile(payload), 'merge')).rejects.toThrow(/during the import/i);
   });
 });

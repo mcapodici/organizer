@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { StorageAdapter } from '../storage/interface';
+import { ConflictError, type StorageAdapter } from '../storage/interface';
 import type { ExportData } from '../types';
 
 const attachmentSchema = z.object({
@@ -101,38 +101,60 @@ export async function importData(adapter: StorageAdapter, file: File, mode: 'rep
     );
   }
 
-  if (mode === 'replace') {
-    const existingTimelines = await adapter.getAllTimelines();
-    const existingEntries = await adapter.getAllEntries();
-    const existingBlobKeys = await adapter.getAllBlobKeys();
-    await Promise.all(existingTimelines.map((t) => adapter.deleteTimeline(t.id)));
-    await Promise.all(existingEntries.map((e) => adapter.deleteEntry(e.id)));
-    // Clear blobs too — a true replace starts from a clean slate, and leaving the
-    // old attachment data behind would orphan it (and stray .bin files on disk).
-    await Promise.all(existingBlobKeys.map((k) => adapter.deleteBlob(k)));
+  // Every adapter write is guarded against concurrent edits from another tab and
+  // throws ConflictError when the workspace moved underneath us. Import is one
+  // logical transaction (in `replace` mode it wipes first, then writes), so a
+  // conflict mid-loop would leave a half-applied — possibly half-wiped — store.
+  // Check up front so we abort BEFORE the destructive wipe, and translate any
+  // conflict that still races in during the writes into a clear message.
+  if (await adapter.hasConflict()) {
+    throw new Error(
+      'Import failed: your data was changed in another tab. Reload the page and try again.',
+    );
   }
 
-  const existing = mode === 'merge'
-    ? new Set([
-        ...(await adapter.getAllTimelines()).map((t) => t.id),
-        ...(await adapter.getAllEntries()).map((e) => e.id),
-      ])
-    : new Set<string>();
+  try {
+    if (mode === 'replace') {
+      const existingTimelines = await adapter.getAllTimelines();
+      const existingEntries = await adapter.getAllEntries();
+      const existingBlobKeys = await adapter.getAllBlobKeys();
+      await Promise.all(existingTimelines.map((t) => adapter.deleteTimeline(t.id)));
+      await Promise.all(existingEntries.map((e) => adapter.deleteEntry(e.id)));
+      // Clear blobs too — a true replace starts from a clean slate, and leaving the
+      // old attachment data behind would orphan it (and stray .bin files on disk).
+      await Promise.all(existingBlobKeys.map((k) => adapter.deleteBlob(k)));
+    }
 
-  // In merge mode, existing blobs must not be clobbered: a colliding key belongs
-  // to a local entry we keep, so its bytes win just like its timeline/entry do.
-  const existingBlobKeys = mode === 'merge'
-    ? new Set(await adapter.getAllBlobKeys())
-    : new Set<string>();
+    const existing = mode === 'merge'
+      ? new Set([
+          ...(await adapter.getAllTimelines()).map((t) => t.id),
+          ...(await adapter.getAllEntries()).map((e) => e.id),
+        ])
+      : new Set<string>();
 
-  for (const timeline of data.timelines) {
-    if (!existing.has(timeline.id)) await adapter.putTimeline(timeline);
-  }
-  for (const entry of data.entries) {
-    if (!existing.has(entry.id)) await adapter.putEntry(entry);
-  }
-  for (const [key, b64] of Object.entries(data.blobs || {})) {
-    if (existingBlobKeys.has(key)) continue;
-    await adapter.putBlob(key, base64ToArrayBuffer(b64));
+    // In merge mode, existing blobs must not be clobbered: a colliding key belongs
+    // to a local entry we keep, so its bytes win just like its timeline/entry do.
+    const existingBlobKeys = mode === 'merge'
+      ? new Set(await adapter.getAllBlobKeys())
+      : new Set<string>();
+
+    for (const timeline of data.timelines) {
+      if (!existing.has(timeline.id)) await adapter.putTimeline(timeline);
+    }
+    for (const entry of data.entries) {
+      if (!existing.has(entry.id)) await adapter.putEntry(entry);
+    }
+    for (const [key, b64] of Object.entries(data.blobs || {})) {
+      if (existingBlobKeys.has(key)) continue;
+      await adapter.putBlob(key, base64ToArrayBuffer(b64));
+    }
+  } catch (err) {
+    if (err instanceof ConflictError) {
+      throw new Error(
+        'Import failed: your data changed in another tab during the import. Reload the page and try again.',
+        { cause: err },
+      );
+    }
+    throw err;
   }
 }

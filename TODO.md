@@ -49,7 +49,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[Medium] Make `guardedWrite` atomic** — data can commit while the
       `saveId` bump fails, drifting data from its change marker.
       `src/storage/opfsAdapter.ts:196`, `src/storage/idbAdapter.ts:71`
-- [ ] **[Medium] Handle import `ConflictError` / partial apply** — the
+- [x] **[Medium] Handle import `ConflictError` / partial apply** — the
       `importData` loop has no conflict handling; in replace mode the wipe
       already ran. `src/utils/exportImport.ts`
 - [ ] **[Low] Guard export/import blob codecs** — full in-memory base64; `atob`
