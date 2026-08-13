@@ -118,7 +118,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Dead code
 
-- [ ] **[Medium] Remove unused `AppBanner` component + CSS** — only
+- [x] **[Medium] Remove unused `AppBanner` component + CSS** — only
       self-references (proven by grep).
 - [ ] **[Medium] Prune dead interface surface** — `mergeConflictFiles` (zero
       stubs), `duplicatedEntryId`, and `mergeForeignState` are never consumed at
