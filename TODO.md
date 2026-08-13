@@ -84,7 +84,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[Medium] Timeline title edit: keyboard access** — rename triggered by
       clicking a bare `<h1>` (no tabIndex/key handler). Add an explicit edit
       button. `src/components/TimelineView/TimelineView.tsx:135`
-- [ ] **[Medium] Image lightbox: closable by keyboard** — overlay closes on
+- [x] **[Medium] Image lightbox: closable by keyboard** — overlay closes on
       click only (no Escape/dialog role). Route through the shared `Modal`.
       `src/components/EntryCard/EntryCard.tsx:144`
 - [ ] **[Low] Standardize UI glyphs to lucide icons** — ✕/×/✎/+ text glyphs used

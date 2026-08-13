@@ -15,6 +15,7 @@ import { useStorage } from '../../context/StorageContext';
 import type { Entry, Attachment } from '../../types';
 import { formatTimestamp, formatFileSize, formatDueDate, getDueDateStatus } from '../../utils/dateFormat';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
+import { Modal } from '../Modal/Modal';
 import styles from './EntryCard.module.css';
 
 interface Props {
@@ -150,9 +151,11 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
         )}
       </div>
       {lightbox && (
-        <div className={styles.lightbox} onClick={() => setLightbox(null)}>
-          <img src={lightbox.src} alt={lightbox.alt} className={styles.lightboxImg} />
-        </div>
+        <Modal title={lightbox.alt} onClose={() => setLightbox(null)}>
+          <div className={styles.lightbox}>
+            <img src={lightbox.src} alt={lightbox.alt} className={styles.lightboxImg} />
+          </div>
+        </Modal>
       )}
     </div>
   );
