@@ -46,6 +46,11 @@ export class FakeAdapter implements StorageAdapter {
   async getBlob(key: string): Promise<ArrayBuffer | undefined> { return this.blobs.get(key); }
   async putBlob(key: string, data: ArrayBuffer): Promise<void> { this.blobs.set(key, data); }
   async deleteBlob(key: string): Promise<void> { this.blobs.delete(key); }
+  async clearAll(): Promise<void> {
+    this.timelines = [];
+    this.entries = [];
+    this.blobs.clear();
+  }
   async getAllBlobKeys(): Promise<string[]> { return [...this.blobs.keys()]; }
 
   async getAllBlobs(): Promise<Record<string, ArrayBuffer>> {

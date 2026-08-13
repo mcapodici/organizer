@@ -48,6 +48,7 @@ function withErrorCapture(
     deleteEntriesForTimeline: id => wrap(() => inner.deleteEntriesForTimeline(id)),
     putBlob: (k, d) => wrap(() => inner.putBlob(k, d)),
     deleteBlob: k => wrap(() => inner.deleteBlob(k)),
+    clearAll: () => wrap(() => inner.clearAll()),
     hasConflict: () => inner.hasConflict(),
     mergeFromDisk: active => inner.mergeFromDisk(active),
     mergeConflictFiles: () => inner.mergeConflictFiles(),

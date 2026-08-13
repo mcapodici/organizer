@@ -343,6 +343,19 @@ export class OpfsAdapter implements StorageAdapter {
     });
   }
 
+  // Wipe all user data: remove the `timelines/` and `blobs/` trees and empty the
+  // in-memory index. `meta/` (the saveId marker) is preserved so guardedWrite's
+  // conflict tracking keeps working across the wipe.
+  async clearAll(): Promise<void> {
+    await this.guardedWrite(async () => {
+      const root = this.root!;
+      try { await root.removeEntry('timelines', { recursive: true }); } catch { /* already gone */ }
+      try { await root.removeEntry('blobs', { recursive: true }); } catch { /* already gone */ }
+      this.timelines = new Map<string, string>();
+      this.entries = new Map<string, string>();
+    });
+  }
+
   // ----- Blobs -----
 
   private async blobDir(): Promise<FileSystemDirectoryHandle> {

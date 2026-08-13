@@ -21,6 +21,7 @@ export interface StorageAdapter {
   getBlob(key: string): Promise<ArrayBuffer | undefined>;
   putBlob(key: string, data: ArrayBuffer): Promise<void>;
   deleteBlob(key: string): Promise<void>;
+  clearAll(): Promise<void>;
   getAllBlobKeys(): Promise<string[]>;
   getAllBlobs(): Promise<Record<string, ArrayBuffer>>;
 

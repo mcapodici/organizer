@@ -90,4 +90,7 @@ export class IdbAdapter implements StorageAdapter {
   deleteEntriesForTimeline(id: string): Promise<void> { return this.guardedWrite(() => db.deleteEntriesForTimeline(id)); }
   putBlob(key: string, data: ArrayBuffer): Promise<void> { return this.guardedWrite(() => db.putBlob(key, data)); }
   deleteBlob(key: string): Promise<void> { return this.guardedWrite(() => db.deleteBlob(key)); }
+  clearAll(): Promise<void> {
+    return this.guardedWrite(() => db.clearAll());
+  }
 }

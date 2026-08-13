@@ -33,7 +33,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Usability / UX
 
-- [ ] **[Critical] Implement a real "Clear all data"** — `handleReset` deletes
+- [x] **[Critical] Implement a real "Clear all data"** — `handleReset` deletes
       nothing and no `clearAll()` exists; data survives a wipe the UI promises.
       Disable the button if the real fix can't land immediately.
       `src/components/Settings/Settings.tsx:39-42`

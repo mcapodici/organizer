@@ -36,7 +36,9 @@ export function Settings({ onDataChanged }: Props) {
     }
   }
 
-  function handleReset() {
+  async function handleReset() {
+    await adapter.clearAll();
+    await onDataChanged();
     setResetModalOpen(false);
     navigate('/', { replace: true });
   }
