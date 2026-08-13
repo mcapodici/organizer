@@ -106,7 +106,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Testing & quality
 
-- [ ] **[High] Behavior tests for untested core surfaces** — Settings,
+- [x] **[High] Behavior tests for untested core surfaces** — Settings,
       DueDatePopover, TimelineView (create/edit/delete, attachments, destructive
       actions) have zero tests. Use the existing `FakeAdapter`.
 - [ ] **[Medium] Add a StorageContext provider test** — safety-critical seam
