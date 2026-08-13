@@ -112,7 +112,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[Medium] Add a StorageContext provider test** — safety-critical seam
       (boot selection, 2s merge poll, write-error modal) is untested and every
       consumer mocks it away. `src/context/StorageContext.tsx`
-- [ ] **[Medium] Fix the brittle SearchBox timer test** — real `setTimeout(50)`
+- [x] **[Medium] Fix the brittle SearchBox timer test** — real `setTimeout(50)`
       before a negative assertion is racy on CI; use fake timers / a positive
       signal. `src/components/SearchBox/SearchBox.test.tsx:70`
 
