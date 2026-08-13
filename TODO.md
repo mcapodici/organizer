@@ -132,7 +132,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[High] Break up the `App.tsx` god component** — 367 lines mixing
       routing, resize drag, welcome seeding, undo wiring, and responsive state.
       Extract into focused modules/hooks. `src/App.tsx`
-- [ ] **[Medium] De-duplicate `EditTagsModal` / `capitalize` / `extractText`** —
+- [x] **[Medium] De-duplicate `EditTagsModal` / `capitalize` / `extractText`** —
       duplicated across TimelineList + TimelineView. Hoist to shared modules.
 
 ## Docs accuracy

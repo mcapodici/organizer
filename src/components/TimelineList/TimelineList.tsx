@@ -4,7 +4,7 @@ import type { Timeline } from '../../types';
 import type { TodoCount } from '../../hooks/useTodoCounts';
 import { TagFilter } from '../TagFilter/TagFilter';
 import { Modal } from '../Modal/Modal';
-import { TagInput } from '../TagInput/TagInput';
+import { EditTagsModal } from '../EditTagsModal/EditTagsModal';
 import styles from './TimelineList.module.css';
 
 interface Props {
@@ -204,24 +204,6 @@ function RenameModal({ timeline, onSave, onClose }: { timeline: Timeline; onSave
           <button type="button" className={styles.btnSecondary} onClick={onClose}>Cancel</button>
         </div>
       </form>
-    </Modal>
-  );
-}
-
-function EditTagsModal({ timeline, allTags, onSave, onClose }: {
-  timeline: Timeline;
-  allTags: string[];
-  onSave: (tags: string[]) => void;
-  onClose: () => void;
-}) {
-  const [tags, setTags] = useState(timeline.tags);
-  return (
-    <Modal title="Edit Tags" onClose={onClose}>
-      <TagInput tags={tags} allTags={allTags} onChange={setTags} />
-      <div className={styles.modalActions} style={{ marginTop: 12 }}>
-        <button className={styles.btn} onClick={() => onSave(tags)}>Save</button>
-        <button className={styles.btnSecondary} onClick={onClose}>Cancel</button>
-      </div>
     </Modal>
   );
 }

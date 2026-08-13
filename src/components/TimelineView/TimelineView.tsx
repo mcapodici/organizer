@@ -6,7 +6,7 @@ import { useStorage } from '../../context/StorageContext';
 import { EntryCard } from '../EntryCard/EntryCard';
 import { EntryComposer } from '../EntryComposer/EntryComposer';
 import { Modal } from '../Modal/Modal';
-import { TagInput } from '../TagInput/TagInput';
+import { EditTagsModal } from '../EditTagsModal/EditTagsModal';
 import styles from './TimelineView.module.css';
 
 interface Props {
@@ -215,23 +215,5 @@ export function TimelineView({
         />
       )}
     </div>
-  );
-}
-
-function EditTagsModal({ timeline, allTags, onSave, onClose }: {
-  timeline: Timeline;
-  allTags: string[];
-  onSave: (tags: string[]) => void;
-  onClose: () => void;
-}) {
-  const [tags, setTags] = useState(timeline.tags);
-  return (
-    <Modal title="Edit Tags" onClose={onClose}>
-      <TagInput tags={tags} allTags={allTags} onChange={setTags} />
-      <div className={styles.modalActions} style={{ marginTop: 12 }}>
-        <button className={styles.btn} onClick={() => onSave(tags)}>Save</button>
-        <button className={styles.btnSecondary} onClick={onClose}>Cancel</button>
-      </div>
-    </Modal>
   );
 }

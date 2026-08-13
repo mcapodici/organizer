@@ -16,6 +16,7 @@ import type { Entry, Attachment } from '../../types';
 import { formatTimestamp, formatFileSize, formatDueDate, getDueDateStatus } from '../../utils/dateFormat';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
 import { Modal } from '../Modal/Modal';
+import { capitalize } from '../../utils/text';
 import styles from './EntryCard.module.css';
 
 interface Props {
@@ -250,8 +251,4 @@ function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; on
       <Paperclip size={13} /> {attachment.name} <span className={styles.fileSize}>({formatFileSize(attachment.size)})</span>
     </a>
   );
-}
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
