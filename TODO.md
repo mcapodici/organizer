@@ -94,7 +94,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Type safety
 
-- [ ] **[High] Enable TypeScript strict mode** — no `strict`/`strictNullChecks`
+- [x] **[High] Enable TypeScript strict mode** — no `strict`/`strictNullChecks`
       anywhere, so every `!` (`this.root!`, `dueDate!`) is unverified. Enable
       `strict`, then work through the fallout. `tsconfig*.json`
 
