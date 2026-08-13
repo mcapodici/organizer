@@ -63,7 +63,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[High] Modal: focus trap, focus-on-open, focus restore** — `aria-modal`
       claims the background is inert but focus stays behind it and Tab escapes.
       Fix once in the shared component. `src/components/Modal.tsx:10-37`
-- [ ] **[High] Make search results keyboard-selectable** — bound to
+- [x] **[High] Make search results keyboard-selectable** — bound to
       `onMouseDown` only; Tab+Enter fires `click` and does nothing. Add
       `onClick`. `src/components/SearchBox/SearchBox.tsx:144`
 - [ ] **[Medium] Fix todo card nested-interactive `role="button"`** — a

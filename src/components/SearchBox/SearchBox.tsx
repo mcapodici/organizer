@@ -145,6 +145,7 @@ export function SearchBox({ timelines, fluid = false }: { timelines: Timeline[];
               key={r.entry.id}
               className={styles.result}
               onMouseDown={() => handleSelect(r)}
+              onClick={() => handleSelect(r)}
             >
               <div className={styles.resultMeta}>
                 <span className={styles.timelineName}>{r.timeline.name}</span>
