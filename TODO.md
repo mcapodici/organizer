@@ -60,7 +60,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Accessibility
 
-- [ ] **[High] Modal: focus trap, focus-on-open, focus restore** — `aria-modal`
+- [x] **[High] Modal: focus trap, focus-on-open, focus restore** — `aria-modal`
       claims the background is inert but focus stays behind it and Tab escapes.
       Fix once in the shared component. `src/components/Modal.tsx:10-37`
 - [ ] **[High] Make search results keyboard-selectable** — bound to
