@@ -148,7 +148,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[Medium] Tighten `.vercelignore`** — doesn't exclude `.env.local` (OIDC
       token), `.pipeline.log` (310 KB), `.git/`, or scratch dirs; all upload to
       the build context. Mirror `.env*`, `*.log`, `.git/`, local tool dirs.
-- [ ] **[Low] `deploy.sh`: run the full `check.sh` gate** — prod runs only
+- [x] **[Low] `deploy.sh`: run the full `check.sh` gate** — prod runs only
       `tsc` + test while preview runs full `check.sh`. Make prod no weaker.
 - [ ] **[Low] Cap `engines` to `>=22 <27`** — open `>=22` could auto-select an
       untested future major on Vercel; `mise` pins 26. `package.json`
