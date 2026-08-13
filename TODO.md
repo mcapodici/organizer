@@ -17,7 +17,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
       sink). `src/components/EntryCard/EntryCard.tsx:34-46`
 - [x] **[High] Add CSP + security headers on Vercel** — no CSP / `nosniff` /
       `Referrer-Policy` / `frame-ancestors`. `vercel.json`
-- [ ] **[Medium] Fix dependency vulnerabilities** — `npm audit fix`, bump
+- [x] **[Medium] Fix dependency vulnerabilities** — `npm audit fix`, bump
       `vite` / `react-router-dom`, re-run `scripts/check.sh`.
 
 ## Data integrity & persistence
