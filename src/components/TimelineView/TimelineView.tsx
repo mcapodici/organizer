@@ -132,9 +132,18 @@ export function TimelineView({
               />
             </form>
           ) : (
-            <h1 className={styles.name} onClick={() => { setNameInput(timeline.name); setEditingName(true); }}>
-              {timeline.name}
-            </h1>
+            <>
+              <h1 className={styles.name} onClick={() => { setNameInput(timeline.name); setEditingName(true); }}>
+                {timeline.name}
+              </h1>
+              <button
+                className={styles.editNameBtn}
+                aria-label="Rename timeline"
+                onClick={() => { setNameInput(timeline.name); setEditingName(true); }}
+              >
+                ✎ Rename
+              </button>
+            </>
           )}
         </div>
         <div className={styles.tagsRow}>

@@ -81,7 +81,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Usability / UX (continued)
 
-- [ ] **[Medium] Timeline title edit: keyboard access** — rename triggered by
+- [x] **[Medium] Timeline title edit: keyboard access** — rename triggered by
       clicking a bare `<h1>` (no tabIndex/key handler). Add an explicit edit
       button. `src/components/TimelineView/TimelineView.tsx:135`
 - [ ] **[Medium] Image lightbox: closable by keyboard** — overlay closes on
