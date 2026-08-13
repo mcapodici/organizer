@@ -25,7 +25,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[High] Quarantine corrupt OPFS files** — defensive parse at scan time;
       one invalid file currently wedges the app in a 2s retry loop.
       `src/storage/opfsAdapter.ts:161`
-- [ ] **[Medium] Guard import against missing `timelines`/`entries` arrays** —
+- [x] **[Medium] Guard import against missing `timelines`/`entries` arrays** —
       unguarded iteration crashes the importer. `src/utils/exportImport.ts:61-66`
 - [ ] **[Medium] Import: honor `version`; fix blob overwrite in merge mode** —
       `version` ignored; blobs overwrite even when entries are skipped.

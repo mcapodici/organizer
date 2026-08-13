@@ -31,8 +31,8 @@ const entrySchema = z.object({
 
 const exportDataSchema = z.object({
   version: z.number(),
-  timelines: z.array(timelineSchema),
-  entries: z.array(entrySchema),
+  timelines: z.array(timelineSchema).default([]),
+  entries: z.array(entrySchema).default([]),
   blobs: z.record(z.string(), z.string()).optional(),
 });
 
