@@ -310,6 +310,11 @@
   background: var(--danger);
 }
 
+.recentBadgeIcon {
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
 /* Row holding the empty state's primary and secondary actions. Wraps rather
    than overflowing on narrow screens. */
 .emptyActions {

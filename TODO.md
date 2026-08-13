@@ -69,7 +69,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 - [x] **[Medium] Fix todo card nested-interactive `role="button"`** — a
       `role=button` div wraps a real `<button>`; key handler misses Space.
       `src/components/TodoPage/TodoPage.tsx:224`
-- [ ] **[Medium] Overdue badge not distinguished by color alone** — add an
+- [x] **[Medium] Overdue badge not distinguished by color alone** — add an
       `aria-label` (e.g. "3 todos, 2 overdue") + a non-color glyph (WCAG 1.4.1).
       `src/components/TimelineList/TimelineList.tsx:116`
 - [ ] **[Low] Composer date/time inputs: add aria-labels** — inputs lack a

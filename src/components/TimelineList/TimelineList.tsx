@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, MoreVertical, Filter } from 'lucide-react';
+import { Plus, MoreVertical, Filter, AlertTriangle } from 'lucide-react';
 import type { Timeline } from '../../types';
 import type { TodoCount } from '../../hooks/useTodoCounts';
 import { TagFilter } from '../TagFilter/TagFilter';
@@ -114,7 +114,13 @@ export function TimelineList({ timelines, allTags, activeId, todoCounts, onSelec
               <button className={styles.name} onClick={() => onSelect(t.id)}>
                 <span className={styles.nameText}>{t.name}</span>
                 {todoCounts[t.id] ? (
-                  <span className={`${styles.todoBadge} ${todoCounts[t.id].overdue > 0 ? styles.todoBadgeOverdue : ''}`}>
+                  <span
+                    className={`${styles.todoBadge} ${todoCounts[t.id].overdue > 0 ? styles.todoBadgeOverdue : ''}`}
+                    aria-label={todoBadgeLabel(todoCounts[t.id])}
+                  >
+                    {todoCounts[t.id].overdue > 0 && (
+                      <AlertTriangle size={11} aria-hidden="true" className={styles.todoBadgeIcon} />
+                    )}
                     {todoCounts[t.id].count}
                   </span>
                 ) : null}
@@ -175,6 +181,11 @@ export function TimelineList({ timelines, allTags, activeId, todoCounts, onSelec
       )}
     </aside>
   );
+}
+
+function todoBadgeLabel({ count, overdue }: TodoCount): string {
+  const todos = `${count} ${count === 1 ? 'todo' : 'todos'}`;
+  return overdue > 0 ? `${todos}, ${overdue} overdue` : todos;
 }
 
 function RenameModal({ timeline, onSave, onClose }: { timeline: Timeline; onSave: (name: string) => void; onClose: () => void }) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { CheckSquare, Settings as SettingsIcon, Menu, Plus, Filter, BookOpen } from 'lucide-react';
+import { CheckSquare, Settings as SettingsIcon, Menu, Plus, Filter, BookOpen, AlertTriangle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { useTimelines } from './hooks/useTimelines';
@@ -336,7 +336,15 @@ export default function App() {
                       <button key={t.id} className={styles.recentItem} onClick={() => handleSelectTimeline(t.id)}>
                         <span className={styles.recentName}>{t.name}</span>
                         {todoCounts[t.id] ? (
-                          <span className={`${styles.recentBadge} ${todoCounts[t.id].overdue > 0 ? styles.recentBadgeOverdue : ''}`}>
+                          <span
+                            className={`${styles.recentBadge} ${todoCounts[t.id].overdue > 0 ? styles.recentBadgeOverdue : ''}`}
+                            aria-label={todoCounts[t.id].overdue > 0
+                              ? `${todoCounts[t.id].count} ${todoCounts[t.id].count === 1 ? 'todo' : 'todos'}, ${todoCounts[t.id].overdue} overdue`
+                              : `${todoCounts[t.id].count} ${todoCounts[t.id].count === 1 ? 'todo' : 'todos'}`}
+                          >
+                            {todoCounts[t.id].overdue > 0 && (
+                              <AlertTriangle size={11} aria-hidden="true" className={styles.recentBadgeIcon} />
+                            )}
                             {todoCounts[t.id].count}
                           </span>
                         ) : null}
