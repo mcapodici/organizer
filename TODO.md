@@ -145,7 +145,7 @@ Severity tags: **Critical** > **High** > **Medium** > **Low**.
 
 ## Build, deploy & config
 
-- [ ] **[Medium] Tighten `.vercelignore`** — doesn't exclude `.env.local` (OIDC
+- [x] **[Medium] Tighten `.vercelignore`** — doesn't exclude `.env.local` (OIDC
       token), `.pipeline.log` (310 KB), `.git/`, or scratch dirs; all upload to
       the build context. Mirror `.env*`, `*.log`, `.git/`, local tool dirs.
 - [ ] **[Low] `deploy.sh`: run the full `check.sh` gate** — prod runs only
