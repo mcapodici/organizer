@@ -1,0 +1,42 @@
+name: CI
+
+# Runs the full local verification suite (scripts/check.sh) on every pull
+# request and on pushes to main:
+#   lint -> unit tests -> TypeScript -> VitePress docs build -> Vite app build
+#   -> Playwright e2e.
+#
+# Node is pinned to 24 to match the version Vercel builds with. Bump this in
+# lockstep with any Vercel Node upgrade (handled manually).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref (e.g. rapid pushes to a PR).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Verify (Node 24)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium + OS deps
+        run: npx playwright install --with-deps chromium
+
+      - name: Run full verification suite
+        run: npm run check
