@@ -17,3 +17,21 @@
 - Improved demo: ./improved.webm (also ./improved-mockup.png). Injected `<style>`: `.dueStatusWeek { color:#15803d }`, raising DUE SOON to 4.79:1. Reloaded to discard.
 - Fix pointer: `src/components/TodoPage/TodoPage.module.css:185-198` — `.dueStatusWeek` color `#16a34a`→`#15803d`; `.dueStatusOverdue` `#dc2626`→`#b91c1c` (or darker bg). These hard-coded hexes also violate UI_STANDARDS §1 (use design tokens) and §3 (contrast minimums).
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

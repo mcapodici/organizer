@@ -13,3 +13,23 @@
 - Improved demo: ./improved.webm (also ./improved-mockup.png). The app's `window` capture-phase scroll listener runs before any injected listener, so it can't be neutralised live without editing the component; instead the demo scrolls the list *first*, then opens the popover, showing it renders and stays fully usable at a scrolled offset — i.e. reposition-on-scroll is viable. Reloaded to discard.
 - Fix pointer: `src/components/DueDatePopover/DueDatePopover.tsx:47-57` — replace `handleScroll = onClose` with a reposition callback (reuse `computePosition(anchorRect, ...)` against a fresh trigger rect), or debounce/ignore small scrolls. Keep the `resize` → reposition behaviour too.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+![issue-2.png](./issue-2.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

@@ -15,3 +15,19 @@
 - Improved demo: ./improved.webm (throwaway tweak: a capture-phase click listener was attached to the "Clear everything" button that `clear()`s the `timelines`, `entries`, and `blobs` object stores in the `timeline-app` IndexedDB, then navigates home and reloads. After the tweak the timeline count went from 5 → 0, i.e. the intended behavior.)
 - Fix pointer: `src/components/Settings/Settings.tsx` `handleReset` — make it `async`, delete all data through `useStorage().adapter` (getAllTimelines/getAllEntries/getAllBlobKeys → deleteTimeline/deleteEntry/deleteBlob), `await onDataChanged()`, then navigate. Reuse the deletion logic already in `src/utils/exportImport.ts` (`importData` replace branch). Consider extracting a shared `clearAllData(adapter)` helper.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

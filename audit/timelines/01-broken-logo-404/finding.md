@@ -15,3 +15,21 @@
 - Improved demo: ./improved.webm (throwaway tweak: ran `document.querySelectorAll('img[src="/logo.svg"]').forEach(i => i.src = '/app/logo.svg')` in the page — all three logos then render, `naturalWidth` becomes 150). Also ./improved-1.png. Tweak discarded via reload.
 - Fix pointer: `src/App.tsx` — the three `<img src="/logo.svg">` occurrences (header `appLogo` ~line 192, mobile brand ~line 250, empty-state `emptyLogo` ~line 331). Grep for other root-absolute `src="/..."` asset references too. Prefer `import.meta.env.BASE_URL`.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

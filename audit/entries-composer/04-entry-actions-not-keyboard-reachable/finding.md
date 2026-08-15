@@ -30,3 +30,21 @@
   `.card:hover .actions, .card:focus-within .actions { opacity: 1 }`, and add a
   focus style for the buttons.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

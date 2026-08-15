@@ -13,3 +13,19 @@
 - Improved demo: ./improved.webm (throwaway tweak: captured the timeline row and its entries from IndexedDB before deletion, deleted through the real UI, then injected a `Deleted "<name>" and N entries · Undo` bar whose button re-`put`s the timeline and all its entries and reloads — the timeline reappears in the sidebar). Reloaded to discard.
 - Fix pointer: `src/App.tsx` `removeTimeline` — before `adapter.deleteTimeline`/`deleteEntriesForTimeline`, snapshot the timeline + its entries (+ referenced blobs), then `registerUndo` a callback that restores them (`src/context/UndoContext.tsx`, mirror `src/utils/todoUndo.ts`).
 - Effort: L
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

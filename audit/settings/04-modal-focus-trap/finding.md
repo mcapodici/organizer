@@ -14,3 +14,19 @@
 - Improved demo: ./improved.webm (throwaway tweak: injected an initial `.focus()` onto the Cancel button plus a `keydown` Tab handler on the `[role=dialog]` that wraps focus between the first and last focusable elements. After the tweak, 6 Tabs kept focus inside the dialog — ending on "Cancel", `insideDialog: true`. Discarded on reload.)
 - Fix pointer: `src/components/Modal/Modal.tsx` — on mount, store `document.activeElement`, focus the dialog (the `ref` is already there), add a Tab-trap keydown handler scoped to the modal, and restore focus in the cleanup. This fixes every modal in the app at once.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

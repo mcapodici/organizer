@@ -14,3 +14,21 @@
 - Improved demo: ./improved.webm (throwaway tweak: injected `aria-pressed` on every tag button reflecting its `.active` class, and added a `✓` + bold weight to the selected tag as a non-colour cue). Also ./improved-1.png; the selected tag is now reachable via `getByRole('button', { pressed: true })`. Reverted with `reload`.
 - Fix pointer: `src/components/TagFilter/TagFilter.tsx` — add `aria-pressed={selected.includes(tag)}` to each tag `<button>`; optionally add a check/indicator element in the `.active` state in `TagFilter.module.css`.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

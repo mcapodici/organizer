@@ -12,3 +12,21 @@
 - Improved demo: ./improved.webm and ./improved-1.png (throwaway tweak: replaced the button's inner content with an inline lucide `pencil` SVG + "Edit tags" and set `display:inline-flex; align-items:center`). Tweak discarded via reload.
 - Fix pointer: `src/components/TimelineView/TimelineView.tsx:144-146` (`editTagsBtn` label; import `Pencil`, `Plus` from `lucide-react`) and `.editTagsBtn` in `src/components/TimelineView/TimelineView.module.css` (add `display:inline-flex; gap` for icon spacing).
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

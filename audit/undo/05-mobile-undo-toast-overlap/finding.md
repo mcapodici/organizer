@@ -13,3 +13,21 @@
 - Improved demo: ./improved.webm / ./improved-1.png (throwaway tweak: injected `@media (max-width:768px){ [class*=bar]{ bottom:78px !important; z-index:10001 !important } }` so the undo bar sits above the merge toast and both are fully visible/clickable). Reloaded to discard.
 - Fix pointer: `src/components/UndoBar/UndoBar.module.css` mobile block — offset `bottom` above the toast stack height and raise `z-index` above the toast, or coordinate placement with `ToastStack` in `src/components/Toast/Toast.tsx` / `src/context/StorageContext.tsx`.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

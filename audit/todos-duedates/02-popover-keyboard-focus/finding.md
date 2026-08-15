@@ -13,3 +13,21 @@
 - Improved demo: ./improved.webm (throwaway tweak, also ./improved-mockup.png). Injected via `run-code`: set `aria-modal="true"`, focused the first control, and added a `keydown` handler that cycles Tab/Shift+Tab between the first and last focusable controls. Focus then stays inside the dialog. Reloaded to discard.
 - Fix pointer: `src/components/DueDatePopover/DueDatePopover.tsx` — add an initial-focus effect and a Tab focus-trap (or a small `focus-trap` helper), set `aria-modal="true"`, and store/restore the trigger element on close. The trigger `<button>` lives in `src/components/TodoPage/TodoPage.tsx:234-254`.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

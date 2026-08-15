@@ -13,3 +13,19 @@
 - Improved demo: ./improved.webm (throwaway tweak: captured the entry record from IndexedDB before deletion, deleted through the real UI, then injected an "Entry deleted · Undo" bar whose button re-`put`s the entry into the `entries` store and reloads — the deleted entry comes back). Reloaded to discard the injected bar.
 - Fix pointer: route entry deletion through `UndoContext.registerUndo` (`src/context/UndoContext.tsx`); capture the `Entry` before `adapter.deleteEntry` in `src/App.tsx`'s delete handler and restore it via `adapter.putEntry` in the undo callback (mirror `src/utils/todoUndo.ts`). Also restore any orphaned attachment blobs.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

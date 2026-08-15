@@ -14,3 +14,21 @@
 - Improved demo: ./improved.webm (throwaway tweak: injected a persistent "Filtering by: personal · Clear filters" bar above the list while the panel stays collapsed). Also ./improved-1.png. Reverted with `reload`.
 - Fix pointer: `src/components/TimelineList/TimelineList.tsx` — render a compact active-filter summary + Clear whenever `filterTags.length > 0`, independent of `showFilter`; or lift the Clear affordance out of `TagFilter` so it survives panel collapse.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

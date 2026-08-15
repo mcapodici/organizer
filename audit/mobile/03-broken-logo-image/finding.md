@@ -13,3 +13,19 @@
 - Improved demo: ./improved.webm (throwaway tweak: `document.querySelectorAll('img').forEach(i => { if (/\/logo\.svg$/.test(i.src)) i.src = '/app/logo.svg' })`). The logo renders correctly (`naturalWidth > 0`). Tweak discarded via `reload`.
 - Fix pointer: `src/App.tsx` lines 192, 250, 331 and `src/components/AppBanner/AppBanner.tsx` line 14 — replace `src="/logo.svg"` with `` src={`${import.meta.env.BASE_URL}logo.svg`} ``. Note `src/App.test.tsx` line 74 asserts the literal `'/logo.svg'`, so update that expectation too.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

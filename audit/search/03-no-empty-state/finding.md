@@ -24,3 +24,21 @@
   `queryWords.length > 0` and render a no-results branch when `results.length === 0`.
   Add an `.empty`/`.noResults` style in `SearchBox.module.css`.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

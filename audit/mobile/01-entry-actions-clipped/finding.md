@@ -14,3 +14,21 @@
 - Improved demo: ./improved.webm (throwaway tweak: injected `[class*="_meta_"] { flex-wrap: wrap !important; row-gap: 6px }` — the real change is adding `flex-wrap: wrap` to `.meta` in `EntryCard.module.css`). Actions wrap to a second line and Delete becomes fully visible; the date also stops breaking vertically. Still: ./improved-1.png. Tweak discarded via `reload`.
 - Fix pointer: `src/components/EntryCard/EntryCard.module.css` `.meta` (line 51 — add `flex-wrap: wrap`) and/or restructure the `.actions` group (`EntryCard.tsx` 124–130) into an overflow menu. Consider a small `@media (max-width: 768px)` rule so wrapping only applies on narrow screens.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

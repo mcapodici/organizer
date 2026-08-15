@@ -16,3 +16,21 @@
 - Improved demo: ./improved.webm and ./improved-mockup.png (throwaway tweak: a capture-phase listener on the "Replace all data" button that, instead of the silent handler, injects a red error banner into the modal reading "Import failed: this file is not valid JSON. Your existing data was left unchanged." — demonstrating the missing feedback. Discarded on reload.)
 - Fix pointer: `src/components/Settings/Settings.tsx` `handleImport` — add `catch (err) { showError(...) }`, keep modal open on failure. Surface errors through the existing `ToastStack` (see `src/context/StorageContext.tsx` / `src/components/Toast/Toast.tsx`). Optionally add shape validation in `src/utils/exportImport.ts` `importData`.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

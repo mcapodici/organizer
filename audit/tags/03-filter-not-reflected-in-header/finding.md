@@ -13,3 +13,21 @@
 - Improved demo: ./improved.webm (throwaway tweak: injected a "Hidden by active filter · personal · clear filter" notice directly under the main `h1`). Also ./improved-1.png. Reverted with `reload`.
 - Fix pointer: lift `filterTags` so the main view can read it (currently local to `TimelineList`), then surface it in `TimelineView`'s header or in `App.tsx` around the `<TimelineView>` render.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

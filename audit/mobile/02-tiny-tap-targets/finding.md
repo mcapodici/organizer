@@ -19,3 +19,19 @@
 - Improved demo: ./improved.webm (throwaway tweak: injected `min-width/min-height:44px` + extra padding on `[class*="_toolBtn_"]`, `[class*="_actionBtn_"]`, `[class*="_customTimeBtn_"]`, `[class*="_todoCheckBtn_"]`). Targets grow to ≥44px and the toolbar stays usable (it already wraps). Tweak discarded via `reload`.
 - Fix pointer: `EntryComposer.module.css` `.toolBtn` (line 75), `.customTimeBtn` (line ~358), `.expandBtn` (line 48); `EntryCard.module.css` `.actionBtn` (line 88) and `.todoCheckBtn` (line ~261). Add a coarse-pointer media block bumping `min-height`/`min-width` to 44px.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

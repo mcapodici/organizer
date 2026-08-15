@@ -31,3 +31,19 @@
   on the input and `role="listbox"`/`role="option"` on the dropdown/results; add
   an active-item style in `SearchBox.module.css`.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

@@ -13,3 +13,23 @@
 - Improved demo: ./improved.webm (also ./improved-mockup.png). Injected `<style>`: `.checkIcon { opacity: .4 }` — the check is now faintly visible at rest and still emphasises on hover. Reloaded to discard.
 - Fix pointer: `src/components/TodoPage/TodoPage.module.css:95-104` — change `.checkIcon { opacity: 0 }` to a resting `~0.4` and keep the hover/focus rule bumping it to `1`.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+![issue-2-hover.png](./issue-2-hover.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

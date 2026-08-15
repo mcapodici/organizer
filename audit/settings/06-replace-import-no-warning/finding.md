@@ -14,3 +14,21 @@
 - Improved demo: ./improved.webm and ./improved-mockup.png (throwaway tweak: injected a red warning banner under "Choose how to import:" reading that Replace permanently deletes current data, and reordered the buttons so the safe "Merge" comes first. Discarded on reload.)
 - Fix pointer: `src/components/Settings/Settings.tsx` import modal (lines 133-153) — add warning copy, reorder actions (Merge first), and/or gate `handleImport('replace')` behind a confirm step.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

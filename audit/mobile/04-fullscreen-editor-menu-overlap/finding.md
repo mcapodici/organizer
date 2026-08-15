@@ -13,3 +13,19 @@
 - Improved demo: ./improved.webm (throwaway tweak: injected `[class*="_expanded_"] [class*="_composerLabel_"] { padding-left: 56px !important }`). The "NEW NOTE" title shifts right and is fully readable. Tweak discarded via `reload`.
 - Fix pointer: `src/components/EntryComposer/EntryComposer.module.css` — add a rule so `.expanded .composerLabel` gets left padding on mobile (or set the expanded composer `z-index` above `.mobileBurger` and pad the top). Alternatively hide `.mobileBurger` (`src/App.module.css` line 433) while a composer is expanded.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

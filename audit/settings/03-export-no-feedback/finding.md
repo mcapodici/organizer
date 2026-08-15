@@ -13,3 +13,21 @@
 - Improved demo: ./improved.webm and ./improved-mockup.png (throwaway tweak: a capture-phase listener on the Export button that shows a bottom-centered "✓ Exported timelines-2026-08-15.json" toast for ~2.6s. Discarded on reload.)
 - Fix pointer: `src/components/Settings/Settings.tsx` `handleExport` — emit a success toast. `src/context/StorageContext.tsx` line 162 / `markSaved` — expose `lastSaved` for the OPFS phase too (read from localStorage on boot for OPFS as it already does for IDB on line 87).
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

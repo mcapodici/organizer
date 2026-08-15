@@ -20,3 +20,21 @@
 - Improved demo: ./improved.webm and ./improved-1.png (throwaway tweak: set `tabindex=0`, `role="button"`, `aria-label`, `title` on the `<h1>`, added a `:focus-visible` outline, and focused it to show the keyboard focus ring; a "✎" hint was injected only to illustrate an affordance — the real fix should use a lucide icon). Tweak discarded via reload.
 - Fix pointer: `src/components/TimelineView/TimelineView.tsx:135` (the `<h1 className={styles.name}>` click handler) and `src/components/TimelineView/TimelineView.module.css` `.name` (add `:focus-visible` styling; add an icon element). Consider a lucide `Pencil` import.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

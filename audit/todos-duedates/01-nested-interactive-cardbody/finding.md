@@ -13,3 +13,21 @@
 - Improved demo: ./improved.webm (throwaway tweak, also captured as ./improved-mockup.png). Injected via `run-code`: removed `role`/`tabIndex` from `.cardBody`, replaced the preview `<div>` with a `<button aria-label="Open in timeline: …">`, leaving the due pill a sibling. The a11y tree then shows separate `"Open in timeline: …"` and `"OVERDUE 12 Aug 2026"` buttons with no wrapping button. Reloaded to discard.
 - Fix pointer: `src/components/TodoPage/TodoPage.tsx:224-264` — drop `role="button"`/`tabIndex`/`onKeyDown` from `.cardBody`; wrap `entryPreview(...)` text in its own button/link; keep the due-date `<button>` as a sibling. `.cardBody` cursor style in `TodoPage.module.css:113-117`.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

@@ -13,3 +13,21 @@
 - Improved demo: ./improved.webm and ./improved-mockup.png (throwaway tweak: rewrote each `img[src="/logo.svg"]` to `/app/logo.svg`; the image then loaded with `naturalWidth: 150`. Discarded on reload.)
 - Fix pointer: `src/App.tsx` (lines 192, 250, 331), `src/components/AppBanner/AppBanner.tsx` (line 14) — replace `"/logo.svg"` with `` `${import.meta.env.BASE_URL}logo.svg` `` (or an `import logoUrl from '.../logo.svg'`). Note `src/App.test.tsx` line 74 asserts the literal `/logo.svg` and will need updating.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

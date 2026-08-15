@@ -15,3 +15,23 @@
 - Improved demo: ./improved.webm (throwaway tweak: injected JS that lower-cases each `.tag` filter chip and hides any whose normalised label was already seen — i.e. what a case-insensitive dedup would produce; only one `client` chip remains). Also ./improved-1.png. Reverted with `reload`.
 - Fix pointer: `src/components/TagInput/TagInput.tsx` `addTag()` (line ~26-29) — compare `trimmed.toLowerCase()` against existing tags lower-cased before pushing; optionally reuse the existing tag's canonical casing. Consider also normalising in `src/hooks/useTags.ts` so historical mixed-case data collapses in the filter.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+![issue-2.png](./issue-2.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

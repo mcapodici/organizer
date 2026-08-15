@@ -13,3 +13,21 @@
 - Improved demo: ./improved.webm / ./improved-1.png (throwaway tweak: a `MutationObserver` rewrote the bar label to `Marked done · Long run — 18 miles` when it appeared). Reloaded to discard.
 - Fix pointer: `src/utils/todoUndo.ts` `describeTodoChange` — accept/return a preview snippet and append it; or have the caller in `src/components/TodoPage/TodoPage.tsx` / `src/App.tsx` pass the entry preview into `registerUndo`. Keep the label to one line (the bar already ellipsis-truncates).
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

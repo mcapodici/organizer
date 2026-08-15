@@ -12,3 +12,21 @@
 - Improved demo: ./improved.webm (throwaway tweak, also ./improved-mockup.png). Injected a `<style>`: `.checkBtn { width:40px; height:40px }` and `.dueDate { min-height:32px; padding: 6px 0; align-items:center }`. Measured check button becomes 40×40. Reloaded to discard.
 - Fix pointer: `src/components/TodoPage/TodoPage.module.css` — `.checkBtn` (lines 71-87) width/height; `.dueDate` (lines 150-165) vertical padding/min-height. Keep the icon glyph small while enlarging the hit box (e.g. padding + negative margin, or a fixed 40 px box).
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

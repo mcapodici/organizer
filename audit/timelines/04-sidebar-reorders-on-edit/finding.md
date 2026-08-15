@@ -15,3 +15,23 @@
 - Improved demo: ./improved.webm and ./improved-1.png (throwaway tweak: after the jump, re-appended the sidebar `<li>` nodes into a stable order so "Journal" returns to its original 4th slot while staying active/highlighted — illustrating a list that doesn't reshuffle mid-edit). Tweak discarded via reload.
 - Fix pointer: `src/hooks/useTimelines.ts:12-22` (the `updatedAt`/`createdAt` sort) and `src/App.tsx` `touchActiveTimeline` (~line 92) which stamps `updatedAt` on the active timeline after every entry write. Consider decoupling "recently changed" ordering from the currently-open timeline, or adding a manual `order` field.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+![issue-2.png](./issue-2.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-1.png](./improved-1.png)
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

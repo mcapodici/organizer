@@ -14,3 +14,19 @@
 - Improved demo: ./improved.webm (throwaway tweak: injected a `MutationObserver` that calls `.focus()` on the "Undo" button when the bar mounts, plus a `button:focus{outline:3px solid #6366f1}` style; then marked a todo done and pressed **Enter** to undo without touching the mouse). Reloaded afterwards to discard.
 - Fix pointer: `src/context/UndoContext.tsx` (focus the Undo button on register, restore focus on clear) and/or `src/components/UndoBar/UndoBar.tsx` (autofocus + focus-visible style, `tabIndex`/`ref`). Consider a global keyboard handler for Ctrl/Cmd+Z bound to the pending undo.
 - Effort: M
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+<video controls preload="metadata" width="720" src="./improved.webm"></video>
+
+<!-- media-embed:end -->

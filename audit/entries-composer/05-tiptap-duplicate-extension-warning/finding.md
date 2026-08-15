@@ -30,3 +30,19 @@
   prefer `StarterKit.configure({ link: false, underline: false })` and keep
   `EntryLink` + `Underline`; make the composer and card extension lists match.
 - Effort: S
+
+<!-- media-embed:start -->
+
+## Evidence
+
+### Issue
+
+![issue-1.png](./issue-1.png)
+
+<video controls preload="metadata" width="720" src="./issue.webm"></video>
+
+### Improved
+
+![improved-mockup.png](./improved-mockup.png)
+
+<!-- media-embed:end -->
