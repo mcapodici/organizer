@@ -93,3 +93,49 @@ test('importing malformed JSON shows a visible error and leaves data intact', as
   await page.reload();
   await expect(page.getByText('Data that must survive a bad import', { exact: true })).toBeVisible();
 });
+
+test('modal traps keyboard focus and restores it on close', async ({ page }) => {
+  await bootApp(page);
+
+  // Open Settings and remember the trigger for the Clear modal.
+  await page.getByRole('button', { name: 'Settings' }).filter({ visible: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
+  const clearButton = page.getByRole('button', { name: 'Clear' });
+  await clearButton.click();
+
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Clear all data' })).toBeVisible();
+
+  // On open, focus moves into the dialog rather than staying on the trigger.
+  await expect(async () => {
+    const insideDialog = await page.evaluate(() => {
+      const dlg = document.querySelector('[role="dialog"]');
+      return !!dlg && dlg.contains(document.activeElement);
+    });
+    expect(insideDialog).toBe(true);
+  }).toPass();
+
+  // Tabbing many times never escapes the dialog.
+  for (let i = 0; i < 8; i++) {
+    await page.keyboard.press('Tab');
+    const insideDialog = await page.evaluate(() => {
+      const dlg = document.querySelector('[role="dialog"]');
+      return !!dlg && dlg.contains(document.activeElement);
+    });
+    expect(insideDialog).toBe(true);
+  }
+
+  // Shift+Tab also stays trapped.
+  await page.keyboard.press('Shift+Tab');
+  expect(
+    await page.evaluate(() => {
+      const dlg = document.querySelector('[role="dialog"]');
+      return !!dlg && dlg.contains(document.activeElement);
+    }),
+  ).toBe(true);
+
+  // Closing via Escape restores focus to the element that opened the modal.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(clearButton).toBeFocused();
+});
