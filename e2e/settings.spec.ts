@@ -42,3 +42,23 @@ test('export from settings, wipe the data, and re-import it intact', async ({ pa
   await page.reload();
   await expect(page.getByText('Precious data that must survive', { exact: true })).toBeVisible();
 });
+
+test('"Clear everything" actually wipes all data', async ({ page }) => {
+  await bootApp(page);
+  await createTimeline(page, 'Doomed Timeline');
+  await addEntry(page, 'This entry should be permanently deleted');
+
+  // Open Settings and trigger the destructive clear.
+  await page.getByRole('button', { name: 'Settings' }).filter({ visible: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
+  await page.getByRole('button', { name: 'Clear' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Clear all data' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Clear everything' }).click();
+
+  // The timeline is gone from the sidebar and stays gone across a real reload.
+  await expect(page.locator('aside li', { hasText: 'Doomed Timeline' })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Go home' }).first()).toBeVisible();
+  await expect(page.locator('aside li', { hasText: 'Doomed Timeline' })).toHaveCount(0);
+});
