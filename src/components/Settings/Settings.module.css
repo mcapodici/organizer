@@ -143,6 +143,17 @@
   flex-wrap: wrap;
 }
 
+.importError {
+  background: var(--danger-surface, rgba(220, 38, 38, 0.08));
+  border: 1px solid var(--danger, #dc2626);
+  color: var(--danger, #dc2626);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+
 @media (max-width: 768px) {
   .page {
     padding: 20px 16px;
