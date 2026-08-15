@@ -29,3 +29,19 @@ test('create, rename, and delete a timeline from the sidebar', async ({ page }) 
   // With no timeline selected the app falls back to the home screen.
   await expect(page.getByRole('heading', { name: 'What to smash next?' })).toBeVisible();
 });
+
+test('the brand logo loads on every route (base path is honored)', async ({ page }) => {
+  await bootApp(page);
+
+  // On the empty/home state, every logo image must actually render: a broken
+  // 404 leaves naturalWidth === 0. This fails when the logo is referenced with
+  // a root-absolute `/logo.svg` because the app is served under `/app/`.
+  const logos = page.locator('img[alt=""], img[alt="Organizer"]');
+  const count = await logos.count();
+  expect(count).toBeGreaterThan(0);
+  for (let i = 0; i < count; i++) {
+    const logo = logos.nth(i);
+    await expect(logo).toHaveJSProperty('complete', true);
+    expect(await logo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  }
+});

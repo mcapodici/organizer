@@ -11,7 +11,7 @@ export function AppBanner({ onLogoClick, rightSlot }: Props) {
     <header className={styles.header}>
       <div className={styles.headerInner}>
         <button type="button" className={styles.brand} onClick={onLogoClick} aria-label="Home">
-          <img src="/logo.svg" alt="" className={styles.logo} />
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className={styles.logo} />
           <span className={styles.brandName}>Organizer</span>
         </button>
         {rightSlot && <div className={styles.right}>{rightSlot}</div>}

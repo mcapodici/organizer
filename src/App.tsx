@@ -189,7 +189,7 @@ export default function App() {
     <div className={styles.app}>
       <header className={styles.appHeader}>
         <button className={styles.logoBtn} onClick={() => navigate('/')} aria-label="Go home">
-          <img src="/logo.svg" alt="" className={styles.appLogo} />
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className={styles.appLogo} />
           <span className={styles.appWordmark}>Organizer</span>
         </button>
         <div className={styles.headerSearch}>
@@ -247,7 +247,7 @@ export default function App() {
               aria-label="Go home"
               title={`Organizer · ${__BUILD_INFO__}`}
             >
-              <img src="/logo.svg" alt="Organizer" className={styles.appLogo} />
+              <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Organizer" className={styles.appLogo} />
             </button>
             <div className={styles.mobileSearch}>
               <SearchBox timelines={timelines} fluid />
@@ -328,7 +328,7 @@ export default function App() {
           ) : (
             <div className={styles.empty}>
               <div className={styles.emptyInner}>
-                <div className={styles.emptyIcon}><img src="/logo.svg" alt="" className={styles.emptyLogo} /></div>
+                <div className={styles.emptyIcon}><img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className={styles.emptyLogo} /></div>
                 <h2 className={styles.emptyHeading}>What to smash next?</h2>
                 {timelines.length > 0 && (
                   <div className={styles.recentList}>
