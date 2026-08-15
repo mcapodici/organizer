@@ -33,6 +33,41 @@ test('entry round-trip: create, edit, reload-persist, delete (default storage)',
   await expect(page.getByText('Timeline Start', { exact: true })).toBeVisible();
 });
 
+test('link toolbar button turns selected text into a link and can unlink it', async ({ page }) => {
+  await bootApp(page);
+  await createTimeline(page, 'Linkable');
+
+  // Type note text and select all of it in the composer.
+  const editor = page.locator('.ProseMirror');
+  await editor.click();
+  await editor.fill('Read the procurement guide');
+  await page.keyboard.press('ControlOrMeta+a');
+
+  // The toolbar exposes a Link control (the bug: no such button existed).
+  await page.getByRole('button', { name: 'Link', exact: true }).click();
+  const urlInput = page.getByRole('textbox', { name: 'Link URL' });
+  await urlInput.fill('https://example.com/procurement');
+  await page.getByRole('button', { name: 'Apply' }).click();
+
+  // The selection is now an anchor inside the live editor.
+  const anchor = editor.locator('a[href="https://example.com/procurement"]');
+  await expect(anchor).toHaveText('Read the procurement guide');
+
+  // Save it; the rendered card keeps the link.
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  const card = page.locator('div[id^="entry-"]', { hasText: 'Read the procurement guide' });
+  await expect(card.locator('a[href="https://example.com/procurement"]')).toBeVisible();
+
+  // Re-open the note, put the caret in the link, and remove it via the popover.
+  await card.hover();
+  await card.getByRole('button', { name: 'Edit entry' }).click();
+  await editor.locator('a[href="https://example.com/procurement"]').click();
+  await page.getByRole('button', { name: 'Link', exact: true }).click();
+  await page.getByRole('button', { name: 'Remove' }).click();
+  await expect(editor.locator('a')).toHaveCount(0);
+  await expect(editor).toHaveText('Read the procurement guide');
+});
+
 test.describe('forced IndexedDB storage', () => {
   test.use({ forceIdb: true });
 

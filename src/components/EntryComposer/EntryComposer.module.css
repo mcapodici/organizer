@@ -103,6 +103,66 @@
   margin: 0 4px;
 }
 
+.linkWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.linkPopover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 30;
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.linkInput {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  outline: none;
+  min-width: 200px;
+}
+
+.linkInput:focus {
+  border-color: var(--accent);
+}
+
+.linkApply {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.linkApply:hover {
+  background: var(--accent-hover);
+}
+
+.linkRemove {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.linkRemove:hover {
+  background: var(--hover-surface);
+}
+
 
 .tableToolbar {
   display: flex;
