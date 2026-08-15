@@ -15,7 +15,7 @@ import {
   Heading1, Heading2, Heading3, Heading4,
   List, ListOrdered, ListTodo, Quote, SeparatorHorizontal, Table as TableIcon,
   Plus, Minus, Rows3, Columns3, TableCellsMerge, Grid3x3, Trash2,
-  Maximize2, Minimize2,
+  Maximize2, Minimize2, X,
 } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
 import { useStorage } from '../../context/StorageContext';
@@ -264,6 +264,7 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
                 value={timestamp}
                 onChange={(e) => setTimestamp(e.target.value)}
                 className={styles.dateInput}
+                aria-label="Custom time"
               />
               {!editing && (
                 <button
@@ -272,7 +273,7 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
                   type="button"
                   aria-label="Remove custom time"
                 >
-                  ✕
+                  <X size={14} />
                 </button>
               )}
             </label>
@@ -294,6 +295,7 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
                 className={styles.dateInput}
+                aria-label="Due date"
               />
               <label className={styles.doneLabel}>
                 <input
@@ -310,7 +312,7 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
                 type="button"
                 aria-label="Remove due date"
               >
-                ✕
+                <X size={14} />
               </button>
             </label>
           ) : (
@@ -359,14 +361,14 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
             <li key={att.id} className={styles.stagedItem}>
               <span>{att.name}</span>
               <span className={styles.size}>{formatFileSize(att.size)}</span>
-              <button onClick={() => removeExisting(att.id)} aria-label="Remove">×</button>
+              <button onClick={() => removeExisting(att.id)} aria-label="Remove"><X size={14} /></button>
             </li>
           ))}
           {staged.map(({ file, id }) => (
             <li key={id} className={styles.stagedItem}>
               <span>{file.name}</span>
               <span className={styles.size}>{formatFileSize(file.size)}</span>
-              <button onClick={() => removeStaged(id)} aria-label="Remove">×</button>
+              <button onClick={() => removeStaged(id)} aria-label="Remove"><X size={14} /></button>
             </li>
           ))}
         </ul>

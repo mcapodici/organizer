@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStorage } from '../../context/StorageContext';
 import { formatTimestamp } from '../../utils/dateFormat';
+import { extractText } from '../../utils/text';
 import type { Timeline, Entry } from '../../types';
 import styles from './SearchBox.module.css';
 
@@ -10,21 +11,6 @@ interface SearchResult {
   timeline: Timeline;
   snippet: string;
   score: number;
-}
-
-function extractText(content: string): string {
-  try {
-    const doc = JSON.parse(content);
-    const parts: string[] = [];
-    function walk(node: { type?: string; text?: string; content?: typeof node[] }) {
-      if (node.type === 'text' && node.text) parts.push(node.text);
-      if (node.content) node.content.forEach(walk);
-    }
-    walk(doc);
-    return parts.join(' ');
-  } catch {
-    return content;
-  }
 }
 
 function scoreEntry(plainText: string, attachmentNames: string[], timelineName: string, queryWords: string[]): number {
@@ -145,6 +131,7 @@ export function SearchBox({ timelines, fluid = false }: { timelines: Timeline[];
               key={r.entry.id}
               className={styles.result}
               onMouseDown={() => handleSelect(r)}
+              onClick={() => handleSelect(r)}
             >
               <div className={styles.resultMeta}>
                 <span className={styles.timelineName}>{r.timeline.name}</span>

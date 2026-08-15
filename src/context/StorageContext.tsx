@@ -48,9 +48,9 @@ function withErrorCapture(
     deleteEntriesForTimeline: id => wrap(() => inner.deleteEntriesForTimeline(id)),
     putBlob: (k, d) => wrap(() => inner.putBlob(k, d)),
     deleteBlob: k => wrap(() => inner.deleteBlob(k)),
+    clearAll: () => wrap(() => inner.clearAll()),
     hasConflict: () => inner.hasConflict(),
     mergeFromDisk: active => inner.mergeFromDisk(active),
-    mergeConflictFiles: () => inner.mergeConflictFiles(),
   };
 }
 
@@ -111,19 +111,16 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
     if (!adapter) return;
     mergeInFlightRef.current = true;
     try {
-      let imported = 0;
-      const conflicts = 0;
+      let conflicts = 0;
       let merged = false;
       if (await adapter.hasConflict()) {
         const r = await adapter.mergeFromDisk(activeEditRef.current);
-        imported += r.importedCount;
+        conflicts += r.mergedCopies;
         merged = true;
       }
-      // OPFS and IndexedDB have no external conflict files to scan,
-      // so mergeConflictFiles always returns zero.
       if (merged) {
         setMergeNonce(v => v + 1);
-        setToasts(list => [...list, { id: (toastSeqRef.current += 1), imported, conflicts }]);
+        setToasts(list => [...list, { id: (toastSeqRef.current += 1), conflicts }]);
       }
     } catch { /* transient read/write failure — the next poll tick retries */ }
     finally { mergeInFlightRef.current = false; }
@@ -134,7 +131,7 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
       return withErrorCapture(phase.adapter, () => setWriteError(true), () => { /* poll auto-merges */ });
     }
     if (phase.tag === 'readyIdb') {
-      return withErrorCapture(phase.adapter, () => { /* idb writes don't have a recoverable error path */ }, () => { /* poll auto-merges */ });
+      return withErrorCapture(phase.adapter, () => setWriteError(true), () => { /* poll auto-merges */ });
     }
     return null;
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -175,7 +172,9 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
           }}>
             <h2 style={{ margin: '0 0 8px', fontSize: '1.1rem' }}>Unable to save</h2>
             <p style={{ margin: '0 0 4px', color: '#374151' }}>
-              A write error occurred. Your data is safe — the next poll will retry automatically.
+              A write error occurred and your latest change was not saved. Your
+              existing data is safe. Press Retry to reconnect storage and save
+              again — background syncing does not replay a failed write on its own.
             </p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
               <button

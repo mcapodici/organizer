@@ -14,6 +14,20 @@ export function nowIso(): string {
   return new Date().toISOString();
 }
 
+// Compare two ISO timestamps chronologically. Parses to epoch milliseconds so
+// mixed timezone offsets and precision (common in imported data) order by the
+// instant they represent rather than by raw string bytes. Returns 0 for equal
+// instants so callers keep their stable (insertion) order on ties. Falls back
+// to a lexical compare only when a value can't be parsed as a date.
+export function compareTimestamps(a: string, b: string): number {
+  const ta = Date.parse(a);
+  const tb = Date.parse(b);
+  if (!isNaN(ta) && !isNaN(tb)) {
+    return ta < tb ? -1 : ta > tb ? 1 : 0;
+  }
+  return a.localeCompare(b);
+}
+
 export function toDatetimeLocalValue(iso: string): string {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';

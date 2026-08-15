@@ -113,6 +113,18 @@
 .cardBody {
   flex: 1;
   min-width: 0;
+}
+
+.cardNav {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
   cursor: pointer;
 }
 

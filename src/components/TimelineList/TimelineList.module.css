@@ -192,6 +192,11 @@
   background: var(--danger-hover);
 }
 
+.todoBadgeIcon {
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
 
 
 .kebab {

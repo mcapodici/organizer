@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuid } from 'uuid';
 import { useStorage } from '../context/StorageContext';
 import type { Entry } from '../types';
+import { compareTimestamps } from '../utils/dateFormat';
 
 export function useEntries(timelineId: string | null) {
   const { adapter } = useStorage();
@@ -10,9 +11,10 @@ export function useEntries(timelineId: string | null) {
   const reload = useCallback(async () => {
     if (!timelineId) { setEntries([]); return; }
     const all = await adapter.getEntriesForTimeline(timelineId);
-    // localeCompare returns 0 for equal timestamps, so same-timestamp entries keep
-    // their original (insertion) order rather than being reversed.
-    all.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    // compareTimestamps orders by instant (parsing mixed offsets/precision) and
+    // returns 0 for equal timestamps, so same-timestamp entries keep their
+    // original (insertion) order rather than being reversed.
+    all.sort((a, b) => compareTimestamps(a.timestamp, b.timestamp));
     setEntries(all);
   }, [timelineId, adapter]);
 

@@ -7,6 +7,28 @@
 .demo-profile/
 .demo-frames/
 
+# Secrets and local env — .env.local holds a short-lived OIDC token.
+.env*
+*.local
+
+# Logs (e.g. .pipeline.log, ~310 KB) — build noise, not deploy input.
+*.log
+
+# Version control and agent/tool scratch dirs.
+.git/
+.worktrees/
+.vercel/
+.backlog/
+.llm/
+.hermes/
+.claude/
+.atomic/
+.playwright-mcp/
+.playwright/
+test-results/
+playwright-report/
+blob-report/
+
 # Dependencies and build output — Vercel installs and builds these itself.
 node_modules/
 dist/

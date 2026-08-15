@@ -7,6 +7,7 @@ import type { Entry, Timeline } from '../../types';
 import { formatDueDate, toLocalDateString, todayDateString, getDueDateStatus } from '../../utils/dateFormat';
 import { describeTodoChange, revertTodoFields } from '../../utils/todoUndo';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
+import { capitalize, extractText } from '../../utils/text';
 import styles from './TodoPage.module.css';
 
 interface TodoItem {
@@ -50,21 +51,8 @@ function buildSections(todos: TodoItem[]): Sections {
   return result;
 }
 
-function extractText(node: Record<string, unknown>): string {
-  if (node.type === 'text') return (node.text as string) || '';
-  if (Array.isArray(node.content)) {
-    return (node.content as Record<string, unknown>[]).map(extractText).join('');
-  }
-  return '';
-}
-
 function entryPreview(content: string): string {
-  try {
-    const json = JSON.parse(content);
-    return extractText(json).slice(0, 120);
-  } catch {
-    return content.slice(0, 120);
-  }
+  return extractText(content).slice(0, 120);
 }
 
 interface Props {
@@ -221,14 +209,14 @@ function TodoRow({
       >
         <Check size={12} className={styles.checkIcon} />
       </button>
-      <div
-        className={styles.cardBody}
-        onClick={() => onGoToTimeline(entry.timelineId, entry.id)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter') onGoToTimeline(entry.timelineId, entry.id); }}
-      >
-        <div className={styles.cardText}>{entryPreview(entry.content)}</div>
+      <div className={styles.cardBody}>
+        <button
+          type="button"
+          className={styles.cardNav}
+          onClick={() => onGoToTimeline(entry.timelineId, entry.id)}
+        >
+          <div className={styles.cardText}>{entryPreview(entry.content)}</div>
+        </button>
         <div className={styles.cardMeta}>
           {timeline && <span className={styles.timelineChip}>{timeline.name}</span>}
           <button
@@ -266,7 +254,3 @@ function TodoRow({
   );
 }
 
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}

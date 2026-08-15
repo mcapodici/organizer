@@ -15,6 +15,8 @@ import { useStorage } from '../../context/StorageContext';
 import type { Entry, Attachment } from '../../types';
 import { formatTimestamp, formatFileSize, formatDueDate, getDueDateStatus } from '../../utils/dateFormat';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
+import { Modal } from '../Modal/Modal';
+import { capitalize } from '../../utils/text';
 import styles from './EntryCard.module.css';
 
 interface Props {
@@ -28,10 +30,11 @@ interface Props {
 }
 
 export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, onUpdate }: Props) {
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
   const [dueAnchor, setDueAnchor] = useState<DOMRect | null>(null);
 
-  let html: string;
+  let html: string | null;
+  let fallbackText: string | null = null;
   try {
     const json = JSON.parse(entry.content);
     html = generateHTML(json, [
@@ -42,7 +45,8 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
       Highlight,
     ]);
   } catch {
-    html = entry.content;
+    html = null;
+    fallbackText = entry.content;
   }
 
   function handleContentClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -129,22 +133,30 @@ export function EntryCard({ entry, isEditing, domId, onEdit, onDelete, onCopy, o
             </div>
           )}
         </div>
-        <div
-          className={styles.content}
-          onClick={handleContentClick}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        {html !== null ? (
+          <div
+            className={styles.content}
+            onClick={handleContentClick}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        ) : (
+          <div className={styles.content} onClick={handleContentClick}>
+            {fallbackText}
+          </div>
+        )}
         {entry.attachments.length > 0 && (
           <AttachmentList
             attachments={entry.attachments}
-            onLightbox={setLightboxSrc}
+            onLightbox={(src, alt) => setLightbox({ src, alt })}
           />
         )}
       </div>
-      {lightboxSrc && (
-        <div className={styles.lightbox} onClick={() => setLightboxSrc(null)}>
-          <img src={lightboxSrc} alt="Full size" className={styles.lightboxImg} />
-        </div>
+      {lightbox && (
+        <Modal title={lightbox.alt} onClose={() => setLightbox(null)}>
+          <div className={styles.lightbox}>
+            <img src={lightbox.src} alt={lightbox.alt} className={styles.lightboxImg} />
+          </div>
+        </Modal>
       )}
     </div>
   );
@@ -178,7 +190,7 @@ function toggleTaskItem(node: TiptapNode, targetIndex: number): boolean {
   return walk(node);
 }
 
-function AttachmentList({ attachments, onLightbox }: { attachments: Attachment[]; onLightbox: (src: string) => void }) {
+function AttachmentList({ attachments, onLightbox }: { attachments: Attachment[]; onLightbox: (src: string, alt: string) => void }) {
   return (
     <div className={styles.attachments}>
       {attachments.map((att) => (
@@ -188,7 +200,7 @@ function AttachmentList({ attachments, onLightbox }: { attachments: Attachment[]
   );
 }
 
-function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; onLightbox: (src: string) => void }) {
+function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; onLightbox: (src: string, alt: string) => void }) {
   const { adapter } = useStorage();
   const [url, setUrl] = useState<string | null>(null);
   const isImage = attachment.mimeType.startsWith('image/');
@@ -211,13 +223,15 @@ function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; on
 
   if (isImage) {
     return (
-      <img
-        src={url}
-        alt={attachment.name}
-        className={styles.thumbnail}
-        onClick={() => onLightbox(url)}
+      <button
+        type="button"
+        className={styles.thumbnailBtn}
+        onClick={() => onLightbox(url, attachment.name)}
         title={attachment.name}
-      />
+        aria-label={`View ${attachment.name} full size`}
+      >
+        <img src={url} alt={attachment.name} className={styles.thumbnail} />
+      </button>
     );
   }
 
@@ -237,8 +251,4 @@ function AttachmentItem({ attachment, onLightbox }: { attachment: Attachment; on
       <Paperclip size={13} /> {attachment.name} <span className={styles.fileSize}>({formatFileSize(attachment.size)})</span>
     </a>
   );
-}
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
