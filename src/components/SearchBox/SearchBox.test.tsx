@@ -42,7 +42,7 @@ describe('SearchBox', () => {
     await h.adapter.putEntry(en('e2', 't2', doc('Buy milk and eggs')));
 
     renderSearch();
-    const input = screen.getByRole('searchbox');
+    const input = screen.getByRole('combobox');
     await userEvent.click(input); // triggers loadEntries
     await userEvent.type(input, 'budget');
 
@@ -54,7 +54,7 @@ describe('SearchBox', () => {
   it('matches on the timeline name as well as the note body', async () => {
     await h.adapter.putEntry(en('e1', 't2', doc('weekly run')));
     renderSearch();
-    const input = screen.getByRole('searchbox');
+    const input = screen.getByRole('combobox');
     await userEvent.click(input);
     await userEvent.type(input, 'groceries');
     await waitFor(() => expect(screen.getByText('Groceries')).toBeTruthy());
@@ -63,7 +63,7 @@ describe('SearchBox', () => {
   it('shows no dropdown when nothing matches', async () => {
     await h.adapter.putEntry(en('e1', 't1', doc('hello world')));
     renderSearch();
-    const input = screen.getByRole('searchbox');
+    const input = screen.getByRole('combobox');
     await userEvent.click(input);
     await userEvent.type(input, 'zzzznomatch');
     // Give the search effect time to run, then confirm no result rows.
@@ -74,7 +74,7 @@ describe('SearchBox', () => {
   it('clears results when the query is emptied', async () => {
     await h.adapter.putEntry(en('e1', 't1', doc('budget review')));
     renderSearch();
-    const input = screen.getByRole('searchbox');
+    const input = screen.getByRole('combobox');
     await userEvent.click(input);
     await userEvent.type(input, 'budget');
     await waitFor(() => expect(screen.getByText('Project Alpha')).toBeTruthy());

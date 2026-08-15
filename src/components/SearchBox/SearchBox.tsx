@@ -71,7 +71,9 @@ export function SearchBox({ timelines, fluid = false }: { timelines: Timeline[];
   const [results, setResults] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const listboxId = 'search-results-listbox';
 
   async function loadEntries() {
     const all = await adapter.getAllEntries();
@@ -102,6 +104,8 @@ export function SearchBox({ timelines, fluid = false }: { timelines: Timeline[];
     scored.sort((a, b) => b.score - a.score);
     setResults(scored.slice(0, 8));
     setOpen(scored.length > 0);
+    // Reset the keyboard highlight whenever the result set changes.
+    setActiveIndex(-1);
   }, [query, entries, timelines]);
 
   useEffect(() => {
@@ -123,6 +127,25 @@ export function SearchBox({ timelines, fluid = false }: { timelines: Timeline[];
     navigate(`/timelines/${result.timeline.id}`);
     setQuery('');
     setOpen(false);
+    setActiveIndex(-1);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (!open || results.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex(i => (i + 1) % results.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex(i => (i <= 0 ? results.length - 1 : i - 1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const target = activeIndex >= 0 ? results[activeIndex] : results[0];
+      if (target) handleSelect(target);
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+      setActiveIndex(-1);
+    }
   }
 
   const queryWords = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
@@ -136,15 +159,29 @@ export function SearchBox({ timelines, fluid = false }: { timelines: Timeline[];
         value={query}
         onChange={e => setQuery(e.target.value)}
         onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
         aria-label="Search entries"
+        role="combobox"
+        aria-expanded={open && results.length > 0}
+        aria-controls={listboxId}
+        aria-autocomplete="list"
+        aria-activedescendant={
+          activeIndex >= 0 && results[activeIndex]
+            ? `search-result-${results[activeIndex].entry.id}`
+            : undefined
+        }
       />
       {open && results.length > 0 && (
-        <div className={styles.dropdown}>
-          {results.map(r => (
+        <div className={styles.dropdown} role="listbox" id={listboxId} aria-label="Search results">
+          {results.map((r, i) => (
             <button
               key={r.entry.id}
-              className={styles.result}
+              id={`search-result-${r.entry.id}`}
+              role="option"
+              aria-selected={i === activeIndex}
+              className={`${styles.result} ${i === activeIndex ? styles.active : ''}`}
               onMouseDown={() => handleSelect(r)}
+              onMouseEnter={() => setActiveIndex(i)}
             >
               <div className={styles.resultMeta}>
                 <span className={styles.timelineName}>{r.timeline.name}</span>
