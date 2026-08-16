@@ -30,7 +30,10 @@ export function UndoProvider({ children }: { children: React.ReactNode }) {
   const [pending, setPending] = useState<PendingUndo | null>(null);
   const seqRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  // The element focused when the undo was registered, so focus can be returned
+  // there after the bar is dismissed/undone/expires (the bar itself steals
+  // focus onto the Undo button).
+  const prevFocusRef = useRef<HTMLElement | null>(null);
   function clearTimer() {
     if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
@@ -38,8 +41,15 @@ export function UndoProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  function restoreFocus() {
+    const el = prevFocusRef.current;
+    prevFocusRef.current = null;
+    if (el && el.isConnected) el.focus();
+  }
+
   const clearUndo = useCallback(() => {
     clearTimer();
+    restoreFocus();
     setPending(null);
   }, []);
 
@@ -48,10 +58,13 @@ export function UndoProvider({ children }: { children: React.ReactNode }) {
   // fresh window (issue #14).
   const registerUndo = useCallback((label: string, undo: () => void | Promise<void>) => {
     clearTimer();
+    const active = document.activeElement;
+    prevFocusRef.current = active instanceof HTMLElement ? active : null;
     seqRef.current += 1;
     setPending({ id: seqRef.current, label, expiresAt: Date.now() + UNDO_WINDOW_MS, undo });
     timerRef.current = setTimeout(() => {
       timerRef.current = null;
+      restoreFocus();
       setPending(null);
     }, UNDO_WINDOW_MS);
   }, []);

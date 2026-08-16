@@ -115,20 +115,15 @@
   min-width: 0;
 }
 
-.cardNav {
+.cardText {
   display: block;
   width: 100%;
   text-align: left;
   background: none;
   border: none;
   padding: 0;
-  margin: 0;
-  font: inherit;
-  color: inherit;
+  font-family: inherit;
   cursor: pointer;
-}
-
-.cardText {
   font-size: 0.875rem;
   color: var(--text);
   line-height: 1.5;
@@ -136,6 +131,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.cardText:hover {
+  text-decoration: underline;
 }
 
 .cardMeta {

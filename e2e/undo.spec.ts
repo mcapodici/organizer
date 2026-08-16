@@ -34,3 +34,33 @@ test('marking a todo done shows the undo bar, and Undo reverts it', async ({ pag
   await expect(card.getByRole('button', { name: 'Mark as done' })).toBeVisible();
   await expect(page.getByRole('status')).toHaveCount(0);
 });
+
+test('the undo bar moves focus to Undo and Enter reverts it without the mouse', async ({ page }) => {
+  await bootApp(page);
+  await createTimeline(page, 'Undo Lab');
+
+  const editor = page.locator('.ProseMirror');
+  await editor.click();
+  await editor.fill('Water the plants');
+  await page.getByRole('button', { name: 'Set due date' }).click();
+  await page.locator('input[type="date"]').fill(todayLocal());
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  const card = page.locator('div[id^="entry-"]', { hasText: 'Water the plants' });
+
+  const markDone = card.getByRole('button', { name: 'Mark as done' });
+  await expect(markDone).toBeVisible();
+  await expect(async () => {
+    if (await markDone.isVisible()) await markDone.click();
+    await expect(card.getByRole('button', { name: 'Mark as not done' })).toBeVisible({ timeout: 2000 });
+  }).toPass();
+
+  // Focus must land on the Undo button so a keyboard user can reach it inside
+  // the 10s window instead of being dropped to <body>.
+  const undoBtn = page.getByRole('button', { name: 'Undo', exact: true });
+  await expect(undoBtn).toBeFocused();
+
+  // Activating the focused control from the keyboard reverts the change.
+  await page.keyboard.press('Enter');
+  await expect(card.getByRole('button', { name: 'Mark as done' })).toBeVisible();
+  await expect(page.getByRole('status')).toHaveCount(0);
+});

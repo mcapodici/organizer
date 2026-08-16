@@ -12,55 +12,50 @@ export function Modal({ title, onClose, children }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  useEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return;
-
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    const dialog = ref.current;
 
     const getFocusable = () =>
       Array.from(
-        dialog.querySelectorAll<HTMLElement>(
+        dialog?.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
+        ) ?? [],
       ).filter((el) => el.offsetParent !== null || el === document.activeElement);
 
-    const focusable = getFocusable();
-    (focusable[0] ?? dialog).focus();
+    // Move focus into the dialog on open.
+    (getFocusable()[0] ?? dialog)?.focus();
 
-    const trap = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      const items = getFocusable();
-      if (items.length === 0) {
-        e.preventDefault();
-        dialog.focus();
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
         return;
       }
-      const first = items[0];
-      const last = items[items.length - 1];
+      if (e.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (focusable.length === 0) {
+        e.preventDefault();
+        dialog?.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
       const active = document.activeElement;
       if (e.shiftKey) {
-        if (active === first || active === dialog || !dialog.contains(active)) {
+        if (active === first || !dialog?.contains(active)) {
           e.preventDefault();
           last.focus();
         }
-      } else if (active === last) {
+      } else if (active === last || !dialog?.contains(active)) {
         e.preventDefault();
         first.focus();
       }
     };
-
-    dialog.addEventListener('keydown', trap);
+    window.addEventListener('keydown', handler);
     return () => {
-      dialog.removeEventListener('keydown', trap);
+      window.removeEventListener('keydown', handler);
       previouslyFocused?.focus?.();
     };
-  }, []);
+  }, [onClose]);
 
   return (
     <div className={styles.backdrop} onClick={onClose}>

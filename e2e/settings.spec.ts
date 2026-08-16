@@ -1,4 +1,4 @@
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, expect, bootApp, createTimeline, addEntry } from './fixtures';
@@ -41,4 +41,101 @@ test('export from settings, wipe the data, and re-import it intact', async ({ pa
   await expect(page.getByText('Precious data that must survive', { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByText('Precious data that must survive', { exact: true })).toBeVisible();
+});
+
+test('"Clear everything" actually wipes all data', async ({ page }) => {
+  await bootApp(page);
+  await createTimeline(page, 'Doomed Timeline');
+  await addEntry(page, 'This entry should be permanently deleted');
+
+  // Open Settings and trigger the destructive clear.
+  await page.getByRole('button', { name: 'Settings' }).filter({ visible: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
+  await page.getByRole('button', { name: 'Clear' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Clear all data' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Clear everything' }).click();
+
+  // The timeline is gone from the sidebar and stays gone across a real reload.
+  await expect(page.locator('aside li', { hasText: 'Doomed Timeline' })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Go home' }).first()).toBeVisible();
+  await expect(page.locator('aside li', { hasText: 'Doomed Timeline' })).toHaveCount(0);
+});
+
+test('importing malformed JSON shows a visible error and leaves data intact', async ({ page }) => {
+  await bootApp(page);
+  await createTimeline(page, 'Survivor Timeline');
+  await addEntry(page, 'Data that must survive a bad import');
+
+  // Write a file that is not valid JSON but carries a .json extension.
+  const badPath = join(mkdtempSync(join(tmpdir(), 'organizer-e2e-')), 'broken.json');
+  writeFileSync(badPath, 'this is { not valid JSON at all');
+
+  await page.getByRole('button', { name: 'Settings' }).filter({ visible: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
+  await page.locator('input[type="file"]').setInputFiles(badPath);
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Import Data' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Replace all data' }).click();
+
+  // A visible error is shown and the modal stays open so the user can retry.
+  await expect(dialog.getByRole('alert')).toContainText('not valid JSON');
+  await expect(dialog.getByRole('heading', { name: 'Import Data' })).toBeVisible();
+
+  // The original data is untouched, even across a real reload.
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await page.getByRole('button', { name: 'Go home' }).filter({ visible: true }).first().click();
+  const survivor = page.locator('aside li', { hasText: 'Survivor Timeline' });
+  await expect(survivor).toBeVisible();
+  await survivor.getByRole('button', { name: 'Survivor Timeline' }).click();
+  await expect(page.getByText('Data that must survive a bad import', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText('Data that must survive a bad import', { exact: true })).toBeVisible();
+});
+
+test('modal traps keyboard focus and restores it on close', async ({ page }) => {
+  await bootApp(page);
+
+  // Open Settings and remember the trigger for the Clear modal.
+  await page.getByRole('button', { name: 'Settings' }).filter({ visible: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
+  const clearButton = page.getByRole('button', { name: 'Clear' });
+  await clearButton.click();
+
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Clear all data' })).toBeVisible();
+
+  // On open, focus moves into the dialog rather than staying on the trigger.
+  await expect(async () => {
+    const insideDialog = await page.evaluate(() => {
+      const dlg = document.querySelector('[role="dialog"]');
+      return !!dlg && dlg.contains(document.activeElement);
+    });
+    expect(insideDialog).toBe(true);
+  }).toPass();
+
+  // Tabbing many times never escapes the dialog.
+  for (let i = 0; i < 8; i++) {
+    await page.keyboard.press('Tab');
+    const insideDialog = await page.evaluate(() => {
+      const dlg = document.querySelector('[role="dialog"]');
+      return !!dlg && dlg.contains(document.activeElement);
+    });
+    expect(insideDialog).toBe(true);
+  }
+
+  // Shift+Tab also stays trapped.
+  await page.keyboard.press('Shift+Tab');
+  expect(
+    await page.evaluate(() => {
+      const dlg = document.querySelector('[role="dialog"]');
+      return !!dlg && dlg.contains(document.activeElement);
+    }),
+  ).toBe(true);
+
+  // Closing via Escape restores focus to the element that opened the modal.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(clearButton).toBeFocused();
 });

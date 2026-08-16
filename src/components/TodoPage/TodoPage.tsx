@@ -212,10 +212,11 @@ function TodoRow({
       <div className={styles.cardBody}>
         <button
           type="button"
-          className={styles.cardNav}
+          className={styles.cardText}
           onClick={() => onGoToTimeline(entry.timelineId, entry.id)}
+          aria-label={`Open in timeline: ${entryPreview(entry.content)}`}
         >
-          <div className={styles.cardText}>{entryPreview(entry.content)}</div>
+          {entryPreview(entry.content)}
         </button>
         <div className={styles.cardMeta}>
           {timeline && <span className={styles.timelineChip}>{timeline.name}</span>}

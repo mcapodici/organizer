@@ -31,3 +31,33 @@ test('mark an entry as a todo, see it on the todos page, complete it', async ({ 
   }).toPass();
   await expect(page.getByText('Buy groceries')).toHaveCount(0);
 });
+
+test('todo row exposes distinct, non-nested controls', async ({ page }) => {
+  await bootApp(page);
+  await createTimeline(page, 'Chores');
+  await addEntry(page, 'Buy groceries');
+
+  // Turn the entry into a todo: edit it and set a due date of today.
+  const card = page.locator('div[id^="entry-"]', { hasText: 'Buy groceries' });
+  await card.hover();
+  await card.getByRole('button', { name: 'Edit entry' }).click();
+  await page.getByRole('button', { name: 'Set due date' }).click();
+  await page.locator('input[type="date"]').fill(todayLocal());
+  await page.getByRole('button', { name: 'Update' }).click();
+
+  await page.getByRole('button', { name: 'Todos' }).filter({ visible: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'Due Now' })).toBeVisible();
+
+  // The preview is its own "open in timeline" button, not a giant card button
+  // that swallows the whole row.
+  const openBtn = page.getByRole('button', { name: 'Open in timeline: Buy groceries' });
+  await expect(openBtn).toBeVisible();
+
+  // The due-date pill is a sibling control — not nested inside another button.
+  const dueBtn = page.getByRole('button', { name: /Buy groceries/ }).locator('button');
+  await expect(dueBtn).toHaveCount(0);
+
+  // And no button on the page contains another button (invalid ARIA nesting).
+  const nestedButtons = page.locator('button button');
+  await expect(nestedButtons).toHaveCount(0);
+});

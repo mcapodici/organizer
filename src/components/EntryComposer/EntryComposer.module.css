@@ -103,6 +103,64 @@
   margin: 0 4px;
 }
 
+.linkWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.linkModal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linkActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.linkInput {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.linkInput:focus {
+  border-color: var(--accent);
+}
+
+.linkApply {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.linkApply:hover {
+  background: var(--accent-hover);
+}
+
+.linkRemove {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.linkRemove:hover {
+  background: var(--hover-surface);
+}
+
 
 .tableToolbar {
   display: flex;

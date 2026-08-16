@@ -15,6 +15,7 @@ export function Settings({ onDataChanged }: Props) {
   const navigate = useNavigate();
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [importing, setImporting] = useState(false);
 
@@ -26,13 +27,19 @@ export function Settings({ onDataChanged }: Props) {
   async function handleImport(importMode: 'replace' | 'merge') {
     if (!importFile) return;
     setImporting(true);
+    setImportError(null);
     try {
       await importData(adapter, importFile, importMode);
       await onDataChanged();
-    } finally {
-      setImporting(false);
       setImportModalOpen(false);
       setImportFile(null);
+    } catch {
+      // Keep the modal open so the user can retry or cancel, and surface a
+      // clear reason. Existing data is untouched: the parse/validation runs
+      // before any storage write.
+      setImportError('Import failed: this file is not valid JSON. Your existing data was left unchanged.');
+    } finally {
+      setImporting(false);
     }
   }
 
@@ -102,7 +109,7 @@ export function Settings({ onDataChanged }: Props) {
                 hidden
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) { setImportFile(file); setImportModalOpen(true); }
+                  if (file) { setImportFile(file); setImportError(null); setImportModalOpen(true); }
                   e.target.value = '';
                 }}
               />
@@ -133,8 +140,11 @@ export function Settings({ onDataChanged }: Props) {
       </section>
 
       {importModalOpen && (
-        <Modal title="Import Data" onClose={() => { if (!importing) { setImportModalOpen(false); setImportFile(null); } }}>
+        <Modal title="Import Data" onClose={() => { if (!importing) { setImportModalOpen(false); setImportFile(null); setImportError(null); } }}>
           <p>Import <strong>{importFile?.name}</strong></p>
+          {importError && (
+            <p role="alert" className={styles.importError}>{importError}</p>
+          )}
           <p>Choose how to import:</p>
           <div className={styles.modalActions}>
             <button className={styles.dangerBtn} onClick={() => handleImport('replace')} disabled={importing}>
@@ -145,7 +155,7 @@ export function Settings({ onDataChanged }: Props) {
             </button>
             <button
               className={styles.btnSecondary}
-              onClick={() => { setImportModalOpen(false); setImportFile(null); }}
+              onClick={() => { setImportModalOpen(false); setImportFile(null); setImportError(null); }}
               disabled={importing}
             >
               Cancel

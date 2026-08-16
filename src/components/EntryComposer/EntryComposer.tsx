@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { EntryLink } from './linkExtension';
+import { Modal } from '../Modal/Modal';
 import { Table as TableExtension } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
@@ -12,6 +13,7 @@ import { TaskItem } from '@tiptap/extension-task-item';
 import { Highlight } from '@tiptap/extension-highlight';
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code, Highlighter,
+  Link as LinkIcon,
   Heading1, Heading2, Heading3, Heading4,
   List, ListOrdered, ListTodo, Quote, SeparatorHorizontal, Table as TableIcon,
   Plus, Minus, Rows3, Columns3, TableCellsMerge, Grid3x3, Trash2,
@@ -45,6 +47,8 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
   const [saving, setSaving] = useState(false);
   const [editorEmpty, setEditorEmpty] = useState(true);
   const [inTable, setInTable] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const draftRef = useRef<string | null>(null);
 
@@ -152,6 +156,30 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
     setTimestamp('');
   }
 
+  function openLinkDialog() {
+    if (!editor) return;
+    // Prefill with the URL of the link under the caret, if any.
+    setLinkUrl(editor.getAttributes('link').href ?? '');
+    setLinkOpen(true);
+  }
+
+  function applyLink() {
+    if (!editor) return;
+    const url = linkUrl.trim();
+    if (url) {
+      editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    } else {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+    }
+    setLinkOpen(false);
+  }
+
+  function removeLink() {
+    if (!editor) return;
+    editor.chain().focus().extendMarkRange('link').unsetLink().run();
+    setLinkOpen(false);
+  }
+
   async function handleSave() {
     if (!editor) return;
     setSaving(true);
@@ -226,6 +254,30 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
             <span className={styles.sep} />
             <ToolbarBtn active={editor.isActive('code')} onClick={() => editor.chain().focus().toggleCode().run()} title="Inline code"><Code size={14} /></ToolbarBtn>
             <ToolbarBtn active={editor.isActive('highlight')} onClick={() => editor.chain().focus().toggleHighlight().run()} title="Highlight"><Highlighter size={14} /></ToolbarBtn>
+            <span className={styles.linkWrap}>
+              <ToolbarBtn active={editor.isActive('link')} onClick={openLinkDialog} title="Link"><LinkIcon size={14} /></ToolbarBtn>
+              {linkOpen && (
+                <Modal title="Link" onClose={() => setLinkOpen(false)}>
+                  <div className={styles.linkModal}>
+                    <input
+                      className={styles.linkInput}
+                      type="url"
+                      placeholder="https://example.com"
+                      aria-label="Link URL"
+                      value={linkUrl}
+                      onChange={(e) => setLinkUrl(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); applyLink(); }
+                      }}
+                    />
+                    <div className={styles.linkActions}>
+                      <button className={styles.linkRemove} type="button" onClick={removeLink}>Remove</button>
+                      <button className={styles.linkApply} type="button" onClick={applyLink}>Apply</button>
+                    </div>
+                  </div>
+                </Modal>
+              )}
+            </span>
             <span className={styles.sep} />
             <ToolbarBtn active={editor.isActive('heading', { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} title="Heading 1"><Heading1 size={14} /></ToolbarBtn>
             <ToolbarBtn active={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title="Heading 2"><Heading2 size={14} /></ToolbarBtn>
