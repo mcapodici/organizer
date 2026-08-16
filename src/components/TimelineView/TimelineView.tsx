@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Pencil, Plus } from 'lucide-react';
 import type { Timeline, Entry } from '../../types';
 import { useStorage } from '../../context/StorageContext';
 import { EntryCard } from '../EntryCard/EntryCard';
 import { EntryComposer } from '../EntryComposer/EntryComposer';
 import { Modal } from '../Modal/Modal';
-import { TagInput } from '../TagInput/TagInput';
+import { EditTagsModal } from '../EditTagsModal/EditTagsModal';
 import styles from './TimelineView.module.css';
 
 interface Props {
@@ -132,9 +133,18 @@ export function TimelineView({
               />
             </form>
           ) : (
-            <h1 className={styles.name} onClick={() => { setNameInput(timeline.name); setEditingName(true); }}>
-              {timeline.name}
-            </h1>
+            <>
+              <h1 className={styles.name} onClick={() => { setNameInput(timeline.name); setEditingName(true); }}>
+                {timeline.name}
+              </h1>
+              <button
+                className={styles.editNameBtn}
+                aria-label="Rename timeline"
+                onClick={() => { setNameInput(timeline.name); setEditingName(true); }}
+              >
+                <Pencil size={14} /> Rename
+              </button>
+            </>
           )}
         </div>
         <div className={styles.tagsRow}>
@@ -142,7 +152,9 @@ export function TimelineView({
             <span key={tag} className={styles.tagChip}>{tag}</span>
           ))}
           <button className={styles.editTagsBtn} onClick={() => setEditingTags(true)}>
-            {timeline.tags.length === 0 ? '+ Add tags' : '✎ Edit tags'}
+            {timeline.tags.length === 0
+              ? <><Plus size={14} /> Add tags</>
+              : <><Pencil size={14} /> Edit tags</>}
           </button>
         </div>
       </div>
@@ -203,23 +215,5 @@ export function TimelineView({
         />
       )}
     </div>
-  );
-}
-
-function EditTagsModal({ timeline, allTags, onSave, onClose }: {
-  timeline: Timeline;
-  allTags: string[];
-  onSave: (tags: string[]) => void;
-  onClose: () => void;
-}) {
-  const [tags, setTags] = useState(timeline.tags);
-  return (
-    <Modal title="Edit Tags" onClose={onClose}>
-      <TagInput tags={tags} allTags={allTags} onChange={setTags} />
-      <div className={styles.modalActions} style={{ marginTop: 12 }}>
-        <button className={styles.btn} onClick={() => onSave(tags)}>Save</button>
-        <button className={styles.btnSecondary} onClick={onClose}>Cancel</button>
-      </div>
-    </Modal>
   );
 }

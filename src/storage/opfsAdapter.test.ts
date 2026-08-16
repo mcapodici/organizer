@@ -174,3 +174,49 @@ describe('OpfsAdapter — conflict guard', () => {
     await expect(a.putEntry(EN('e2', 't1'))).resolves.toBeUndefined();
   });
 });
+
+describe('OpfsAdapter — corrupt file quarantine', () => {
+  it('quarantines an unparseable entry file instead of wedging the scan', async () => {
+    // A valid timeline + a valid entry, plus one corrupt entry file on disk.
+    mockRoot.seed('timelines/t1/timeline.json', JSON.stringify(TL('t1')));
+    mockRoot.seed('timelines/t1/entries/e1.json', JSON.stringify(EN('e1', 't1')));
+    mockRoot.seed('timelines/t1/entries/bad.json', '{ not valid json');
+
+    const a = new OpfsAdapter();
+    // Scan must not throw; the good data survives and the bad file is gone.
+    expect((await a.getAllEntries()).map((e) => e.id)).toEqual(['e1']);
+    expect((await a.getAllTimelines()).map((t) => t.id)).toEqual(['t1']);
+
+    const eDir = mockRoot.dirs.get('timelines')!.dirs.get('t1')!.dirs.get('entries')!;
+    expect(eDir.files.has('bad.json')).toBe(false);
+    expect(eDir.files.has('e1.json')).toBe(true);
+
+    // The corrupt file's contents were copied into quarantine/.
+    const qDir = mockRoot.dirs.get('quarantine')!;
+    expect(qDir).toBeDefined();
+    expect(qDir.files.size).toBe(1);
+  });
+
+  it('quarantines a corrupt timeline.json', async () => {
+    mockRoot.seed('timelines/t1/timeline.json', 'nonsense');
+    const a = new OpfsAdapter();
+    expect(await a.getAllTimelines()).toEqual([]);
+    const tlDir = mockRoot.dirs.get('timelines')!.dirs.get('t1')!;
+    expect(tlDir.files.has('timeline.json')).toBe(false);
+    expect(mockRoot.dirs.get('quarantine')!.files.size).toBe(1);
+  });
+
+  it('does not wedge mergeFromDisk when a corrupt file appears', async () => {
+    const seed = new OpfsAdapter();
+    await seed.putTimeline(TL('t1'));
+    await seed.putEntry(EN('e1', 't1'));
+
+    // A corrupt file lands on disk before a merge.
+    mockRoot.dirs.get('timelines')!.dirs.get('t1')!.dirs.get('entries')!
+      .files.set('bad.json', { data: '{oops', mtime: 0 } as never);
+
+    const a = new OpfsAdapter();
+    await expect(a.mergeFromDisk(null)).resolves.toBeDefined();
+    expect((await a.getAllEntries()).map((e) => e.id)).toEqual(['e1']);
+  });
+});

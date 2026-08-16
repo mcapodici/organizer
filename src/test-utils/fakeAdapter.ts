@@ -11,7 +11,7 @@ export class FakeAdapter implements StorageAdapter {
   entries: Entry[] = [];
   blobs = new Map<string, ArrayBuffer>();
   conflict = false;
-  mergeResult: { duplicatedEntryId: string | null; importedCount: number } = { duplicatedEntryId: null, importedCount: 0 };
+  mergeResult: { mergedCopies: number } = { mergedCopies: 0 };
 
   async getAllTimelines(): Promise<Timeline[]> { return [...this.timelines]; }
 
@@ -46,6 +46,11 @@ export class FakeAdapter implements StorageAdapter {
   async getBlob(key: string): Promise<ArrayBuffer | undefined> { return this.blobs.get(key); }
   async putBlob(key: string, data: ArrayBuffer): Promise<void> { this.blobs.set(key, data); }
   async deleteBlob(key: string): Promise<void> { this.blobs.delete(key); }
+  async clearAll(): Promise<void> {
+    this.timelines = [];
+    this.entries = [];
+    this.blobs.clear();
+  }
   async getAllBlobKeys(): Promise<string[]> { return [...this.blobs.keys()]; }
 
   async getAllBlobs(): Promise<Record<string, ArrayBuffer>> {
@@ -55,6 +60,5 @@ export class FakeAdapter implements StorageAdapter {
   }
 
   async hasConflict(): Promise<boolean> { return this.conflict; }
-  async mergeFromDisk(): Promise<{ duplicatedEntryId: string | null; importedCount: number }> { return this.mergeResult; }
-  async mergeConflictFiles(): Promise<{ importedCount: number; conflictCount: number }> { return { importedCount: 0, conflictCount: 0 }; }
+  async mergeFromDisk(): Promise<{ mergedCopies: number }> { return this.mergeResult; }
 }

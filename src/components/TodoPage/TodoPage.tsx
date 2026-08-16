@@ -7,6 +7,7 @@ import type { Entry, Timeline } from '../../types';
 import { formatDueDate, toLocalDateString, todayDateString, getDueDateStatus } from '../../utils/dateFormat';
 import { describeTodoChange, revertTodoFields } from '../../utils/todoUndo';
 import { DueDatePopover } from '../DueDatePopover/DueDatePopover';
+import { capitalize, extractText } from '../../utils/text';
 import styles from './TodoPage.module.css';
 
 interface TodoItem {
@@ -50,21 +51,8 @@ function buildSections(todos: TodoItem[]): Sections {
   return result;
 }
 
-function extractText(node: Record<string, unknown>): string {
-  if (node.type === 'text') return (node.text as string) || '';
-  if (Array.isArray(node.content)) {
-    return (node.content as Record<string, unknown>[]).map(extractText).join('');
-  }
-  return '';
-}
-
 function entryPreview(content: string): string {
-  try {
-    const json = JSON.parse(content);
-    return extractText(json).slice(0, 120);
-  } catch {
-    return content.slice(0, 120);
-  }
+  return extractText(content).slice(0, 120);
 }
 
 interface Props {
@@ -267,7 +255,3 @@ function TodoRow({
   );
 }
 
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Download, Upload, RotateCcw, Globe, BookOpen } from 'lucide-react';
 import { useStorage } from '../../context/StorageContext';
 import { Modal } from '../Modal/Modal';
-import { exportData, importData, clearAllData } from '../../utils/exportImport';
+import { exportData, importData } from '../../utils/exportImport';
 import styles from './Settings.module.css';
 
 interface Props {
@@ -44,7 +44,7 @@ export function Settings({ onDataChanged }: Props) {
   }
 
   async function handleReset() {
-    await clearAllData(adapter);
+    await adapter.clearAll();
     await onDataChanged();
     setResetModalOpen(false);
     navigate('/', { replace: true });

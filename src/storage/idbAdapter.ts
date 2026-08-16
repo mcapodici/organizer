@@ -42,38 +42,36 @@ export class IdbAdapter implements StorageAdapter {
   // already holds the other tab's writes — adopt its saveId and unfreeze. If a note
   // open in the editor (activeBase) was changed by the other tab, preserve that
   // version as a marked duplicate and restore the editor's note under its own id.
-  async mergeFromDisk(activeBase: Entry | null): Promise<{ duplicatedEntryId: string | null; importedCount: number }> {
+  async mergeFromDisk(activeBase: Entry | null): Promise<{ mergedCopies: number }> {
     await this.init();
     this.frozen = false;
-    let duplicatedEntryId: string | null = null;
     if (activeBase) {
       const diskActive = (await db.getAllEntries()).find((e) => e.id === activeBase.id);
       if (diskActive && diskActive.content !== activeBase.content) {
-        duplicatedEntryId = uuid();
-        const dup: Entry = { ...diskActive, id: duplicatedEntryId, content: markMergedCopy(diskActive.content) };
+        const dup: Entry = { ...diskActive, id: uuid(), content: markMergedCopy(diskActive.content) };
         await db.putEntry(activeBase);
         await db.putEntry(dup);
         const next = uuid();
         await writeSaveId(next);
         this.lastKnownSaveId = next;
-        return { duplicatedEntryId, importedCount: 1 };
+        return { mergedCopies: 1 };
       }
     }
     this.lastKnownSaveId = await readSaveId();
-    return { duplicatedEntryId, importedCount: 0 };
+    return { mergedCopies: 0 };
   }
 
-  // IndexedDB has no file backing, so there are no conflict files to scan.
-  async mergeConflictFiles(): Promise<{ importedCount: number; conflictCount: number }> {
-    return { importedCount: 0, conflictCount: 0 };
-  }
-
+  // Bump the saveId BEFORE the data write so the change marker can never lag
+  // behind committed data. If writeSaveId fails, nothing is written and
+  // lastKnownSaveId is untouched (consistent). If op fails after the marker
+  // moved, the marker is merely ahead of the data — a harmless merge that finds
+  // no new data — never behind, which would hide the change from other tabs.
   private async guardedWrite(op: () => Promise<void>): Promise<void> {
     if (await this.hasConflict()) throw new ConflictError();
-    await op();
     const next = uuid();
     await writeSaveId(next);
     this.lastKnownSaveId = next;
+    await op();
   }
 
   getAllTimelines(): Promise<Timeline[]> { return db.getAllTimelines(); }
@@ -90,4 +88,7 @@ export class IdbAdapter implements StorageAdapter {
   deleteEntriesForTimeline(id: string): Promise<void> { return this.guardedWrite(() => db.deleteEntriesForTimeline(id)); }
   putBlob(key: string, data: ArrayBuffer): Promise<void> { return this.guardedWrite(() => db.putBlob(key, data)); }
   deleteBlob(key: string): Promise<void> { return this.guardedWrite(() => db.deleteBlob(key)); }
+  clearAll(): Promise<void> {
+    return this.guardedWrite(() => db.clearAll());
+  }
 }

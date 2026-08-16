@@ -65,10 +65,14 @@ describe('SearchBox', () => {
     renderSearch();
     const input = screen.getByRole('combobox');
     await userEvent.click(input);
+    // Positive signal: a matching query surfaces the timeline, proving entries
+    // have loaded and the search effect has run.
+    await userEvent.type(input, 'hello');
+    await waitFor(() => expect(screen.getByText('Project Alpha')).toBeTruthy());
+    // Now switch to a non-matching query; the result must disappear.
+    await userEvent.clear(input);
     await userEvent.type(input, 'zzzznomatch');
-    // Give the search effect time to run, then confirm no result rows.
-    await new Promise((r) => setTimeout(r, 50));
-    expect(screen.queryByText('Project Alpha')).toBeNull();
+    await waitFor(() => expect(screen.queryByText('Project Alpha')).toBeNull());
   });
 
   it('clears results when the query is emptied', async () => {

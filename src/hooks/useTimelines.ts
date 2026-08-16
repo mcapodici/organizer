@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuid } from 'uuid';
 import { useStorage } from '../context/StorageContext';
 import type { Timeline } from '../types';
-import { nowIso } from '../utils/dateFormat';
+import { nowIso, compareTimestamps } from '../utils/dateFormat';
 
 export function useTimelines() {
   const { adapter } = useStorage();
@@ -14,9 +14,9 @@ export function useTimelines() {
     // Most recently changed first. Fall back to createdAt for data saved before
     // updatedAt existed.
     const changed = (t: Timeline) => t.updatedAt ?? t.createdAt;
-    // localeCompare returns 0 for ties, keeping equal-"changed" timelines in their
-    // original order instead of reversing them.
-    all.sort((a, b) => changed(b).localeCompare(changed(a)));
+    // compareTimestamps orders by instant and returns 0 for ties, keeping
+    // equal-"changed" timelines in their original order instead of reversing.
+    all.sort((a, b) => compareTimestamps(changed(b), changed(a)));
     setTimelines(all);
     setLoading(false);
   }, [adapter]);

@@ -14,7 +14,26 @@
 }
 
 .titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 10px;
+}
+
+.editNameBtn {
+  background: none;
+  border: 1px dashed var(--accent-300);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  color: var(--accent);
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.editNameBtn:hover {
+  background: var(--accent-100);
+  border-style: solid;
 }
 
 .name {
