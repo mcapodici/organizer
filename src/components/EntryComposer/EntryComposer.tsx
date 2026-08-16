@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { EntryLink } from './linkExtension';
+import { Modal } from '../Modal/Modal';
 import { Table as TableExtension } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
@@ -155,11 +156,11 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
     setTimestamp('');
   }
 
-  function openLinkPopover() {
+  function openLinkDialog() {
     if (!editor) return;
     // Prefill with the URL of the link under the caret, if any.
     setLinkUrl(editor.getAttributes('link').href ?? '');
-    setLinkOpen((open) => !open);
+    setLinkOpen(true);
   }
 
   function applyLink() {
@@ -254,25 +255,27 @@ export function EntryComposer({ editing, loadContent, onLoadConsumed, onEditorEm
             <ToolbarBtn active={editor.isActive('code')} onClick={() => editor.chain().focus().toggleCode().run()} title="Inline code"><Code size={14} /></ToolbarBtn>
             <ToolbarBtn active={editor.isActive('highlight')} onClick={() => editor.chain().focus().toggleHighlight().run()} title="Highlight"><Highlighter size={14} /></ToolbarBtn>
             <span className={styles.linkWrap}>
-              <ToolbarBtn active={editor.isActive('link')} onClick={openLinkPopover} title="Link"><LinkIcon size={14} /></ToolbarBtn>
+              <ToolbarBtn active={editor.isActive('link')} onClick={openLinkDialog} title="Link"><LinkIcon size={14} /></ToolbarBtn>
               {linkOpen && (
-                <div className={styles.linkPopover}>
-                  <input
-                    className={styles.linkInput}
-                    type="url"
-                    placeholder="https://example.com"
-                    aria-label="Link URL"
-                    value={linkUrl}
-                    autoFocus
-                    onChange={(e) => setLinkUrl(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') { e.preventDefault(); applyLink(); }
-                      else if (e.key === 'Escape') { e.preventDefault(); setLinkOpen(false); }
-                    }}
-                  />
-                  <button className={styles.linkApply} type="button" onClick={applyLink}>Apply</button>
-                  <button className={styles.linkRemove} type="button" onClick={removeLink}>Remove</button>
-                </div>
+                <Modal title="Link" onClose={() => setLinkOpen(false)}>
+                  <div className={styles.linkModal}>
+                    <input
+                      className={styles.linkInput}
+                      type="url"
+                      placeholder="https://example.com"
+                      aria-label="Link URL"
+                      value={linkUrl}
+                      onChange={(e) => setLinkUrl(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); applyLink(); }
+                      }}
+                    />
+                    <div className={styles.linkActions}>
+                      <button className={styles.linkRemove} type="button" onClick={removeLink}>Remove</button>
+                      <button className={styles.linkApply} type="button" onClick={applyLink}>Apply</button>
+                    </div>
+                  </div>
+                </Modal>
               )}
             </span>
             <span className={styles.sep} />
